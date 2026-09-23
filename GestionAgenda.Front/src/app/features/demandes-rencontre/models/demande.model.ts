@@ -173,3 +173,19 @@ export function filtreVide(): FiltreDemande {
     vue: '',
   };
 }
+
+export function filtreInitial(vue: string | null, statut: string | null): FiltreDemande {
+  return {
+    ...filtreVide(),
+    vue: estVue(vue) ? vue : '',
+    statut: estStatut(statut) ? statut : '',
+  };
+}
+
+function estVue(valeur: string | null): valeur is VueFile {
+  return VUES.some((vue) => vue.id === valeur);
+}
+
+function estStatut(valeur: string | null): valeur is StatutDemande {
+  return STATUTS.some((statut) => statut === valeur);
+}

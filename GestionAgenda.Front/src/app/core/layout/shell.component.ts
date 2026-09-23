@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
@@ -17,6 +17,7 @@ export class ShellComponent {
   readonly notifications = inject(NotificationService);
   private readonly tempsReel = inject(NotificationsTempsReelService);
   readonly email = this.auth.email;
+  readonly estAssistante = computed(() => this.auth.roles().includes('Assistante'));
 
   constructor() {
     void this.tempsReel.demarrer();

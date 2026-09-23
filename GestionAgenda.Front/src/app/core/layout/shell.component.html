@@ -1,8 +1,11 @@
 <header class="flex flex-wrap items-center gap-6 border-b-4 border-gold bg-paper px-6 py-3">
-  <a routerLink="/demandes-rencontre/file" class="shrink-0">
+  <a routerLink="/" class="shrink-0">
     <img ngSrc="assets/softwell.png" width="179" height="96" alt="Softwell" priority class="h-12 w-auto" />
   </a>
   <nav class="flex flex-1 flex-wrap gap-4">
+    @if (estAssistante()) {
+      <a routerLink="/demandes-rencontre/tableau" routerLinkActive="!text-gold-deep" class="font-semibold no-underline">Tableau</a>
+    }
     <a routerLink="/demandes-rencontre/file" routerLinkActive="!text-gold-deep" class="font-semibold no-underline">File</a>
     <a routerLink="/demandes-rencontre" routerLinkActive="!text-gold-deep" [routerLinkActiveOptions]="{ exact: true }" class="font-semibold no-underline">Liste</a>
     <a routerLink="/demandes-rencontre/nouvelle" routerLinkActive="!text-gold-deep" class="font-semibold no-underline">Nouvelle demande</a>

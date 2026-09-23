@@ -1,0 +1,13 @@
+<article class="grid gap-1 border-b border-line py-3">
+  <p class="m-0 flex flex-wrap items-center gap-2">
+    <app-badge [label]="rencontre().urgence" [tone]="tons().urgence" />
+    <span class="text-sage">|</span>
+    <app-badge [label]="rencontre().priorite" [tone]="tons().priorite" />
+  </p>
+  <strong>{{ rencontre().dirigeantNom }}</strong>
+  <p class="m-0">{{ rencontre().motif }}</p>
+  <p class="m-0 text-sm text-navy-soft">
+    {{ rencontre().debut | date: 'dd/MM/yyyy HH:mm' }} · {{ rencontre().societeNom }}
+  </p>
+  <a [routerLink]="['/demandes-rencontre', rencontre().demandeId]">Détail</a>
+</article>

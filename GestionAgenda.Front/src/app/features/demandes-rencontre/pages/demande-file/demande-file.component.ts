@@ -1,10 +1,11 @@
 import { DestroyRef, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { catchError, combineLatest, finalize, of, switchMap, tap } from 'rxjs';
 import { PagerComponent } from '../../../../shared/components/pager/pager.component';
 import { DemandeFiltresComponent } from '../../components/demande-filtres/demande-filtres.component';
 import { DemandeLigneComponent } from '../../components/demande-ligne/demande-ligne.component';
-import { FiltreDemande, VUES, VueFile, filtreVide } from '../../models/demande.model';
+import { FiltreDemande, VUES, VueFile, filtreInitial } from '../../models/demande.model';
 import { DemandesApiService } from '../../services/demandes-api.service';
 
 @Component({
@@ -15,8 +16,12 @@ import { DemandesApiService } from '../../services/demandes-api.service';
 })
 export class DemandeFileComponent {
   private readonly api = inject(DemandesApiService);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly filtre = signal(filtreVide());
+  private readonly filtre = signal(filtreInitial(
+    this.route.snapshot.queryParamMap.get('vue'),
+    this.route.snapshot.queryParamMap.get('statut'),
+  ));
   private readonly page = signal(1);
   private readonly version = signal(0);
   readonly vues = VUES;

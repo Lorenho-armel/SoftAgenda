@@ -1,0 +1,55 @@
+<section class="page">
+  <header class="carte">
+    <h1 class="mt-0">Tableau de bord</h1>
+    <p class="m-0 text-navy-soft">L'urgence et la priorité restent deux informations distinctes.</p>
+  </header>
+  @if (tableau() === undefined) {
+    <p class="carte">Chargement…</p>
+  }
+  @if (tableau() === null) {
+    <p class="carte">Le tableau est indisponible.</p>
+  }
+  @if (tableau(); as donnees) {
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-3.5">
+      @for (carte of cartes(); track carte.libelle) {
+        @if (carte.ancre) {
+          <a class="carte no-underline" [href]="carte.ancre">
+            <p class="m-0 text-sm text-navy-soft">{{ carte.libelle }}</p>
+            <p class="m-0 text-3xl font-semibold text-navy">{{ carte.valeur }}</p>
+          </a>
+        } @else {
+          <a class="carte no-underline" [routerLink]="carte.route" [queryParams]="carte.params">
+            <p class="m-0 text-sm text-navy-soft">{{ carte.libelle }}</p>
+            <p class="m-0 text-3xl font-semibold text-navy">{{ carte.valeur }}</p>
+          </a>
+        }
+      }
+    </div>
+    <section class="carte" id="a-traiter">
+      <h2>À traiter maintenant</h2>
+      @for (demande of donnees.aTraiterMaintenant; track demande.id) {
+        <app-demande-ligne [demande]="demande" />
+      } @empty {
+        <p>Aucune demande à traiter.</p>
+      }
+    </section>
+    <div class="grid gap-5 md:grid-cols-2">
+      <section class="carte" id="aujourdhui">
+        <h2>Rencontres planifiées aujourd'hui</h2>
+        @for (rencontre of donnees.rencontresAujourdhui; track rencontre.demandeId) {
+          <app-rencontre-ligne [rencontre]="rencontre" />
+        } @empty {
+          <p>Aucune rencontre aujourd'hui.</p>
+        }
+      </section>
+      <section class="carte" id="prochaines">
+        <h2>Prochaines rencontres du dirigeant</h2>
+        @for (rencontre of donnees.prochainesRencontres; track rencontre.demandeId) {
+          <app-rencontre-ligne [rencontre]="rencontre" />
+        } @empty {
+          <p>Aucune rencontre à venir.</p>
+        }
+      </section>
+    </div>
+  }
+</section>
