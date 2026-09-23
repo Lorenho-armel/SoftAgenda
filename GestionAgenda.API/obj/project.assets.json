@@ -89,11 +89,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda\\GestionAgenda.csproj",
-      "projectName": "GestionAgenda",
-      "projectPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda\\GestionAgenda.csproj",
+      "projectUniqueName": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.API\\GestionAgenda.API.csproj",
+      "projectName": "GestionAgenda.API",
+      "projectPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.API\\GestionAgenda.API.csproj",
       "packagesPath": "C:\\Users\\LOR-IT-PC\\.nuget\\packages\\",
-      "outputPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda\\obj\\",
+      "outputPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
