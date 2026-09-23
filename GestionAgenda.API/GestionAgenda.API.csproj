@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GestionAgenda.Application\GestionAgenda.Application.csproj" />
+    <ProjectReference Include="..\GestionAgenda.Infrastructure\GestionAgenda.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

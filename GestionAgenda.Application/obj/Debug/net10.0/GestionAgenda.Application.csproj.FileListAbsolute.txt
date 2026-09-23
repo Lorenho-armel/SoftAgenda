@@ -1,0 +1,15 @@
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\bin\Debug\net10.0\GestionAgenda.Application.deps.json
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\bin\Debug\net10.0\GestionAgenda.Application.dll
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\bin\Debug\net10.0\GestionAgenda.Application.pdb
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\bin\Debug\net10.0\GestionAgenda.Domain.dll
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\bin\Debug\net10.0\GestionAgenda.Domain.pdb
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.csproj.AssemblyReference.cache
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.AssemblyInfoInputs.cache
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.AssemblyInfo.cs
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.csproj.CoreCompileInputs.cache
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionA.0E16E9E8.Up2Date
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.dll
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\refint\GestionAgenda.Application.dll
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\GestionAgenda.Application.pdb
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Application\obj\Debug\net10.0\ref\GestionAgenda.Application.dll

@@ -1,11 +1,30 @@
 {
   "version": 4,
   "targets": {
-    "net10.0": {}
+    "net10.0": {
+      "GestionAgenda.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/GestionAgenda.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GestionAgenda.Domain.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "GestionAgenda.Domain/1.0.0": {
+      "type": "project",
+      "path": "../GestionAgenda.Domain/GestionAgenda.Domain.csproj",
+      "msbuildProject": "../GestionAgenda.Domain/GestionAgenda.Domain.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net10.0": []
+    "net10.0": [
+      "GestionAgenda.Domain >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\LOR-IT-PC\\.nuget\\packages\\": {},
@@ -39,7 +58,11 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Domain\\GestionAgenda.Domain.csproj": {
+              "projectPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Domain\\GestionAgenda.Domain.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
