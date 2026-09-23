@@ -4,6 +4,7 @@ using GestionAgenda.API.Middleware;
 using GestionAgenda.API.Services;
 using GestionAgenda.Application.Services.Interfaces;
 using GestionAgenda.Infrastructure;
+using GestionAgenda.Infrastructure.Migrations;
 using GestionAgenda.Infrastructure.Seeding;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -49,6 +50,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     await using var scope = app.Services.CreateAsyncScope();
+    var generateur = scope.ServiceProvider.GetRequiredService<GenerateurScriptsMigration>();
+    await generateur.EcrireAsync();
     var seeder = scope.ServiceProvider.GetRequiredService<DevDataSeeder>();
     await seeder.SeedAsync();
 }

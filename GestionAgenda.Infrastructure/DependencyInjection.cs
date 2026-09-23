@@ -4,6 +4,7 @@ using GestionAgenda.Domain.Interfaces;
 using GestionAgenda.Infrastructure.Context;
 using GestionAgenda.Infrastructure.Options;
 using GestionAgenda.Infrastructure.Repositories;
+using GestionAgenda.Infrastructure.Migrations;
 using GestionAgenda.Infrastructure.Seeding;
 using GestionAgenda.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<Application.Services.Interfaces.IDemandeRencontreService, DemandeRencontreService>();
         services.AddScoped<Application.Services.Interfaces.IAuthService, AuthService>();
         services.AddScoped<DevDataSeeder>();
+        services.AddScoped<GenerateurScriptsMigration>();
         services.AddApplication();
         AjouterJwt(services, configuration);
         return services;
