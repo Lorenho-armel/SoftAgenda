@@ -15,3 +15,5 @@ D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Infrastructure\obj
 D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Infrastructure\obj\Debug\net10.0\refint\GestionAgenda.Infrastructure.dll
 D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Infrastructure\obj\Debug\net10.0\GestionAgenda.Infrastructure.pdb
 D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Infrastructure\obj\Debug\net10.0\ref\GestionAgenda.Infrastructure.dll
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Infrastructure\bin\Debug\net10.0\GestionAgenda.Infrastructure.runtimeconfig.json
+D:\softwell_travail\GestionAgenda\GestionAgenda\GestionAgenda.Infrastructure\obj\Debug\net10.0\GestionAgenda.Infrastructure.genruntimeconfig.cache

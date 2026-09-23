@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GestionAgenda.Infrastructure" />
+  </ItemGroup>
+
 </Project>

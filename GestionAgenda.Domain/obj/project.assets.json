@@ -8,7 +8,7 @@
     "net10.0": []
   },
   "packageFolders": {
-    "C:\\Users\\LOR-IT-PC\\.nuget\\packages\\": {},
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -17,7 +17,7 @@
       "projectUniqueName": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Domain\\GestionAgenda.Domain.csproj",
       "projectName": "GestionAgenda.Domain",
       "projectPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Domain\\GestionAgenda.Domain.csproj",
-      "packagesPath": "C:\\Users\\LOR-IT-PC\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget",
       "outputPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [

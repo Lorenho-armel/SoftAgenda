@@ -3,4 +3,5 @@
   <Project Path="GestionAgenda.Application/GestionAgenda.Application.csproj" />
   <Project Path="GestionAgenda.Domain/GestionAgenda.Domain.csproj" />
   <Project Path="GestionAgenda.Infrastructure/GestionAgenda.Infrastructure.csproj" />
+  <Project Path="GestionAgenda.Tests/GestionAgenda.Tests.csproj" />
 </Solution>

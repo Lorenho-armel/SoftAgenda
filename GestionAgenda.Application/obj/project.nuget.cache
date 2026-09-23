@@ -1,8 +1,28 @@
 {
   "version": 2,
-  "dgSpecHash": "SAmaxb3FZwg=",
+  "dgSpecHash": "d1UPQB42bvg=",
   "success": true,
   "projectFilePath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Application\\GestionAgenda.Application.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512",
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget\\fluentvalidation.dependencyinjectionextensions\\12.1.1\\fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget\\microsoft.extensions.dependencyinjection.abstractions\\10.0.12\\microsoft.extensions.dependencyinjection.abstractions.10.0.12.nupkg.sha512",
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget\\microsoft.extensions.options\\6.0.0\\microsoft.extensions.options.6.0.0.nupkg.sha512",
+    "C:\\Users\\LOR-IT-PC\\AppData\\Local\\Temp\\cursor-sandbox-cache\\ba5a527b465683d63b7b644cf0a50797\\nuget\\microsoft.extensions.primitives\\6.0.0\\microsoft.extensions.primitives.6.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Le package 'AutoMapper' 13.0.1 présente une vulnérabilité de gravité élevé(e) connue, https://github.com/advisories/GHSA-rvv3-g6hj-g44x.",
+      "projectPath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Application\\GestionAgenda.Application.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda.Application\\GestionAgenda.Application.csproj",
+      "libraryId": "AutoMapper",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
