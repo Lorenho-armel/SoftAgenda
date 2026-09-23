@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "3dNab+GgXNM=",
+  "success": true,
+  "projectFilePath": "D:\\softwell_travail\\GestionAgenda\\GestionAgenda\\GestionAgenda\\GestionAgenda.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\LOR-IT-PC\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "C:\\Users\\LOR-IT-PC\\.nuget\\packages\\microsoft.openapi\\2.12.0\\microsoft.openapi.2.12.0.nupkg.sha512"
+  ],
+  "logs": []
+}
