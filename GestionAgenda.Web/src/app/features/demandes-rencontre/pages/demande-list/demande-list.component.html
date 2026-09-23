@@ -1,0 +1,24 @@
+<section class="page">
+  <header class="carte"><h1>Liste des demandes</h1></header>
+  <app-demande-filtres
+    [societes]="options()?.societes ?? []"
+    [demandeurs]="options()?.demandeurs ?? []"
+    (appliquer)="filtrer($event)"
+  />
+  @if (resultat() === undefined) {
+    <p class="carte">Chargement…</p>
+  }
+  @if (resultat() === null) {
+    <p class="carte">La liste est indisponible.</p>
+  }
+  @if (resultat(); as page) {
+    <section class="carte">
+      @for (demande of page.items; track demande.id) {
+        <app-demande-ligne [demande]="demande" />
+      } @empty {
+        <p>Aucune demande.</p>
+      }
+      <app-pager [page]="page.page" [totalPages]="page.totalPages" [totalCount]="page.totalCount" (pageChange)="changerPage($event)" />
+    </section>
+  }
+</section>

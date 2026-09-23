@@ -1,0 +1,26 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--sage);
+  color: var(--ink);
+}
+
+.badge::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge[data-tone='critique'] { background: var(--navy); color: var(--paper); }
+.badge[data-tone='urgent'] { background: var(--gold); color: var(--ink); }
+.badge[data-tone='normal'] { background: var(--sage); color: var(--ink); }
+.badge[data-tone='haute'] { background: var(--gold-light); color: var(--ink); }
+.badge[data-tone='moyenne'] { background: var(--navy-soft); color: var(--paper); }
+.badge[data-tone='faible'] { background: var(--paper); color: var(--navy); border: 1px solid var(--sage); }

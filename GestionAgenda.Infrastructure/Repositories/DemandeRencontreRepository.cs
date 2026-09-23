@@ -26,6 +26,8 @@ public sealed class DemandeRencontreRepository(ApplicationDbContext context) : I
         IQueryable<DemandeRencontre> requete = context.DemandesRencontre
             .Include(d => d.Participants)
             .Include(d => d.Historique)
+            .Include(d => d.Demandeur)
+            .Include(d => d.Societe)
             .Include(d => d.RendezVous)
             .Include(d => d.Reunion)
             .AsSplitQuery();

@@ -20,5 +20,7 @@ public record DemandeRencontreResponse(
     Guid? ReunionId,
     DateTimeOffset DateCreation,
     DateTimeOffset DateModification,
+    string DemandeurNom,
+    string SocieteNom,
     IReadOnlyList<ParticipantResponse> Participants,
     IReadOnlyList<HistoriqueDemandeResponse> Historique);

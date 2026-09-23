@@ -1,0 +1,32 @@
+@if (entete(); as vue) {
+  <section class="page">
+    <header class="carte">
+      <h1>{{ vue.demande.motif }}</h1>
+      <p class="badges">
+        <app-badge [label]="vue.demande.urgence" [tone]="vue.tonUrgence" />
+        <app-badge [label]="vue.demande.priorite" [tone]="vue.tonPriorite" />
+        <span>{{ vue.statut }}</span>
+        <span>{{ vue.type }}</span>
+      </p>
+      <p>{{ vue.demande.demandeurNom }} · {{ vue.demande.societeNom }}</p>
+      <p>Souhaité le {{ vue.demande.dateDebutSouhaitee | date: 'dd/MM/yyyy HH:mm' }} · {{ vue.demande.dureeMinutes }} min</p>
+      @if (vue.participants.length > 0) {
+        <ul>
+          @for (participant of vue.participants; track participant.id) {
+            <li>{{ participant.libelle }}</li>
+          }
+        </ul>
+      }
+      @if (vue.demande.rendezVousId) { <p>Rendez-vous lié : {{ vue.demande.rendezVousId }}</p> }
+      @if (vue.demande.reunionId) { <p>Réunion liée : {{ vue.demande.reunionId }}</p> }
+    </header>
+    <app-traitement-demande [statut]="vue.demande.statut" (decider)="decider($event)" />
+    <app-planification-demande
+      [visible]="vue.demande.statut === 'Acceptee'"
+      [bilan]="bilan()"
+      (verifier)="verifier($event)"
+      (planifier)="planifier($event)"
+    />
+    <app-historique-demande [historique]="vue.demande.historique" />
+  </section>
+}

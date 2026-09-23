@@ -20,6 +20,13 @@ public sealed class DemandeRencontreProfile : Profile
                 option => option.MapFrom(source => source.Societe == null ? string.Empty : source.Societe.Nom));
         CreateMap<DemandeRencontre, DemandeRencontreResponse>()
             .ForMember(
+                destination => destination.DemandeurNom,
+                option => option.MapFrom(source =>
+                    source.Demandeur == null ? string.Empty : source.Demandeur.Prenom + " " + source.Demandeur.Nom))
+            .ForMember(
+                destination => destination.SocieteNom,
+                option => option.MapFrom(source => source.Societe == null ? string.Empty : source.Societe.Nom))
+            .ForMember(
                 destination => destination.RendezVousId,
                 option => option.MapFrom(source => source.RendezVous == null ? (Guid?)null : source.RendezVous.Id))
             .ForMember(

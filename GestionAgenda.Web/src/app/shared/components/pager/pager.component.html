@@ -1,0 +1,6 @@
+<p>{{ totalCount() }} demande(s)</p>
+<div class="actions">
+  <button type="button" class="secondaire" [disabled]="page() <= 1" (click)="pageChange.emit(page() - 1)">Précédent</button>
+  <span>Page {{ page() }} / {{ totalPages() || 1 }}</span>
+  <button type="button" class="secondaire" [disabled]="page() >= totalPages()" (click)="pageChange.emit(page() + 1)">Suivant</button>
+</div>

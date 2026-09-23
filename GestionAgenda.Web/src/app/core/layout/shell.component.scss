@@ -1,0 +1,36 @@
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.85rem 1.5rem;
+  background: var(--paper);
+  border-bottom: 4px solid var(--gold);
+}
+
+.marque {
+  margin: 0;
+  color: var(--navy);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.35rem;
+}
+
+nav { display: flex; gap: 1rem; flex: 1; }
+
+nav a { text-decoration: none; font-weight: 600; }
+
+nav a.actif { color: var(--gold-deep); }
+
+.session { margin: 0; color: var(--navy-soft); }
+
+.alerte {
+  margin: 0;
+  padding: 0.75rem 1.5rem;
+  background: #fff6d8;
+  color: var(--navy);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }

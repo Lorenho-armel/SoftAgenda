@@ -1,0 +1,19 @@
+<header class="entete">
+  <p class="marque">Softwell</p>
+  <nav>
+    <a routerLink="/demandes-rencontre/file" routerLinkActive="actif">File</a>
+    <a routerLink="/demandes-rencontre" routerLinkActive="actif" [routerLinkActiveOptions]="{ exact: true }">Liste</a>
+    <a routerLink="/demandes-rencontre/nouvelle" routerLinkActive="actif">Nouvelle demande</a>
+  </nav>
+  <p class="session">{{ email() }}</p>
+  <button type="button" class="secondaire" (click)="deconnecter()">Quitter</button>
+</header>
+@if (notifications.message(); as message) {
+  <p class="alerte" role="status">
+    {{ message }}
+    <button type="button" class="secondaire" (click)="notifications.effacer()">Fermer</button>
+  </p>
+}
+<main>
+  <router-outlet />
+</main>

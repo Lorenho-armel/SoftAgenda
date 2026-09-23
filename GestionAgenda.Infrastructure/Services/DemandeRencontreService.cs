@@ -68,7 +68,7 @@ public sealed class DemandeRencontreService(
         CancellationToken cancellationToken = default)
     {
         await queryValidator.ValiderAsync(query, cancellationToken);
-        var filtre = PreparationDemande.VersFiltre(query) with { SortBy = null };
+        var filtre = PreparationDemande.VersFiltre(query);
         var resultat = await demandes.ObtenirFileAsync(utilisateurId, filtre, cancellationToken);
         return LectureFileDemandes.VersResponse(resultat, query, mapper);
     }
