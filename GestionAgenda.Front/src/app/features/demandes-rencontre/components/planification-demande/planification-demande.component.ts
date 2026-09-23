@@ -16,6 +16,7 @@ export interface CreneauConfirme {
 })
 export class PlanificationDemandeComponent {
   readonly visible = input(false);
+  readonly confirmerLibelle = input('Planifier');
   readonly bilan = input<BilanPlanification | null>(null);
   readonly verifier = output<CreneauConfirme>();
   readonly planifier = output<CreneauConfirme>();

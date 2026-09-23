@@ -3,13 +3,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, catchError, combineLatest, filter, map, switchMap } from 'rxjs';
+import { EMPTY, catchError, combineLatest, filter, map, of, switchMap, tap } from 'rxjs';
 import { ApiResponse } from '../../../../core/models/api-response.model';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { HistoriqueDemandeComponent } from '../../components/historique-demande/historique-demande.component';
 import { CreneauConfirme, PlanificationDemandeComponent } from '../../components/planification-demande/planification-demande.component';
 import { DecisionDemande, TraitementDemandeComponent } from '../../components/traitement-demande/traitement-demande.component';
 import { BilanPlanification, ConflitPlanification } from '../../models/demande.model';
+import { messageApi } from '../../models/message-api';
 import { libelleStatut, tonPriorite, tonUrgence } from '../../models/demande-libelles';
 import { DemandesApiService } from '../../services/demandes-api.service';
 
@@ -25,13 +26,20 @@ export class DemandeDetailComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly version = signal(0);
   readonly bilan = signal<BilanPlanification | null>(null);
+  readonly erreur = signal('');
   readonly demande = toSignal(
     combineLatest([
       this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
       toObservable(this.version),
     ]).pipe(
       filter(([id]) => id.length > 0),
-      switchMap(([id]) => this.api.obtenir(id)),
+      switchMap(([id]) => this.api.obtenir(id).pipe(
+        tap(() => this.erreur.set('')),
+        catchError((erreur: unknown) => {
+          this.erreur.set(messageApi(erreur));
+          return of(null);
+        }),
+      )),
     ),
   );
   readonly entete = computed(() => {
@@ -59,11 +67,18 @@ export class DemandeDetailComponent {
       return;
     }
 
+    this.erreur.set('');
     this.api.changerStatut(id, decision.statut, decision.commentaire || null, {
       debut: decision.dateDebutSouhaitee,
       fin: decision.dateFinSouhaitee,
     }, null, null)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        catchError((erreur: unknown) => {
+          this.erreur.set(messageApi(erreur));
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(() => this.version.update((valeur) => valeur + 1));
   }
 
@@ -73,8 +88,15 @@ export class DemandeDetailComponent {
       return;
     }
 
+    this.erreur.set('');
     this.api.verifierCreneau(id, creneau.debutPlanifie, creneau.salleId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        catchError((erreur: unknown) => {
+          this.erreur.set(messageApi(erreur));
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((bilan) => this.bilan.set(bilan));
   }
 
@@ -84,7 +106,12 @@ export class DemandeDetailComponent {
       return;
     }
 
-    this.api.changerStatut(id, 'Planifiee', null, { debut: null, fin: null }, creneau.debutPlanifie, creneau.salleId)
+    const demande = this.demande();
+    const appel = demande?.statut === 'Planifiee'
+      ? this.api.deplacer(id, creneau.debutPlanifie, creneau.salleId)
+      : this.api.changerStatut(id, 'Planifiee', null, { debut: null, fin: null }, creneau.debutPlanifie, creneau.salleId);
+    this.erreur.set('');
+    appel
       .pipe(
         catchError((erreur: unknown) => this.retenirConflits(erreur, creneau.debutPlanifie)),
         takeUntilDestroyed(this.destroyRef),
@@ -104,6 +131,8 @@ export class DemandeDetailComponent {
         peutPlanifier: false,
         conflits: Array.isArray(corps.data) ? corps.data : [],
       });
+    } else {
+      this.erreur.set(messageApi(erreur));
     }
 
     return EMPTY;

@@ -63,6 +63,34 @@ public sealed class PlanificationRepository(ApplicationDbContext context) : IPla
         return rendezVous.Concat(reunions).ToList();
     }
 
+    public async Task<IReadOnlyList<OccurrenceARappeler>> ListerARappelerAsync(
+        DateTimeOffset maintenant,
+        DateTimeOffset limite,
+        CancellationToken cancellationToken = default)
+    {
+        var rendezVous = await EcheancesRendezVous(maintenant, limite).ToListAsync(cancellationToken);
+        var reunions = await EcheancesReunions(maintenant, limite).ToListAsync(cancellationToken);
+        return rendezVous.Concat(reunions).ToList();
+    }
+
+    private IQueryable<OccurrenceARappeler> EcheancesRendezVous(DateTimeOffset maintenant, DateTimeOffset limite) =>
+        from item in context.RendezVous
+        join demande in context.DemandesRencontre on item.DemandeRencontreId equals demande.Id
+        where item.Statut == StatutOccurrence.Planifie
+            && item.Debut > maintenant
+            && item.Debut <= limite
+            && demande.Statut == StatutDemande.Planifiee
+        select new OccurrenceARappeler(demande.Id, item.Debut, item.DateModification);
+
+    private IQueryable<OccurrenceARappeler> EcheancesReunions(DateTimeOffset maintenant, DateTimeOffset limite) =>
+        from item in context.Reunions
+        join demande in context.DemandesRencontre on item.DemandeRencontreId equals demande.Id
+        where item.Statut == StatutOccurrence.Planifie
+            && item.Debut > maintenant
+            && item.Debut <= limite
+            && demande.Statut == StatutDemande.Planifiee
+        select new OccurrenceARappeler(demande.Id, item.Debut, item.DateModification);
+
     private async Task<List<OccupationCalendrier>> RendezVousDesDirigeantsAsync(
         IReadOnlyCollection<Guid> identifiants,
         Intervalle creneau,

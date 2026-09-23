@@ -29,6 +29,19 @@ public sealed class RendezVous : BaseEntity
 
     public DemandeRencontre? Demande { get; private set; }
 
+    public void Deplacer(DateTimeOffset debut, DateTimeOffset fin, Guid? salleId)
+    {
+        if (Statut != StatutOccurrence.Planifie)
+        {
+            throw new DomainException("Cette rencontre ne peut plus être déplacée.");
+        }
+
+        GarantirCreneau(debut, fin);
+        Debut = debut;
+        Fin = fin;
+        SalleId = salleId;
+    }
+
     public void Annuler() => Statut = StatutOccurrence.Annule;
 
     public void Terminer() => Statut = StatutOccurrence.Termine;

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { FieldErrorComponent } from '../../../../shared/components/field-error/field-error.component';
 import { PRIORITES, TYPES, URGENCES } from '../../models/demande.model';
 import { libelleStatut } from '../../models/demande-libelles';
+import { messageApi } from '../../models/message-api';
 import { DemandesApiService } from '../../services/demandes-api.service';
 
 @Component({
@@ -68,7 +69,10 @@ export class DemandeCreateComponent {
 
     this.api.creer({ ...valeur, participants })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((demande) => void this.router.navigate(['/demandes-rencontre', demande.id]));
+      .subscribe({
+        next: (demande) => void this.router.navigate(['/demandes-rencontre', demande.id]),
+        error: (erreur: unknown) => this.alerte.set(messageApi(erreur)),
+      });
   }
 }
 

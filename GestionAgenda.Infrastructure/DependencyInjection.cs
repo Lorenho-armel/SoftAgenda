@@ -67,17 +67,21 @@ public static class DependencyInjection
         services.AddScoped<IEnvoiPush, EnvoiPushNavigateur>();
         services.AddScoped<IEnfileurNotification, EnfileurHangfire>();
         services.AddScoped<DiffuseurNotification>();
+        services.AddScoped<RappelsRencontre>();
         services.AddSignalR();
         services.AddHangfire(options => options.UseSqlServerStorage(connectionString));
-        services.AddHangfireServer();
+        if (configuration.GetValue("Hangfire:Actif", true))
+        {
+            services.AddHangfireServer();
+        }
     }
 
     private static void AjouterJwt(IServiceCollection services, IConfiguration configuration)
     {
         var secret = configuration["Jwt:Secret"];
-        if (string.IsNullOrWhiteSpace(secret))
+        if (string.IsNullOrWhiteSpace(secret) || secret.Length < 32)
         {
-            return;
+            throw new InvalidOperationException("Jwt:Secret doit contenir au moins 32 caractères.");
         }
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

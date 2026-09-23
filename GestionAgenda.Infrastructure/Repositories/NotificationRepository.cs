@@ -1,5 +1,6 @@
 using GestionAgenda.Domain.Common;
 using GestionAgenda.Domain.Entities;
+using GestionAgenda.Domain.Enums;
 using GestionAgenda.Domain.Interfaces;
 using GestionAgenda.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -60,4 +61,16 @@ public sealed class NotificationRepository(ApplicationDbContext context) : INoti
         ensemble.Remove(abonnement);
         return Task.CompletedTask;
     }
+
+    public Task<bool> RappelEmisAsync(
+        Guid demandeId,
+        string titre,
+        DateTimeOffset depuis,
+        CancellationToken cancellationToken = default) =>
+        context.Set<Notification>().AnyAsync(
+            notification => notification.DemandeId == demandeId
+                && notification.Evenement == EvenementNotification.Rappel
+                && notification.Titre == titre
+                && notification.DateCreation >= depuis,
+            cancellationToken);
 }

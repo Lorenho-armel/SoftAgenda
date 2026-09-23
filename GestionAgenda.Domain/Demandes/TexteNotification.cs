@@ -23,7 +23,14 @@ public static class TexteNotification
         EvenementNotification.Planifiee => "Rencontre planifiée",
         EvenementNotification.ModificationRendezVous => "Rendez-vous modifié",
         EvenementNotification.Annulation => "Demande annulée",
+        EvenementNotification.Rappel => "Rappel de rencontre",
         _ => "Demande de rencontre",
+    };
+
+    public static string TitreRappel(HorizonRappel horizon) => horizon switch
+    {
+        HorizonRappel.Heure => "Rappel : rencontre imminente",
+        _ => "Rappel : rencontre à venir",
     };
 
     public static string Message(EvenementNotification evenement, string motif) => evenement switch
@@ -35,6 +42,13 @@ public static class TexteNotification
         EvenementNotification.Planifiee => $"Une rencontre a été planifiée : {motif}.",
         EvenementNotification.ModificationRendezVous => $"Le rendez-vous a été modifié : {motif}.",
         EvenementNotification.Annulation => $"La demande a été annulée : {motif}.",
+        EvenementNotification.Rappel => motif,
         _ => motif,
+    };
+
+    public static string MessageRappel(HorizonRappel horizon, string motif) => horizon switch
+    {
+        HorizonRappel.Heure => $"Votre rencontre commence dans moins d'une heure : {motif}.",
+        _ => $"Votre rencontre commence dans moins de 24 heures : {motif}.",
     };
 }

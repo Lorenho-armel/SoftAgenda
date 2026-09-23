@@ -32,6 +32,12 @@ public interface IDemandeRencontreService
         Guid utilisateurId,
         CancellationToken cancellationToken = default);
 
+    Task<DemandeRencontreResponse> ReplanifierAsync(
+        Guid id,
+        VerifierCreneauRequest request,
+        Guid utilisateurId,
+        CancellationToken cancellationToken = default);
+
     Task<DemandeRencontreResponse> UpdateAsync(
         Guid id,
         MettreAJourDemandeRencontreRequest request,

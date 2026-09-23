@@ -7,7 +7,7 @@
       <label>Salle, si nécessaire<input formControlName="salleId" placeholder="Identifiant de salle" /></label>
       <div class="flex flex-wrap gap-3">
         <button type="button" class="btn-secondaire" (click)="controler()">Vérifier les conflits</button>
-        <button type="button" (click)="confirmer()" [disabled]="bilan() !== null && !bilan()!.peutPlanifier">Planifier</button>
+        <button type="button" (click)="confirmer()" [disabled]="bilan() !== null && !bilan()!.peutPlanifier">{{ confirmerLibelle() }}</button>
       </div>
     </form>
     @if (bilan(); as resultat) {

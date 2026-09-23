@@ -24,4 +24,10 @@ public interface INotificationRepository
         CancellationToken cancellationToken = default);
 
     Task RetirerAbonnementAsync(AbonnementPush abonnement, CancellationToken cancellationToken = default);
+
+    Task<bool> RappelEmisAsync(
+        Guid demandeId,
+        string titre,
+        DateTimeOffset depuis,
+        CancellationToken cancellationToken = default);
 }

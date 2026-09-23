@@ -61,6 +61,18 @@ public sealed class DemandesRencontreController(IDemandeRencontreService service
         return Ok(ApiResponse<BilanPlanificationResponse>.Ok(result));
     }
 
+    [HttpPatch("{id:guid}/creneau")]
+    [ProducesResponseType(typeof(ApiResponse<DemandeRencontreResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Replanifier(
+        Guid id,
+        VerifierCreneauRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.ReplanifierAsync(id, request, currentUser.UserId, cancellationToken);
+        return Ok(ApiResponse<DemandeRencontreResponse>.Ok(result));
+    }
+
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ApiResponse<DemandeRencontreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(

@@ -89,6 +89,51 @@ public class PlanificationDemandeTests
     }
 
     [Fact]
+    public async Task Deplacer_CreneauLibre_MetAJourLeRendezVous()
+    {
+        // Arrange
+        var planification = new Mock<IPlanificationRepository>();
+        Libre(planification);
+        var sut = new PlanificationDemande(planification.Object);
+        var demande = DemandeAcceptee();
+        var debut = demande.DateDebutSouhaitee;
+        await sut.AppliquerAsync(demande, StatutPlanifie(debut, null), Guid.CreateVersion7());
+        var nouveauDebut = debut.AddMinutes(30);
+
+        // Act
+        await sut.DeplacerAsync(demande, nouveauDebut, null, Guid.CreateVersion7());
+
+        // Assert
+        demande.Statut.Should().Be(StatutDemande.Planifiee);
+        demande.RendezVous!.Debut.Should().Be(nouveauDebut);
+        demande.Historique.Should().Contain(h => h.TypeEvenement == TypeEvenementDemande.Deplacement);
+    }
+
+    [Fact]
+    public async Task Deplacer_ConflitSalle_LaisseLeCreneauInchange()
+    {
+        // Arrange
+        var demande = DemandeAcceptee();
+        var salle = Salle.Creer(demande.SocieteId, "Conseil", 8);
+        var debut = demande.DateDebutSouhaitee;
+        var planification = new Mock<IPlanificationRepository>();
+        Libre(planification);
+        planification.Setup(p => p.GetSalleAsync(salle.Id, It.IsAny<CancellationToken>())).ReturnsAsync(salle);
+        var sut = new PlanificationDemande(planification.Object);
+        await sut.AppliquerAsync(demande, StatutPlanifie(debut, salle.Id), Guid.CreateVersion7());
+        planification.Setup(p => p.OccupationsSalleAsync(
+                salle.Id, It.IsAny<Intervalle>(), demande.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new OccupationSalle(Guid.CreateVersion7(), "Autre", debut, debut.AddMinutes(30))]);
+
+        // Act
+        var act = () => sut.DeplacerAsync(demande, debut.AddMinutes(15), salle.Id, Guid.CreateVersion7());
+
+        // Assert
+        await act.Should().ThrowAsync<ConflictException>();
+        demande.RendezVous!.Debut.Should().Be(debut);
+    }
+
+    [Fact]
     public async Task Evaluer_SalleTropPetite_ThrowsDomainException()
     {
         // Arrange

@@ -99,6 +99,22 @@ public sealed class DemandeRencontreService(
         return mapper.Map<BilanPlanificationResponse>(bilan);
     }
 
+    public async Task<DemandeRencontreResponse> ReplanifierAsync(
+        Guid id,
+        VerifierCreneauRequest request,
+        Guid utilisateurId,
+        CancellationToken cancellationToken = default)
+    {
+        await creneauValidator.ValiderAsync(request, cancellationToken);
+        var demande = await ChargerAsync(id, suivi: true, cancellationToken);
+        await evaluationAcces.ExigerGestionnaireAsync(demande, utilisateurId, cancellationToken);
+        await planificationDemande.DeplacerAsync(
+            demande, request.DebutPlanifie, request.SalleId, utilisateurId, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await notifications.RendezVousModifieAsync(demande.Id, cancellationToken);
+        return mapper.Map<DemandeRencontreResponse>(demande);
+    }
+
     public async Task<DemandeRencontreResponse> UpdateAsync(
         Guid id,
         MettreAJourDemandeRencontreRequest request,

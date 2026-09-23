@@ -12,4 +12,5 @@ public enum TypeEvenementDemande
     Cloture = 8,
     ChangementUrgence = 9,
     ChangementPriorite = 10,
+    Deplacement = 11,
 }

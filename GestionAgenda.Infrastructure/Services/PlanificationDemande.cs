@@ -15,9 +15,9 @@ public sealed class PlanificationDemande(IPlanificationRepository planification)
         Guid? salleId,
         CancellationToken cancellationToken = default)
     {
-        if (demande.Statut != StatutDemande.Acceptee)
+        if (demande.Statut is not (StatutDemande.Acceptee or StatutDemande.Planifiee))
         {
-            throw new DomainException("Seule une demande acceptée peut être planifiée.");
+            throw new DomainException("Seule une demande acceptée ou planifiée peut occuper un créneau.");
         }
 
         var fin = demande.FinDuCreneau(debut);
@@ -40,6 +40,23 @@ public sealed class PlanificationDemande(IPlanificationRepository planification)
         var bilan = await EvaluerAsync(demande, request.DebutPlanifie.Value, request.SalleId, cancellationToken);
         GarantirSansConflit(bilan);
         Inscrire(demande, bilan, request, auteurId);
+    }
+
+    public async Task DeplacerAsync(
+        DemandeRencontre demande,
+        DateTimeOffset debut,
+        Guid? salleId,
+        Guid auteurId,
+        CancellationToken cancellationToken = default)
+    {
+        if (demande.Statut != StatutDemande.Planifiee)
+        {
+            throw new DomainException("Seule une rencontre planifiée peut être déplacée.");
+        }
+
+        var bilan = await EvaluerAsync(demande, debut, salleId, cancellationToken);
+        GarantirSansConflit(bilan);
+        demande.DeplacerOccurrence(bilan.Debut, bilan.Fin, NormaliserSalle(salleId), auteurId);
     }
 
     private static void GarantirSansConflit(BilanPlanification bilan)

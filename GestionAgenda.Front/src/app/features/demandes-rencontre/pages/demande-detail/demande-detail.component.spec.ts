@@ -123,6 +123,44 @@ describe('DemandeDetailComponent', () => {
     );
   });
 
+  it('devrait afficher l erreur de chargement', async () => {
+    // Arrange
+    api.obtenir.mockReturnValueOnce(throwError(() => new HttpErrorResponse({
+      status: 404,
+      error: { message: 'Demande introuvable.' },
+    })));
+
+    // Act
+    await afficher();
+
+    // Assert
+    expect(fixture.nativeElement.textContent).toContain('Demande introuvable.');
+    expect(fixture.nativeElement.textContent).not.toContain('Chargement');
+  });
+
+  it('devrait afficher l echec d une decision', async () => {
+    // Arrange
+    api.changerStatut.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 400,
+      error: { message: 'La transition est interdite.' },
+    })));
+    await afficher();
+
+    // Act
+    fixture.componentInstance.decider({
+      statut: 'Acceptee',
+      commentaire: '',
+      dateDebutSouhaitee: null,
+      dateFinSouhaitee: null,
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Assert
+    expect(fixture.nativeElement.textContent).toContain('La transition est interdite.');
+  });
+
   it('devrait afficher le blocage quand la planification est conflictuelle', async () => {
     // Arrange
     statut = 'Acceptee';

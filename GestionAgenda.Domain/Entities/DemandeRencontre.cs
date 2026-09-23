@@ -225,6 +225,38 @@ public sealed class DemandeRencontre : BaseEntity
         });
     }
 
+    public void DeplacerOccurrence(DateTimeOffset debut, DateTimeOffset fin, Guid? salleId, Guid auteurId)
+    {
+        if (Statut != StatutDemande.Planifiee)
+        {
+            throw new DomainException("Seule une rencontre planifiée peut être déplacée.");
+        }
+
+        if (RendezVous is not null)
+        {
+            RendezVous.Deplacer(debut, fin, salleId);
+        }
+        else if (Reunion is not null)
+        {
+            Reunion.Deplacer(debut, fin, salleId);
+        }
+        else
+        {
+            throw new DomainException("Aucune rencontre planifiée à déplacer.");
+        }
+
+        Journaliser(new NouvelEvenementDemande
+        {
+            AuteurId = auteurId,
+            TypeEvenement = TypeEvenementDemande.Deplacement,
+            StatutAvant = Statut,
+            StatutApres = Statut,
+            DateDebutApres = debut,
+            DateFinApres = fin,
+            SalleApresId = salleId,
+        });
+    }
+
     public DateTimeOffset FinDuCreneau(DateTimeOffset debut)
     {
         InvariantsDemande.GarantirCreneauDansPeriode(DateDebutSouhaitee, DateFinSouhaitee, debut, DureeMinutes);

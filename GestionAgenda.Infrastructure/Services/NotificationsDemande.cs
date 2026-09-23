@@ -28,6 +28,9 @@ public sealed class NotificationsDemande(
     public Task RendezVousModifieAsync(Guid demandeId, CancellationToken cancellationToken = default) =>
         ProtegerAsync(() => PublierModificationAsync(demandeId, cancellationToken));
 
+    public Task RappelerAsync(Guid demandeId, HorizonRappel horizon, CancellationToken cancellationToken = default) =>
+        ProtegerAsync(() => PublierRappelAsync(demandeId, horizon, cancellationToken));
+
     private async Task PublierCreationAsync(Guid demandeId, CancellationToken cancellationToken)
     {
         var demande = await ChargerAsync(demandeId, cancellationToken);
@@ -89,6 +92,26 @@ public sealed class NotificationsDemande(
             cancellationToken);
     }
 
+    private async Task PublierRappelAsync(
+        Guid demandeId,
+        HorizonRappel horizon,
+        CancellationToken cancellationToken)
+    {
+        var demande = await ChargerAsync(demandeId, cancellationToken);
+        if (demande is null || demande.Statut != StatutDemande.Planifiee)
+        {
+            return;
+        }
+
+        await PublierPrepareAsync(
+            demande,
+            EvenementNotification.Rappel,
+            TexteNotification.TitreRappel(horizon),
+            TexteNotification.MessageRappel(horizon, demande.Motif),
+            await CiblesParticipantsAsync(demande, cancellationToken),
+            cancellationToken);
+    }
+
     private async Task<IReadOnlyList<DestinataireNotification>> CiblesDemandeurAsync(
         DemandeRencontre demande,
         CancellationToken cancellationToken)
@@ -132,8 +155,23 @@ public sealed class NotificationsDemande(
         IReadOnlyList<DestinataireNotification> cibles,
         CancellationToken cancellationToken)
     {
-        var titre = TexteNotification.Titre(evenement);
-        var message = TexteNotification.Message(evenement, demande.Motif);
+        await PublierPrepareAsync(
+            demande,
+            evenement,
+            TexteNotification.Titre(evenement),
+            TexteNotification.Message(evenement, demande.Motif),
+            cibles,
+            cancellationToken);
+    }
+
+    private async Task PublierPrepareAsync(
+        DemandeRencontre demande,
+        EvenementNotification evenement,
+        string titre,
+        string message,
+        IReadOnlyList<DestinataireNotification> cibles,
+        CancellationToken cancellationToken)
+    {
         var creees = new List<Notification>();
         foreach (var cible in cibles)
         {

@@ -63,6 +63,12 @@ export class DemandesApiService {
       .pipe(map((reponse) => reponse.data));
   }
 
+  deplacer(id: string, debutPlanifie: string, salleId: string | null): Observable<DemandeDetail> {
+    return this.http
+      .patch<ApiResponse<DemandeDetail>>(`${this.baseUrl}/${id}/creneau`, { debutPlanifie, salleId })
+      .pipe(map((reponse) => reponse.data));
+  }
+
   verifierCreneau(id: string, debutPlanifie: string, salleId: string | null): Observable<BilanPlanification> {
     return this.http
       .post<ApiResponse<BilanPlanification>>(`${this.baseUrl}/${id}/verification-creneau`, { debutPlanifie, salleId })

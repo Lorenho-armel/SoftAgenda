@@ -3,10 +3,14 @@ using GestionAgenda.Domain.Enums;
 using GestionAgenda.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace GestionAgenda.Infrastructure.Seeding;
 
-public sealed class DevDataSeeder(ApplicationDbContext context, IConfiguration configuration)
+public sealed class DevDataSeeder(
+    ApplicationDbContext context,
+    IConfiguration configuration,
+    ILogger<DevDataSeeder> journal)
 {
     public static readonly Guid SocieteId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     public static readonly Guid DirigeantId = Guid.Parse("22222222-2222-2222-2222-222222222222");
@@ -24,8 +28,9 @@ public sealed class DevDataSeeder(ApplicationDbContext context, IConfiguration c
 
         if (!await context.Database.CanConnectAsync(cancellationToken))
         {
-            throw new InvalidOperationException(
-                "Base inaccessible. Appliquez la migration AjoutDemandesRencontre.");
+            journal.LogError(
+                "Base inaccessible. Les données de démonstration ne sont pas chargées. L'API continue de démarrer.");
+            return;
         }
 
         if (await context.Utilisateurs.AnyAsync(cancellationToken))

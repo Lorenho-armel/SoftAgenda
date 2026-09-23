@@ -24,4 +24,9 @@ public interface IPlanificationRepository
         Intervalle creneau,
         Guid demandeExclueId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<OccurrenceARappeler>> ListerARappelerAsync(
+        DateTimeOffset maintenant,
+        DateTimeOffset limite,
+        CancellationToken cancellationToken = default);
 }

@@ -9,4 +9,5 @@ public enum EvenementNotification
     Planifiee = 5,
     ModificationRendezVous = 6,
     Annulation = 7,
+    Rappel = 8,
 }
