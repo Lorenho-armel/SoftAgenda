@@ -1,0 +1,58 @@
+<form class="carte grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] items-end gap-3.5" [formGroup]="form" (ngSubmit)="soumettre()">
+  <label>Recherche<input formControlName="search" type="search" placeholder="Motif" /></label>
+  <label>Urgence
+    <select formControlName="urgence">
+      <option value="">Toutes</option>
+      @for (valeur of urgences; track valeur) { <option [value]="valeur">{{ valeur }}</option> }
+    </select>
+  </label>
+  <label>Priorité
+    <select formControlName="priorite">
+      <option value="">Toutes</option>
+      @for (valeur of priorites; track valeur) { <option [value]="valeur">{{ valeur }}</option> }
+    </select>
+  </label>
+  <label>Statut
+    <select formControlName="statut">
+      <option value="">Tous</option>
+      @for (item of statuts; track item.valeur) { <option [value]="item.valeur">{{ item.libelle }}</option> }
+    </select>
+  </label>
+  <label>Type
+    <select formControlName="type">
+      <option value="">Tous</option>
+      @for (item of types; track item.valeur) { <option [value]="item.valeur">{{ item.libelle }}</option> }
+    </select>
+  </label>
+  <label>Société
+    <select formControlName="societeId">
+      <option value="">Toutes</option>
+      @for (societe of societes(); track societe.id) { <option [value]="societe.id">{{ societe.nom }}</option> }
+    </select>
+  </label>
+  <label>Demandeur
+    <select formControlName="demandeurId">
+      <option value="">Tous</option>
+      @for (personne of demandeurs(); track personne.id) { <option [value]="personne.id">{{ personne.nomComplet }}</option> }
+    </select>
+  </label>
+  <label>Dès le<input formControlName="dateDebut" type="date" /></label>
+  <label>Jusqu'au<input formControlName="dateFin" type="date" /></label>
+  <label>Tri
+    <select formControlName="sortBy">
+      <option value="">Urgence, priorité, date souhaitée</option>
+      <option value="urgence">Urgence</option>
+      <option value="priorite">Priorité</option>
+      <option value="datedebutsouhaitee">Date souhaitée</option>
+      <option value="datecreation">Date de création</option>
+      <option value="statut">Statut</option>
+    </select>
+  </label>
+  <label>Sens
+    <select formControlName="sortDirection">
+      <option value="asc">Croissant</option>
+      <option value="desc">Décroissant</option>
+    </select>
+  </label>
+  <button type="submit">Filtrer</button>
+</form>

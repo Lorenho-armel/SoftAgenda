@@ -1,0 +1,22 @@
+<article class="grid items-center gap-x-2.5 border-b border-line py-3 max-md:grid-cols-1 md:grid-cols-[auto_auto_auto_auto_auto_1fr]">
+  <app-badge [label]="demande().urgence" [tone]="tonUrgence()" />
+  <span class="text-sage max-md:hidden">|</span>
+  <app-badge [label]="demande().priorite" [tone]="tonPriorite()" />
+  <span class="text-sage max-md:hidden">|</span>
+  <strong>{{ client() }}</strong>
+  <span class="text-sage max-md:hidden">|</span>
+  <span>{{ jour() }}</span>
+  <p class="col-span-full m-0">{{ demande().motif }}</p>
+  <p class="col-span-full m-0 text-sm text-navy-soft">{{ statut() }} · {{ demande().societeNom }}</p>
+  <div class="col-span-full flex flex-wrap items-center gap-3">
+    <a [routerLink]="['/demandes-rencontre', demande().id]">Détail</a>
+    @if (actionsRapides() && demande().statut === 'EnAttente') {
+      <button type="button" (click)="analyser.emit(demande().id)">Analyser</button>
+    }
+    @if (actionsRapides() && demande().statut === 'EnAnalyse') {
+      <button type="button" (click)="accepter.emit(demande().id)">Accepter</button>
+      <a [routerLink]="['/demandes-rencontre', demande().id]" fragment="traitement">Refuser</a>
+      <a [routerLink]="['/demandes-rencontre', demande().id]" fragment="traitement">Reporter</a>
+    }
+  </div>
+</article>

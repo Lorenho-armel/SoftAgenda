@@ -1,0 +1,47 @@
+<section class="page">
+  <header class="carte">
+    <h1 class="mt-0">Demandes de rencontre</h1>
+    <div class="flex flex-wrap gap-2">
+      @for (vue of vues; track vue.id) {
+        <button
+          type="button"
+          [class]="vueActive().vue === vue.id ? 'border border-navy bg-navy text-paper' : 'border border-sage bg-paper text-navy'"
+          (click)="choisirVue(vue.id)"
+        >
+          {{ vue.libelle }}
+          @if (file(); as donnees) {
+            <span [class]="vueActive().vue === vue.id ? 'ml-1 text-gold-light' : 'ml-1 text-gold-deep'">{{ donnees.compteurs[vue.compteur] }}</span>
+          }
+        </button>
+      }
+    </div>
+  </header>
+  @if (file() === undefined) {
+    <p class="carte">Chargement…</p>
+  }
+  @if (file() === null) {
+    <p class="carte">La file est indisponible.</p>
+  }
+  @if (file(); as donnees) {
+    <app-demande-filtres [societes]="donnees.societes" [demandeurs]="donnees.demandeurs" (appliquer)="filtrer($event)" />
+    <section class="carte">
+      @if (chargement()) { <p>Chargement…</p> }
+      @for (demande of donnees.demandes.items; track demande.id) {
+        <app-demande-ligne
+          [demande]="demande"
+          [actionsRapides]="true"
+          (analyser)="analyser($event)"
+          (accepter)="accepter($event)"
+        />
+      } @empty {
+        <p>Aucune demande dans cette file.</p>
+      }
+      <app-pager
+        [page]="donnees.demandes.page"
+        [totalPages]="donnees.demandes.totalPages"
+        [totalCount]="donnees.demandes.totalCount"
+        (pageChange)="changerPage($event)"
+      />
+    </section>
+  }
+</section>

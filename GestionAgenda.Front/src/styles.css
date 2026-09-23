@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, sans-serif;
+  --color-navy: #2e427b;
+  --color-navy-soft: #575d8f;
+  --color-gold: #bc9c22;
+  --color-gold-light: #e1c340;
+  --color-gold-deep: #aa9e39;
+  --color-sage: #aeb091;
+  --color-ink: #000000;
+  --color-paper: #ffffff;
+  --color-mist: #f6f4ee;
+  --color-line: #e4e0d4;
+  --color-alert: #fff6d8;
+  --color-danger: #8a1f2b;
+}
+
+@layer base {
+  body {
+    @apply m-0 min-h-screen bg-mist font-sans text-ink;
+  }
+
+  h1 {
+    @apply text-2xl font-bold text-navy;
+  }
+
+  h2 {
+    @apply text-xl font-bold text-navy;
+  }
+
+  h3 {
+    @apply text-lg font-bold text-navy;
+  }
+
+  a {
+    @apply text-navy;
+  }
+
+  label {
+    @apply grid gap-1 text-sm font-semibold text-navy;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    @apply font-sans;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply w-full rounded border border-sage bg-paper px-2.5 py-2;
+  }
+
+  button {
+    @apply cursor-pointer rounded bg-navy px-3.5 py-2 text-paper disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
+
+@utility btn-secondaire {
+  @apply cursor-pointer rounded border border-navy bg-transparent px-3.5 py-2 text-navy disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility carte {
+  @apply border border-line border-t-4 border-t-gold bg-paper p-5;
+}
+
+@utility page {
+  @apply grid gap-5;
+}
+
+@utility grille {
+  @apply grid gap-3.5;
+}

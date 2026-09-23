@@ -1,0 +1,20 @@
+<section class="carte" id="historique">
+  <h2>Historique</h2>
+  @if (lignes().length === 0) {
+    <p>Aucun événement.</p>
+  }
+  <ol class="m-0 grid list-none gap-3 p-0">
+    @for (evenement of lignes(); track evenement.id) {
+      <li class="border-l-[3px] border-gold pl-3">
+        <strong>{{ evenement.typeEvenement }}</strong>
+        <time class="block text-sm text-navy-soft">{{ evenement.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</time>
+        @if (evenement.statut) {
+          <span class="block text-sm text-navy-soft">{{ evenement.statut }}</span>
+        }
+        @if (evenement.commentaire) {
+          <p>{{ evenement.commentaire }}</p>
+        }
+      </li>
+    }
+  </ol>
+</section>
