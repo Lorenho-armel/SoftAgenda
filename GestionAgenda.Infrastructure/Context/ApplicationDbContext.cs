@@ -33,6 +33,10 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public DbSet<Notification> Notifications => Set<Notification>();
+
+    public DbSet<AbonnementPush> AbonnementsPush => Set<AbonnementPush>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 }

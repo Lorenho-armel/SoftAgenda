@@ -14,6 +14,19 @@ public sealed class UtilisateurRepository(ApplicationDbContext context) : IUtili
     public Task<Utilisateur?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         context.Utilisateurs.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyList<Utilisateur>> GetByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default)
+    {
+        var distincts = ids.Distinct().ToList();
+        if (distincts.Count == 0)
+        {
+            return [];
+        }
+
+        return await context.Utilisateurs.Where(u => distincts.Contains(u.Id)).ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<RoleSociete>> GetRolesAsync(
         Guid utilisateurId,
         CancellationToken cancellationToken = default)

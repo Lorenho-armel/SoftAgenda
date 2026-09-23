@@ -27,6 +27,7 @@ public sealed class DemandeRencontreService(
     IValidator<DemandeRencontreQuery> queryValidator,
     IValidator<VerifierCreneauRequest> creneauValidator,
     IMapper mapper,
+    INotificationsDemande notifications,
     ILogger<DemandeRencontreService> logger) : IDemandeRencontreService
 {
     private readonly EvaluationAccesDemande evaluationAcces = new(acces);
@@ -43,6 +44,7 @@ public sealed class DemandeRencontreService(
         await unitOfWork.SaveChangesAsync(cancellationToken);
         logger.LogInformation(
             "Demande {DemandeId} créée pour le dirigeant {DirigeantId}", demande.Id, demande.DirigeantId);
+        await notifications.DemandeCreeeAsync(demande.Id, cancellationToken);
         return mapper.Map<DemandeRencontreResponse>(demande);
     }
 
@@ -123,6 +125,7 @@ public sealed class DemandeRencontreService(
         await VerifierParticipantsAsync(request.Participants, demande.SocieteId, cancellationToken);
         demande.MettreAJour(PreparationDemande.VersMiseAJour(request));
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await notifications.RendezVousModifieAsync(demande.Id, cancellationToken);
         return mapper.Map<DemandeRencontreResponse>(demande);
     }
 
@@ -144,6 +147,7 @@ public sealed class DemandeRencontreService(
         await unitOfWork.SaveChangesAsync(cancellationToken);
         logger.LogInformation(
             "Demande {DemandeId} passée au statut {Statut} par {AuteurId}", demande.Id, demande.Statut, utilisateurId);
+        await notifications.StatutModifieAsync(demande.Id, cancellationToken);
         return mapper.Map<DemandeRencontreResponse>(demande);
     }
 

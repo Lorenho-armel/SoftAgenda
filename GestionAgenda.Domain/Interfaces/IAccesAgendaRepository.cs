@@ -21,4 +21,9 @@ public interface IAccesAgendaRepository
         IReadOnlyCollection<Guid> utilisateurIds,
         Guid societeId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Guid>> ListerAssistantesActivesAsync(
+        Guid dirigeantId,
+        Guid societeId,
+        CancellationToken cancellationToken = default);
 }

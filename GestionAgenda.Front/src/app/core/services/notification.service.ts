@@ -8,6 +8,10 @@ export class NotificationService {
     this.message.set(message);
   }
 
+  annoncer(message: string): void {
+    this.message.set(message);
+  }
+
   effacer(): void {
     this.message.set(null);
   }

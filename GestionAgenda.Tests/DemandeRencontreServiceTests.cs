@@ -2,6 +2,7 @@ using AutoMapper;
 using FluentAssertions;
 using GestionAgenda.Application.DTOs.DemandesRencontre;
 using GestionAgenda.Application.Mappings;
+using GestionAgenda.Application.Services.Interfaces;
 using GestionAgenda.Application.Validators;
 using GestionAgenda.Domain.Entities;
 using GestionAgenda.Domain.Enums;
@@ -69,6 +70,8 @@ public class DemandeRencontreServiceTests
         Mock<IUnitOfWork> unitOfWork)
     {
         var mapper = new MapperConfiguration(cfg => cfg.AddProfile<DemandeRencontreProfile>()).CreateMapper();
+        var notifications = new Mock<INotificationsDemande>();
+        notifications.SetReturnsDefault(Task.CompletedTask);
         return new DemandeRencontreService(
             demandes.Object,
             acces.Object,
@@ -83,6 +86,7 @@ public class DemandeRencontreServiceTests
             new DemandeRencontreQueryValidator(),
             new VerifierCreneauRequestValidator(),
             mapper,
+            notifications.Object,
             NullLogger<DemandeRencontreService>.Instance);
     }
 }

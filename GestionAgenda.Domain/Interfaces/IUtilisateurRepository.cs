@@ -9,5 +9,9 @@ public interface IUtilisateurRepository
 
     Task<Utilisateur?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Utilisateur>> GetByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<RoleSociete>> GetRolesAsync(Guid utilisateurId, CancellationToken cancellationToken = default);
 }

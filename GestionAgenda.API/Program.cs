@@ -5,6 +5,7 @@ using GestionAgenda.API.Services;
 using GestionAgenda.Application.Services.Interfaces;
 using GestionAgenda.Infrastructure;
 using GestionAgenda.Infrastructure.Migrations;
+using GestionAgenda.Infrastructure.Notifications;
 using GestionAgenda.Infrastructure.Seeding;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -67,5 +68,6 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
+app.MapHub<NotificationsHub>("/hubs/notifications");
 app.MapControllers();
 app.Run();

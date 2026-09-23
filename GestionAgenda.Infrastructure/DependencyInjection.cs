@@ -1,12 +1,15 @@
 using System.Text;
 using GestionAgenda.Application;
+using GestionAgenda.Application.Services.Interfaces;
 using GestionAgenda.Domain.Interfaces;
 using GestionAgenda.Infrastructure.Context;
+using GestionAgenda.Infrastructure.Notifications;
 using GestionAgenda.Infrastructure.Options;
 using GestionAgenda.Infrastructure.Repositories;
 using GestionAgenda.Infrastructure.Migrations;
 using GestionAgenda.Infrastructure.Seeding;
 using GestionAgenda.Infrastructure.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -44,8 +47,27 @@ public static class DependencyInjection
         services.AddScoped<DevDataSeeder>();
         services.AddScoped<GenerateurScriptsMigration>();
         services.AddApplication();
+        AjouterNotifications(services, configuration, connectionString);
         AjouterJwt(services, configuration);
         return services;
+    }
+
+    private static void AjouterNotifications(
+        IServiceCollection services,
+        IConfiguration configuration,
+        string connectionString)
+    {
+        services.Configure<NotificationsOptions>(configuration.GetSection(NotificationsOptions.SectionName));
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<INotificationsDemande, NotificationsDemande>();
+        services.AddScoped<ICentreNotifications, CentreNotifications>();
+        services.AddScoped<IEnvoiEmail, EnvoiEmailSmtp>();
+        services.AddScoped<IEnvoiPush, EnvoiPushNavigateur>();
+        services.AddScoped<IEnfileurNotification, EnfileurHangfire>();
+        services.AddScoped<DiffuseurNotification>();
+        services.AddSignalR();
+        services.AddHangfire(options => options.UseSqlServerStorage(connectionString));
+        services.AddHangfireServer();
     }
 
     private static void AjouterJwt(IServiceCollection services, IConfiguration configuration)
@@ -72,6 +94,19 @@ public static class DependencyInjection
                     ClockSkew = TimeSpan.FromMinutes(1),
                     RoleClaimType = "role",
                     NameClaimType = "sub",
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = contexte =>
+                    {
+                        var jeton = contexte.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(jeton) && contexte.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                        {
+                            contexte.Token = jeton;
+                        }
+
+                        return Task.CompletedTask;
+                    },
                 };
             });
     }

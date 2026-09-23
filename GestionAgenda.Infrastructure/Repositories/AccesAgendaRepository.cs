@@ -58,4 +58,17 @@ public sealed class AccesAgendaRepository(ApplicationDbContext context) : IAcces
             .CountAsync(cancellationToken);
         return trouves == distincts.Count;
     }
+
+    public async Task<IReadOnlyList<Guid>> ListerAssistantesActivesAsync(
+        Guid dirigeantId,
+        Guid societeId,
+        CancellationToken cancellationToken = default)
+    {
+        var identifiants = await context.AffectationAssistantes
+            .Where(a => a.EstActive && a.DirigeantId == dirigeantId && a.SocieteId == societeId)
+            .Select(a => a.AssistanteId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        return identifiants;
+    }
 }

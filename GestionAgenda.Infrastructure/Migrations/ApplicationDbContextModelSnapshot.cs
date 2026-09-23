@@ -22,6 +22,46 @@ namespace GestionAgenda.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("GestionAgenda.Domain.Entities.AbonnementPush", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CleP256dh")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("DateCreation")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("DateModification")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("UtilisateurId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Endpoint")
+                        .IsUnique();
+
+                    b.HasIndex("UtilisateurId");
+
+                    b.ToTable("AbonnementsPush", (string)null);
+                });
+
             modelBuilder.Entity("GestionAgenda.Domain.Entities.AffectationAssistante", b =>
                 {
                     b.Property<Guid>("Id")
@@ -262,6 +302,53 @@ namespace GestionAgenda.Infrastructure.Migrations
                     b.HasIndex("DemandeRencontreId", "DateCreation");
 
                     b.ToTable("HistoriqueDemandes", (string)null);
+                });
+
+            modelBuilder.Entity("GestionAgenda.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("DateCreation")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("DateModification")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DemandeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DestinataireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Evenement")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Titre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DemandeId");
+
+                    b.HasIndex("DestinataireId", "DateCreation");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("GestionAgenda.Domain.Entities.RefreshToken", b =>
@@ -544,6 +631,15 @@ namespace GestionAgenda.Infrastructure.Migrations
                     b.ToTable("UtilisateurSocietes", (string)null);
                 });
 
+            modelBuilder.Entity("GestionAgenda.Domain.Entities.AbonnementPush", b =>
+                {
+                    b.HasOne("GestionAgenda.Domain.Entities.Utilisateur", null)
+                        .WithMany()
+                        .HasForeignKey("UtilisateurId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GestionAgenda.Domain.Entities.AffectationAssistante", b =>
                 {
                     b.HasOne("GestionAgenda.Domain.Entities.Utilisateur", "Assistante")
@@ -632,6 +728,20 @@ namespace GestionAgenda.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Demande");
+                });
+
+            modelBuilder.Entity("GestionAgenda.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("GestionAgenda.Domain.Entities.DemandeRencontre", null)
+                        .WithMany()
+                        .HasForeignKey("DemandeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GestionAgenda.Domain.Entities.Utilisateur", null)
+                        .WithMany()
+                        .HasForeignKey("DestinataireId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("GestionAgenda.Domain.Entities.RefreshToken", b =>

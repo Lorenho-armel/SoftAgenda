@@ -1,0 +1,40 @@
+using GestionAgenda.Domain.Enums;
+
+namespace GestionAgenda.Domain.Demandes;
+
+public static class TexteNotification
+{
+    public static EvenementNotification? DepuisStatut(StatutDemande statut) => statut switch
+    {
+        StatutDemande.Acceptee => EvenementNotification.Acceptee,
+        StatutDemande.Refusee => EvenementNotification.Refusee,
+        StatutDemande.Reportee => EvenementNotification.Reportee,
+        StatutDemande.Planifiee => EvenementNotification.Planifiee,
+        StatutDemande.Annulee => EvenementNotification.Annulation,
+        _ => null,
+    };
+
+    public static string Titre(EvenementNotification evenement) => evenement switch
+    {
+        EvenementNotification.Creation => "Nouvelle demande de rencontre",
+        EvenementNotification.Acceptee => "Demande acceptée",
+        EvenementNotification.Refusee => "Demande refusée",
+        EvenementNotification.Reportee => "Demande reportée",
+        EvenementNotification.Planifiee => "Rencontre planifiée",
+        EvenementNotification.ModificationRendezVous => "Rendez-vous modifié",
+        EvenementNotification.Annulation => "Demande annulée",
+        _ => "Demande de rencontre",
+    };
+
+    public static string Message(EvenementNotification evenement, string motif) => evenement switch
+    {
+        EvenementNotification.Creation => $"Une demande vous est adressée : {motif}.",
+        EvenementNotification.Acceptee => $"Votre demande a été acceptée : {motif}.",
+        EvenementNotification.Refusee => $"Votre demande a été refusée : {motif}.",
+        EvenementNotification.Reportee => $"Votre demande a été reportée : {motif}.",
+        EvenementNotification.Planifiee => $"Une rencontre a été planifiée : {motif}.",
+        EvenementNotification.ModificationRendezVous => $"Le rendez-vous a été modifié : {motif}.",
+        EvenementNotification.Annulation => $"La demande a été annulée : {motif}.",
+        _ => motif,
+    };
+}
