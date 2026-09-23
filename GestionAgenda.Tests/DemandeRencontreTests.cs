@@ -55,7 +55,7 @@ public class DemandeRencontreTests
     public void Refuser_SansCommentaire_ThrowsDomainException()
     {
         // Arrange
-        var sut = DemandeRencontre.Creer(DemandeValide());
+        var sut = DemandeEnAnalyse();
 
         // Act
         var act = () => sut.Refuser(Guid.CreateVersion7(), " ");
@@ -65,10 +65,24 @@ public class DemandeRencontreTests
     }
 
     [Fact]
-    public void Accepter_DepuisEnAttente_PasseAAcceptee()
+    public void Accepter_DepuisEnAttente_ThrowsDomainException()
     {
         // Arrange
         var sut = DemandeRencontre.Creer(DemandeValide());
+
+        // Act
+        var act = () => sut.Accepter(Guid.CreateVersion7(), null);
+
+        // Assert
+        act.Should().Throw<DomainException>();
+        sut.Statut.Should().Be(StatutDemande.EnAttente);
+    }
+
+    [Fact]
+    public void Accepter_DepuisEnAnalyse_PasseAAcceptee()
+    {
+        // Arrange
+        var sut = DemandeEnAnalyse();
 
         // Act
         sut.Accepter(Guid.CreateVersion7(), null);
@@ -96,7 +110,7 @@ public class DemandeRencontreTests
     public void ChangerUrgence_DemandeRefusee_ThrowsDomainException()
     {
         // Arrange
-        var sut = DemandeRencontre.Creer(DemandeValide());
+        var sut = DemandeEnAnalyse();
         sut.Refuser(Guid.CreateVersion7(), "Créneau impossible");
 
         // Act
@@ -143,6 +157,13 @@ public class DemandeRencontreTests
 
         // Assert
         sut.Should().BeTrue();
+    }
+
+    private static DemandeRencontre DemandeEnAnalyse()
+    {
+        var demande = DemandeRencontre.Creer(DemandeValide());
+        demande.PrendreEnAnalyse(Guid.CreateVersion7(), null);
+        return demande;
     }
 
     private static NouvelleDemande DemandeValide(

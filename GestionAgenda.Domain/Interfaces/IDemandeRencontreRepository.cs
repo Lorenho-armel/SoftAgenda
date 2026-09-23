@@ -14,4 +14,9 @@ public interface IDemandeRencontreRepository
         Guid utilisateurId,
         DemandeRencontreFiltre filtre,
         CancellationToken cancellationToken = default);
+
+    Task<ResultatFile> ObtenirFileAsync(
+        Guid utilisateurId,
+        DemandeRencontreFiltre filtre,
+        CancellationToken cancellationToken = default);
 }

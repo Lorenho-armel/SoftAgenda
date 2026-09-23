@@ -10,9 +10,6 @@ public static class TransitionsDemande
             [StatutDemande.EnAttente] =
             [
                 StatutDemande.EnAnalyse,
-                StatutDemande.Acceptee,
-                StatutDemande.Refusee,
-                StatutDemande.Reportee,
                 StatutDemande.Annulee,
             ],
             [StatutDemande.EnAnalyse] =
@@ -25,22 +22,17 @@ public static class TransitionsDemande
             [StatutDemande.Acceptee] =
             [
                 StatutDemande.Planifiee,
-                StatutDemande.Reportee,
-                StatutDemande.Refusee,
                 StatutDemande.Annulee,
             ],
             [StatutDemande.Reportee] =
             [
                 StatutDemande.EnAnalyse,
-                StatutDemande.Acceptee,
-                StatutDemande.Refusee,
                 StatutDemande.Annulee,
             ],
             [StatutDemande.Planifiee] =
             [
                 StatutDemande.Terminee,
                 StatutDemande.Annulee,
-                StatutDemande.Reportee,
             ],
         };
 

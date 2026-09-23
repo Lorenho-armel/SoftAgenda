@@ -42,13 +42,74 @@ public sealed class DemandeRencontreRepository(ApplicationDbContext context) : I
         DemandeRencontreFiltre filtre,
         CancellationToken cancellationToken = default)
     {
-        var requete = AppliquerFiltres(Visibles(utilisateurId), filtre);
+        var requete = AppliquerVue(AppliquerFiltres(Visibles(utilisateurId), filtre), filtre.Vue);
+        return await PaginerAsync(requete, filtre, cancellationToken);
+    }
+
+    public async Task<ResultatFile> ObtenirFileAsync(
+        Guid utilisateurId,
+        DemandeRencontreFiltre filtre,
+        CancellationToken cancellationToken = default)
+    {
+        var visibles = Visibles(utilisateurId);
+        var filtrees = AppliquerFiltres(visibles, filtre);
+        var compteurs = await CompterAsync(filtrees, cancellationToken);
+        var page = await PaginerAsync(AppliquerVue(filtrees, filtre.Vue), filtre, cancellationToken);
+        var demandeurs = await ListerDemandeursAsync(visibles, cancellationToken);
+        var societes = await ListerSocietesAsync(visibles, cancellationToken);
+        return new ResultatFile(page, compteurs, demandeurs, societes);
+    }
+
+    private async Task<Page<DemandeRencontre>> PaginerAsync(
+        IQueryable<DemandeRencontre> requete,
+        DemandeRencontreFiltre filtre,
+        CancellationToken cancellationToken)
+    {
         var total = await requete.CountAsync(cancellationToken);
         var items = await Trier(requete, filtre)
+            .Include(d => d.Demandeur)
+            .Include(d => d.Societe)
             .Skip((filtre.Page - 1) * filtre.Size)
             .Take(filtre.Size)
             .ToListAsync(cancellationToken);
         return new Page<DemandeRencontre>(items, total);
+    }
+
+    private static async Task<CompteursFile> CompterAsync(
+        IQueryable<DemandeRencontre> requete,
+        CancellationToken cancellationToken)
+    {
+        return new CompteursFile(
+            await requete.CountAsync(VuesFile.Pour(VueFile.Nouvelles), cancellationToken),
+            await requete.CountAsync(VuesFile.Pour(VueFile.Urgentes), cancellationToken),
+            await requete.CountAsync(VuesFile.Pour(VueFile.Critiques), cancellationToken),
+            await requete.CountAsync(VuesFile.Pour(VueFile.Prioritaires), cancellationToken),
+            await requete.CountAsync(VuesFile.Pour(VueFile.EnAttente), cancellationToken),
+            await requete.CountAsync(VuesFile.Pour(VueFile.Planifiees), cancellationToken));
+    }
+
+    private static async Task<IReadOnlyList<PersonneFile>> ListerDemandeursAsync(
+        IQueryable<DemandeRencontre> visibles,
+        CancellationToken cancellationToken)
+    {
+        var lignes = await visibles
+            .Select(d => new { d.DemandeurId, Nom = d.Demandeur!.Prenom + " " + d.Demandeur.Nom })
+            .Distinct()
+            .OrderBy(p => p.Nom)
+            .ToListAsync(cancellationToken);
+        return lignes.Select(p => new PersonneFile(p.DemandeurId, p.Nom)).ToList();
+    }
+
+    private static async Task<IReadOnlyList<SocieteFile>> ListerSocietesAsync(
+        IQueryable<DemandeRencontre> visibles,
+        CancellationToken cancellationToken)
+    {
+        var lignes = await visibles
+            .Select(d => new { d.SocieteId, d.Societe!.Nom })
+            .Distinct()
+            .OrderBy(s => s.Nom)
+            .ToListAsync(cancellationToken);
+        return lignes.Select(s => new SocieteFile(s.SocieteId, s.Nom)).ToList();
     }
 
     private IQueryable<DemandeRencontre> Visibles(Guid utilisateurId) =>
@@ -106,8 +167,18 @@ public sealed class DemandeRencontreRepository(ApplicationDbContext context) : I
             requete = requete.Where(d => d.DateDebutSouhaitee <= filtre.DateFin);
         }
 
+        if (filtre.DemandeurId.HasValue)
+        {
+            requete = requete.Where(d => d.DemandeurId == filtre.DemandeurId);
+        }
+
         return requete;
     }
+
+    private static IQueryable<DemandeRencontre> AppliquerVue(
+        IQueryable<DemandeRencontre> requete,
+        VueFile? vue) =>
+        vue.HasValue ? requete.Where(VuesFile.Pour(vue.Value)) : requete;
 
     private static IQueryable<DemandeRencontre> Trier(
         IQueryable<DemandeRencontre> requete,
@@ -115,10 +186,7 @@ public sealed class DemandeRencontreRepository(ApplicationDbContext context) : I
     {
         if (string.IsNullOrWhiteSpace(filtre.SortBy))
         {
-            return requete
-                .OrderBy(d => d.Urgence == Urgence.Critique ? 0 : d.Urgence == Urgence.Urgent ? 1 : 2)
-                .ThenBy(d => d.Priorite == Priorite.Critique ? 0 : d.Priorite == Priorite.Haute ? 1 : d.Priorite == Priorite.Moyenne ? 2 : 3)
-                .ThenBy(d => d.DateDebutSouhaitee);
+            return ClassementFile.Appliquer(requete);
         }
 
         return filtre.SortBy.Trim().ToLowerInvariant() switch

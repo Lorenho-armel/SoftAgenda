@@ -20,5 +20,6 @@ public sealed class DemandeRencontreQueryValidator : AbstractValidator<DemandeRe
         RuleFor(x => x.SortBy)
             .Must(v => v is null || TrisAutorises.Contains(v.Trim().ToLowerInvariant()))
             .WithMessage("Le tri demandé n'est pas autorisé.");
+        RuleFor(x => x.Vue).IsInEnum().When(x => x.Vue.HasValue);
     }
 }

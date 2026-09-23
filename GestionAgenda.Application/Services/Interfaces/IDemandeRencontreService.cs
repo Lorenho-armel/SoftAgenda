@@ -16,6 +16,11 @@ public interface IDemandeRencontreService
         Guid utilisateurId,
         CancellationToken cancellationToken = default);
 
+    Task<FileDemandesResponse> GetFileAsync(
+        DemandeRencontreQuery query,
+        Guid utilisateurId,
+        CancellationToken cancellationToken = default);
+
     Task<DemandeRencontreResponse> GetByIdAsync(
         Guid id,
         Guid utilisateurId,

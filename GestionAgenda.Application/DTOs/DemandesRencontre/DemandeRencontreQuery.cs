@@ -14,4 +14,6 @@ public record DemandeRencontreQuery(
     TypeDemande? Type = null,
     Guid? SocieteId = null,
     DateTimeOffset? DateDebut = null,
-    DateTimeOffset? DateFin = null);
+    DateTimeOffset? DateFin = null,
+    Guid? DemandeurId = null,
+    VueFile? Vue = null);

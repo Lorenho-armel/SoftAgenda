@@ -14,4 +14,6 @@ public sealed record DemandeRencontreFiltre(
     TypeDemande? Type,
     Guid? SocieteId,
     DateTimeOffset? DateDebut,
-    DateTimeOffset? DateFin);
+    DateTimeOffset? DateFin,
+    Guid? DemandeurId,
+    VueFile? Vue);

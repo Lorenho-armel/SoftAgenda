@@ -43,7 +43,9 @@ internal static class PreparationDemande
             query.Type,
             query.SocieteId,
             query.DateDebut,
-            query.DateFin);
+            query.DateFin,
+            query.DemandeurId,
+            query.Vue);
 
     private static IReadOnlyList<NouveauParticipant> VersParticipants(IReadOnlyList<ParticipantRequest>? participants) =>
         (participants ?? []).Select(p => new NouveauParticipant(p.UtilisateurId, p.NomComplet, p.Email)).ToList();

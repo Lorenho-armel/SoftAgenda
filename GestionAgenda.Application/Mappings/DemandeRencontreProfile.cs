@@ -10,7 +10,14 @@ public sealed class DemandeRencontreProfile : Profile
     {
         CreateMap<DemandeParticipant, ParticipantResponse>();
         CreateMap<HistoriqueDemande, HistoriqueDemandeResponse>();
-        CreateMap<DemandeRencontre, DemandeRencontreResumeResponse>();
+        CreateMap<DemandeRencontre, DemandeRencontreResumeResponse>()
+            .ForMember(
+                destination => destination.DemandeurNom,
+                option => option.MapFrom(source =>
+                    source.Demandeur == null ? string.Empty : source.Demandeur.Prenom + " " + source.Demandeur.Nom))
+            .ForMember(
+                destination => destination.SocieteNom,
+                option => option.MapFrom(source => source.Societe == null ? string.Empty : source.Societe.Nom));
         CreateMap<DemandeRencontre, DemandeRencontreResponse>()
             .ForMember(
                 destination => destination.RendezVousId,

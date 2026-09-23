@@ -16,4 +16,6 @@ public record DemandeRencontreResumeResponse(
     Priorite Priorite,
     StatutDemande Statut,
     Guid? SalleSouhaiteeId,
-    DateTimeOffset DateCreation);
+    DateTimeOffset DateCreation,
+    string DemandeurNom,
+    string SocieteNom);
