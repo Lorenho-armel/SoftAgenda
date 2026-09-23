@@ -5,6 +5,6 @@ public record ApiResponse<T>(bool Success, string? Message, T? Data, DateTimeOff
     public static ApiResponse<T> Ok(T data, string? message = null) =>
         new(true, message, data, DateTimeOffset.UtcNow);
 
-    public static ApiResponse<T> Fail(string message) =>
-        new(false, message, default, DateTimeOffset.UtcNow);
+    public static ApiResponse<T> Fail(string message, T? data = default) =>
+        new(false, message, data, DateTimeOffset.UtcNow);
 }

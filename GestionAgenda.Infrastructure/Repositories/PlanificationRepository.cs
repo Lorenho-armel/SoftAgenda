@@ -1,3 +1,4 @@
+using GestionAgenda.Domain.Demandes;
 using GestionAgenda.Domain.Entities;
 using GestionAgenda.Domain.Enums;
 using GestionAgenda.Domain.Interfaces;
@@ -11,41 +12,138 @@ public sealed class PlanificationRepository(ApplicationDbContext context) : IPla
     public Task<Salle?> GetSalleAsync(Guid salleId, CancellationToken cancellationToken = default) =>
         context.Salles.FirstOrDefaultAsync(s => s.Id == salleId, cancellationToken);
 
-    public async Task<bool> DirigeantLibreAsync(
+    public async Task<IReadOnlyList<OccupationCalendrier>> OccupationsDirigeantAsync(
         Guid dirigeantId,
-        DateTimeOffset debut,
-        DateTimeOffset fin,
+        Intervalle creneau,
+        Guid demandeExclueId,
         CancellationToken cancellationToken = default)
     {
-        var rendezVousOccupe = await context.RendezVous.AnyAsync(
-            r => r.DirigeantId == dirigeantId && r.Statut != StatutOccurrence.Annule && r.Debut < fin && r.Fin > debut,
-            cancellationToken);
-        if (rendezVousOccupe)
-        {
-            return false;
-        }
-
-        return !await context.Reunions.AnyAsync(
-            r => r.DirigeantId == dirigeantId && r.Statut != StatutOccurrence.Annule && r.Debut < fin && r.Fin > debut,
-            cancellationToken);
+        var identifiants = new[] { dirigeantId };
+        var rendezVous = await RendezVousDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken);
+        var reunions = await ReunionsDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken);
+        return rendezVous.Concat(reunions).ToList();
     }
 
-    public async Task<bool> SalleLibreAsync(
+    public async Task<IReadOnlyList<OccupationCalendrier>> OccupationsParticipantsAsync(
+        IReadOnlyCollection<Guid> utilisateurIds,
+        Intervalle creneau,
+        Guid demandeExclueId,
+        CancellationToken cancellationToken = default)
+    {
+        if (utilisateurIds.Count == 0)
+        {
+            return [];
+        }
+
+        var identifiants = utilisateurIds.Distinct().ToList();
+        var commeDirigeants = await RendezVousDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken);
+        commeDirigeants.AddRange(await ReunionsDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken));
+        var commeInvites = await RendezVousDesInvitesAsync(identifiants, creneau, demandeExclueId, cancellationToken);
+        commeInvites.AddRange(await ReunionsDesInvitesAsync(identifiants, creneau, demandeExclueId, cancellationToken));
+        return commeDirigeants
+            .Concat(commeInvites)
+            .DistinctBy(occupation => (occupation.OccurrenceId, occupation.PersonneId))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<OccupationSalle>> OccupationsSalleAsync(
         Guid salleId,
-        DateTimeOffset debut,
-        DateTimeOffset fin,
+        Intervalle creneau,
+        Guid demandeExclueId,
         CancellationToken cancellationToken = default)
     {
-        var rendezVousOccupe = await context.RendezVous.AnyAsync(
-            r => r.SalleId == salleId && r.Statut != StatutOccurrence.Annule && r.Debut < fin && r.Fin > debut,
-            cancellationToken);
-        if (rendezVousOccupe)
-        {
-            return false;
-        }
-
-        return !await context.Reunions.AnyAsync(
-            r => r.SalleId == salleId && r.Statut != StatutOccurrence.Annule && r.Debut < fin && r.Fin > debut,
-            cancellationToken);
+        var rendezVous = await RendezVousOccupes(creneau, demandeExclueId)
+            .Where(r => r.SalleId == salleId)
+            .Select(r => new OccupationSalle(r.Id, r.Titre, r.Debut, r.Fin))
+            .ToListAsync(cancellationToken);
+        var reunions = await ReunionsOccupees(creneau, demandeExclueId)
+            .Where(r => r.SalleId == salleId)
+            .Select(r => new OccupationSalle(r.Id, r.Titre, r.Debut, r.Fin))
+            .ToListAsync(cancellationToken);
+        return rendezVous.Concat(reunions).ToList();
     }
+
+    private async Task<List<OccupationCalendrier>> RendezVousDesDirigeantsAsync(
+        IReadOnlyCollection<Guid> identifiants,
+        Intervalle creneau,
+        Guid demandeExclueId,
+        CancellationToken cancellationToken) =>
+        await (
+            from rendezVous in RendezVousOccupes(creneau, demandeExclueId)
+            join utilisateur in context.Utilisateurs on rendezVous.DirigeantId equals utilisateur.Id
+            where identifiants.Contains(rendezVous.DirigeantId)
+            select new OccupationCalendrier(
+                rendezVous.Id,
+                utilisateur.Id,
+                utilisateur.Prenom + " " + utilisateur.Nom,
+                rendezVous.Titre,
+                rendezVous.Debut,
+                rendezVous.Fin)).ToListAsync(cancellationToken);
+
+    private async Task<List<OccupationCalendrier>> ReunionsDesDirigeantsAsync(
+        IReadOnlyCollection<Guid> identifiants,
+        Intervalle creneau,
+        Guid demandeExclueId,
+        CancellationToken cancellationToken) =>
+        await (
+            from reunion in ReunionsOccupees(creneau, demandeExclueId)
+            join utilisateur in context.Utilisateurs on reunion.DirigeantId equals utilisateur.Id
+            where identifiants.Contains(reunion.DirigeantId)
+            select new OccupationCalendrier(
+                reunion.Id,
+                utilisateur.Id,
+                utilisateur.Prenom + " " + utilisateur.Nom,
+                reunion.Titre,
+                reunion.Debut,
+                reunion.Fin)).ToListAsync(cancellationToken);
+
+    private async Task<List<OccupationCalendrier>> RendezVousDesInvitesAsync(
+        IReadOnlyCollection<Guid> identifiants,
+        Intervalle creneau,
+        Guid demandeExclueId,
+        CancellationToken cancellationToken) =>
+        await (
+            from rendezVous in RendezVousOccupes(creneau, demandeExclueId)
+            join participant in context.DemandeParticipants on rendezVous.DemandeRencontreId equals participant.DemandeRencontreId
+            join utilisateur in context.Utilisateurs on participant.UtilisateurId equals utilisateur.Id
+            where participant.UtilisateurId != null && identifiants.Contains(participant.UtilisateurId.Value)
+            select new OccupationCalendrier(
+                rendezVous.Id,
+                utilisateur.Id,
+                utilisateur.Prenom + " " + utilisateur.Nom,
+                rendezVous.Titre,
+                rendezVous.Debut,
+                rendezVous.Fin)).ToListAsync(cancellationToken);
+
+    private async Task<List<OccupationCalendrier>> ReunionsDesInvitesAsync(
+        IReadOnlyCollection<Guid> identifiants,
+        Intervalle creneau,
+        Guid demandeExclueId,
+        CancellationToken cancellationToken) =>
+        await (
+            from reunion in ReunionsOccupees(creneau, demandeExclueId)
+            join participant in context.DemandeParticipants on reunion.DemandeRencontreId equals participant.DemandeRencontreId
+            join utilisateur in context.Utilisateurs on participant.UtilisateurId equals utilisateur.Id
+            where participant.UtilisateurId != null && identifiants.Contains(participant.UtilisateurId.Value)
+            select new OccupationCalendrier(
+                reunion.Id,
+                utilisateur.Id,
+                utilisateur.Prenom + " " + utilisateur.Nom,
+                reunion.Titre,
+                reunion.Debut,
+                reunion.Fin)).ToListAsync(cancellationToken);
+
+    private IQueryable<RendezVous> RendezVousOccupes(Intervalle creneau, Guid demandeExclueId) =>
+        context.RendezVous.Where(rendezVous =>
+            rendezVous.Statut != StatutOccurrence.Annule
+            && rendezVous.Debut < creneau.Fin
+            && rendezVous.Fin > creneau.Debut
+            && rendezVous.DemandeRencontreId != demandeExclueId);
+
+    private IQueryable<Reunion> ReunionsOccupees(Intervalle creneau, Guid demandeExclueId) =>
+        context.Reunions.Where(reunion =>
+            reunion.Statut != StatutOccurrence.Annule
+            && reunion.Debut < creneau.Fin
+            && reunion.Fin > creneau.Debut
+            && reunion.DemandeRencontreId != demandeExclueId);
 }

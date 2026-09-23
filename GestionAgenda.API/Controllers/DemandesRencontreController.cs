@@ -48,6 +48,19 @@ public sealed class DemandesRencontreController(IDemandeRencontreService service
         return Ok(ApiResponse<DemandeRencontreResponse>.Ok(result));
     }
 
+    [HttpPost("{id:guid}/verification-creneau")]
+    [ProducesResponseType(typeof(ApiResponse<BilanPlanificationResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> VerifierCreneau(
+        Guid id,
+        VerifierCreneauRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.VerifierCreneauAsync(id, request, currentUser.UserId, cancellationToken);
+        return Ok(ApiResponse<BilanPlanificationResponse>.Ok(result));
+    }
+
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ApiResponse<DemandeRencontreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(

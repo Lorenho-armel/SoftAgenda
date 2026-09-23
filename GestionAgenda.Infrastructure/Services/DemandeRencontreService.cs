@@ -25,6 +25,7 @@ public sealed class DemandeRencontreService(
     IValidator<ChangerPrioriteDemandeRequest> prioriteValidator,
     IValidator<ChangerUrgenceDemandeRequest> urgenceValidator,
     IValidator<DemandeRencontreQuery> queryValidator,
+    IValidator<VerifierCreneauRequest> creneauValidator,
     IMapper mapper,
     ILogger<DemandeRencontreService> logger) : IDemandeRencontreService
 {
@@ -69,7 +70,7 @@ public sealed class DemandeRencontreService(
         await queryValidator.ValiderAsync(query, cancellationToken);
         var filtre = PreparationDemande.VersFiltre(query) with { SortBy = null };
         var resultat = await demandes.ObtenirFileAsync(utilisateurId, filtre, cancellationToken);
-        return VersFile(resultat, query);
+        return LectureFileDemandes.VersResponse(resultat, query, mapper);
     }
 
     public async Task<DemandeRencontreResponse> GetByIdAsync(
@@ -80,6 +81,20 @@ public sealed class DemandeRencontreService(
         var demande = await ChargerAsync(id, suivi: false, cancellationToken);
         await evaluationAcces.ExigerVisibleAsync(demande, utilisateurId, cancellationToken);
         return mapper.Map<DemandeRencontreResponse>(demande);
+    }
+
+    public async Task<BilanPlanificationResponse> VerifierCreneauAsync(
+        Guid id,
+        VerifierCreneauRequest request,
+        Guid utilisateurId,
+        CancellationToken cancellationToken = default)
+    {
+        await creneauValidator.ValiderAsync(request, cancellationToken);
+        var demande = await ChargerAsync(id, suivi: false, cancellationToken);
+        await evaluationAcces.ExigerGestionnaireAsync(demande, utilisateurId, cancellationToken);
+        var bilan = await planificationDemande.EvaluerAsync(
+            demande, request.DebutPlanifie, request.SalleId, cancellationToken);
+        return mapper.Map<BilanPlanificationResponse>(bilan);
     }
 
     public async Task<DemandeRencontreResponse> UpdateAsync(
@@ -266,30 +281,6 @@ public sealed class DemandeRencontreService(
         {
             throw new DomainException("Un participant n'appartient pas à la société.");
         }
-    }
-
-    private FileDemandesResponse VersFile(ResultatFile resultat, DemandeRencontreQuery query)
-    {
-        var totalPages = query.Size == 0
-            ? 0
-            : (int)Math.Ceiling(resultat.Page.TotalCount / (double)query.Size);
-        var compteurs = resultat.Compteurs;
-        return new FileDemandesResponse(
-            new PaginatedResult<DemandeRencontreResumeResponse>(
-                mapper.Map<List<DemandeRencontreResumeResponse>>(resultat.Page.Items),
-                resultat.Page.TotalCount,
-                query.Page,
-                query.Size,
-                totalPages),
-            new CompteursFileResponse(
-                compteurs.Nouvelles,
-                compteurs.Urgentes,
-                compteurs.Critiques,
-                compteurs.Prioritaires,
-                compteurs.EnAttente,
-                compteurs.Planifiees),
-            resultat.Demandeurs.Select(d => new PersonneOptionResponse(d.Id, d.NomComplet)).ToList(),
-            resultat.Societes.Select(s => new SocieteOptionResponse(s.Id, s.Nom)).ToList());
     }
 
     private async Task<DemandeRencontre> ChargerAsync(Guid id, bool suivi, CancellationToken cancellationToken) =>

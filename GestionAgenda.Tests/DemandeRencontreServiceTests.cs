@@ -81,6 +81,7 @@ public class DemandeRencontreServiceTests
             new ChangerPrioriteDemandeRequestValidator(),
             new ChangerUrgenceDemandeRequestValidator(),
             new DemandeRencontreQueryValidator(),
+            new VerifierCreneauRequestValidator(),
             mapper,
             NullLogger<DemandeRencontreService>.Instance);
     }

@@ -9,32 +9,63 @@ namespace GestionAgenda.Infrastructure.Services;
 
 public sealed class PlanificationDemande(IPlanificationRepository planification)
 {
+    public async Task<BilanPlanification> EvaluerAsync(
+        DemandeRencontre demande,
+        DateTimeOffset debut,
+        Guid? salleId,
+        CancellationToken cancellationToken = default)
+    {
+        if (demande.Statut != StatutDemande.Acceptee)
+        {
+            throw new DomainException("Seule une demande acceptée peut être planifiée.");
+        }
+
+        var fin = demande.FinDuCreneau(debut);
+        var salle = await ExigerSalleValideAsync(demande, NormaliserSalle(salleId), cancellationToken);
+        var conflits = await CollecterAsync(demande, new Intervalle(debut, fin), salle, cancellationToken);
+        return new BilanPlanification(debut, fin, conflits);
+    }
+
     public async Task AppliquerAsync(
         DemandeRencontre demande,
         ChangerStatutDemandeRequest request,
         Guid auteurId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         if (request.DebutPlanifie is null)
         {
             throw new DomainException("Le créneau confirmé est obligatoire pour planifier.");
         }
 
-        var debut = request.DebutPlanifie.Value;
-        var fin = demande.FinDuCreneau(debut);
-        var salleId = request.SalleId is null || request.SalleId == Guid.Empty ? null : request.SalleId;
-        if (!await planification.DirigeantLibreAsync(demande.DirigeantId, debut, fin, cancellationToken))
-        {
-            throw new ConflictException("Le dirigeant n'est pas disponible sur ce créneau.");
-        }
+        var bilan = await EvaluerAsync(demande, request.DebutPlanifie.Value, request.SalleId, cancellationToken);
+        GarantirSansConflit(bilan);
+        Inscrire(demande, bilan, request, auteurId);
+    }
 
-        if (salleId.HasValue)
+    private static void GarantirSansConflit(BilanPlanification bilan)
+    {
+        if (!bilan.PeutPlanifier)
         {
-            await VerifierSalleAsync(demande, salleId.Value, debut, fin, cancellationToken);
+            throw new ConflictException(
+                "La planification est impossible : des conflits bloquants ont été détectés.",
+                bilan.Conflits);
         }
+    }
 
+    private static void Inscrire(
+        DemandeRencontre demande,
+        BilanPlanification bilan,
+        ChangerStatutDemandeRequest request,
+        Guid auteurId)
+    {
         var creneau = new CreneauPlanifie(
-            demande.DirigeantId, demande.SocieteId, demande.Id, salleId, debut, fin, demande.Motif);
+            demande.DirigeantId,
+            demande.SocieteId,
+            demande.Id,
+            NormaliserSalle(request.SalleId),
+            bilan.Debut,
+            bilan.Fin,
+            demande.Motif);
         if (demande.Type == TypeDemande.RendezVous)
         {
             demande.PlanifierRendezVous(RendezVous.Planifier(creneau), auteurId, request.Commentaire);
@@ -44,28 +75,59 @@ public sealed class PlanificationDemande(IPlanificationRepository planification)
         demande.PlanifierReunion(Reunion.Planifier(creneau), auteurId, request.Commentaire);
     }
 
-    private async Task VerifierSalleAsync(
+    private async Task<IReadOnlyList<ConflitPlanification>> CollecterAsync(
         DemandeRencontre demande,
-        Guid salleId,
-        DateTimeOffset debut,
-        DateTimeOffset fin,
+        Intervalle creneau,
+        Salle? salle,
         CancellationToken cancellationToken)
     {
-        var salle = await planification.GetSalleAsync(salleId, cancellationToken);
+        var conflits = new List<ConflitPlanification>();
+        var dirigeant = await planification.OccupationsDirigeantAsync(
+            demande.DirigeantId, creneau, demande.Id, cancellationToken);
+        conflits.AddRange(dirigeant.Select(ConflitsPlanification.CalendrierDirigeant));
+        var participants = await planification.OccupationsParticipantsAsync(
+            IdentifiantsInternes(demande), creneau, demande.Id, cancellationToken);
+        conflits.AddRange(participants.Select(ConflitsPlanification.CalendrierParticipant));
+        if (salle is not null)
+        {
+            var occupations = await planification.OccupationsSalleAsync(salle.Id, creneau, demande.Id, cancellationToken);
+            conflits.AddRange(occupations.Select(occupation => ConflitsPlanification.Salle(salle.Id, salle.Nom, occupation)));
+        }
+
+        return conflits;
+    }
+
+    private async Task<Salle?> ExigerSalleValideAsync(
+        DemandeRencontre demande,
+        Guid? salleId,
+        CancellationToken cancellationToken)
+    {
+        if (salleId is null)
+        {
+            return null;
+        }
+
+        var salle = await planification.GetSalleAsync(salleId.Value, cancellationToken);
         if (salle is null || !salle.EstActive || salle.SocieteId != demande.SocieteId)
         {
             throw new DomainException("La salle est introuvable, inactive ou hors société.");
         }
 
-        var effectif = 1 + demande.Participants.Count;
-        if (salle.Capacite < effectif)
+        if (salle.Capacite < 1 + demande.Participants.Count)
         {
             throw new DomainException("La capacité de la salle est insuffisante.");
         }
 
-        if (!await planification.SalleLibreAsync(salleId, debut, fin, cancellationToken))
-        {
-            throw new ConflictException("La salle n'est pas disponible sur ce créneau.");
-        }
+        return salle;
     }
+
+    private static IReadOnlyCollection<Guid> IdentifiantsInternes(DemandeRencontre demande) =>
+        demande.Participants
+            .Where(participant => participant.UtilisateurId.HasValue)
+            .Select(participant => participant.UtilisateurId!.Value)
+            .Distinct()
+            .ToList();
+
+    private static Guid? NormaliserSalle(Guid? salleId) =>
+        salleId is null || salleId == Guid.Empty ? null : salleId;
 }

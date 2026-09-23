@@ -1,3 +1,4 @@
+using GestionAgenda.Domain.Demandes;
 using GestionAgenda.Domain.Entities;
 
 namespace GestionAgenda.Domain.Interfaces;
@@ -6,15 +7,21 @@ public interface IPlanificationRepository
 {
     Task<Salle?> GetSalleAsync(Guid salleId, CancellationToken cancellationToken = default);
 
-    Task<bool> DirigeantLibreAsync(
+    Task<IReadOnlyList<OccupationCalendrier>> OccupationsDirigeantAsync(
         Guid dirigeantId,
-        DateTimeOffset debut,
-        DateTimeOffset fin,
+        Intervalle creneau,
+        Guid demandeExclueId,
         CancellationToken cancellationToken = default);
 
-    Task<bool> SalleLibreAsync(
+    Task<IReadOnlyList<OccupationCalendrier>> OccupationsParticipantsAsync(
+        IReadOnlyCollection<Guid> utilisateurIds,
+        Intervalle creneau,
+        Guid demandeExclueId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<OccupationSalle>> OccupationsSalleAsync(
         Guid salleId,
-        DateTimeOffset debut,
-        DateTimeOffset fin,
+        Intervalle creneau,
+        Guid demandeExclueId,
         CancellationToken cancellationToken = default);
 }
