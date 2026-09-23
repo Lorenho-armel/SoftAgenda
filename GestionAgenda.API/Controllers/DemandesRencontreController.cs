@@ -23,6 +23,14 @@ public sealed class DemandesRencontreController(IDemandeRencontreService service
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, ApiResponse<DemandeRencontreResponse>.Ok(created));
     }
 
+    [HttpGet("file")]
+    [ProducesResponseType(typeof(ApiResponse<FileDemandesResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFile([FromQuery] DemandeRencontreQuery query, CancellationToken cancellationToken)
+    {
+        var result = await service.GetFileAsync(query, currentUser.UserId, cancellationToken);
+        return Ok(ApiResponse<FileDemandesResponse>.Ok(result));
+    }
+
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<PaginatedResult<DemandeRencontreResumeResponse>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] DemandeRencontreQuery query, CancellationToken cancellationToken)
