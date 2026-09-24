@@ -34,6 +34,7 @@ public sealed class DemandeRencontreProfile : Profile
                 option => option.MapFrom(source => source.Reunion == null ? (Guid?)null : source.Reunion.Id))
             .ForMember(
                 destination => destination.Historique,
-                option => option.MapFrom(source => source.Historique.OrderBy(item => item.DateCreation)));
+                option => option.MapFrom(source => source.Historique.OrderBy(item => item.DateCreation)))
+            .ForMember(destination => destination.EstGestionnaire, option => option.Ignore());
     }
 }

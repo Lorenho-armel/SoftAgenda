@@ -54,6 +54,7 @@ export interface DemandeDetail extends DemandeResume {
   reunionId: string | null;
   participants: Participant[];
   historique: HistoriqueDemande[];
+  estGestionnaire: boolean;
 }
 
 export interface PersonneOption {

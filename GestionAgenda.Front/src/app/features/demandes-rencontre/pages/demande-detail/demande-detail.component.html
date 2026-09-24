@@ -27,13 +27,26 @@
     @if (calendrier(); as options) {
       <section class="carte">
         <h2>Calendrier</h2>
-        <p class="m-0 mb-3 text-xs text-navy-soft">La demande apparaît à sa date souhaitée ; la période souhaitée est surlignée en doré.</p>
+        <p class="m-0 mb-3 text-xs text-navy-soft">
+          @if (peutDeplacer()) {
+            Laissez la demande à sa place pour l'accepter, ou faites-la glisser vers une autre date pour la reporter.
+          } @else {
+            La demande apparaît à sa date souhaitée ; la période souhaitée est surlignée en doré.
+          }
+        </p>
         <app-calendrier [options]="options" />
       </section>
     }
-    <app-traitement-demande [statut]="vue.demande.statut" [evenements]="evenements()" (decider)="decider($event)" />
+    @if (vue.demande.estGestionnaire) {
+      <app-traitement-demande
+        [statut]="vue.demande.statut"
+        [proposition]="proposition()"
+        (decider)="decider($event)"
+        (annulerDeplacement)="annulerDeplacement()"
+      />
+    }
     <app-planification-demande
-      [visible]="vue.demande.statut === 'Acceptee' || vue.demande.statut === 'Planifiee'"
+      [visible]="planificationVisible()"
       [confirmerLibelle]="vue.demande.statut === 'Planifiee' ? 'Déplacer' : 'Planifier'"
       [bilan]="bilan()"
       [debutSouhaite]="vue.demande.dateDebutSouhaitee"

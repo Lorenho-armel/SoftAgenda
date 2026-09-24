@@ -1,45 +1,41 @@
 <section id="traitement" class="carte grid gap-4">
   <h2>Traitement</h2>
   @if (peutDecider()) {
-    <div class="flex flex-wrap gap-2">
-      <button type="button" (click)="accepter()">Accepter</button>
-      @if (statut() === 'EnAttente') {
-        <button type="button" class="btn-secondaire" (click)="analyser()">Prendre en analyse</button>
-      }
-    </div>
+    @if (proposition()) {
+      <p class="m-0 rounded-lg border-l-4 border-gold bg-alert px-3 py-2 text-sm">
+        <strong>Report</strong> — nouvelle période proposée {{ libelleProposition() }}.
+      </p>
+      <form class="grid gap-2.5" [formGroup]="report" (ngSubmit)="reporter()">
+        <label>Commentaire (transmis au demandeur)<textarea formControlName="commentaire" rows="3"></textarea></label>
+        <app-field-error [control]="report.controls.commentaire" />
+        <div class="flex flex-wrap gap-2">
+          <button type="submit">Reporter</button>
+          <button type="button" class="btn-secondaire" (click)="annulerDeplacement.emit()">Annuler le déplacement</button>
+        </div>
+      </form>
+    } @else {
+      <p class="m-0 text-sm text-navy-soft">
+        La demande est à sa position initiale : vous pouvez l'accepter.
+        Faites-la glisser dans le calendrier pour la reporter à une autre période.
+      </p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" (click)="accepter()">Accepter</button>
+        @if (statut() === 'EnAttente') {
+          <button type="button" class="btn-secondaire" (click)="analyser()">Prendre en analyse</button>
+        }
+      </div>
+      <form class="grid gap-2.5" [formGroup]="refus" (ngSubmit)="refuser()">
+        <h3>Refuser</h3>
+        <label>Motif du refus (transmis au demandeur)<textarea formControlName="commentaire" rows="3"></textarea></label>
+        <app-field-error [control]="refus.controls.commentaire" />
+        <button type="submit">Refuser</button>
+      </form>
+    }
   }
   @if (statut() === 'Reportee') {
     <button type="button" (click)="analyser()">Reprendre en analyse</button>
   }
   @if (statut() === 'Planifiee') {
     <button type="button" (click)="terminer()">Marquer terminée</button>
-  }
-  @if (peutDecider()) {
-    <p class="m-0 text-sm text-navy-soft">Le demandeur est notifié de la décision, avec le commentaire saisi ci-dessous.</p>
-    <form class="grid gap-2.5" [formGroup]="refus" (ngSubmit)="refuser()">
-      <h3>Refuser</h3>
-      <label>Motif du refus (transmis au demandeur)<textarea formControlName="commentaire" rows="3"></textarea></label>
-      <app-field-error [control]="refus.controls.commentaire" />
-      <button type="submit">Refuser</button>
-    </form>
-    <div class="grid gap-2.5">
-      <h3>Reporter</h3>
-      <app-calendrier-saisie
-        mode="periode"
-        [debut]="report.controls.dateDebutSouhaitee.value"
-        [fin]="report.controls.dateFinSouhaitee.value"
-        [evenements]="evenements()"
-        (choisir)="choisirReport($event)"
-      />
-      <form class="grid gap-2.5" [formGroup]="report" (ngSubmit)="reporter()">
-        <label>Commentaire (transmis au demandeur)<textarea formControlName="commentaire" rows="3"></textarea></label>
-        <app-field-error [control]="report.controls.commentaire" />
-        <label>Nouveau début<input formControlName="dateDebutSouhaitee" type="datetime-local" /></label>
-        <app-field-error [control]="report.controls.dateDebutSouhaitee" />
-        <label>Nouvelle fin<input formControlName="dateFinSouhaitee" type="datetime-local" /></label>
-        <app-field-error [control]="report.controls.dateFinSouhaitee" />
-        <button type="submit">Reporter</button>
-      </form>
-    </div>
   }
 </section>

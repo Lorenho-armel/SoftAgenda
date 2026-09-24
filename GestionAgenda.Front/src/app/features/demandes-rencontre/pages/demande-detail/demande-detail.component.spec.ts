@@ -12,10 +12,11 @@ const identifiant = '11111111-1111-1111-1111-111111111111';
 
 describe('DemandeDetailComponent', () => {
   let statut: StatutDemande = 'EnAnalyse';
+  let gestionnaire = true;
   let fixture: ComponentFixture<DemandeDetailComponent>;
   const api = {
-    obtenir: vi.fn(() => of(detail(statut))),
-    changerStatut: vi.fn(() => of(detail(statut))),
+    obtenir: vi.fn(() => of(detail(statut, gestionnaire))),
+    changerStatut: vi.fn(() => of(detail(statut, gestionnaire))),
     verifierCreneau: vi.fn(() => of({
       debut: '2026-10-01T08:00:00.000Z',
       fin: '2026-10-01T09:00:00.000Z',
@@ -26,8 +27,9 @@ describe('DemandeDetailComponent', () => {
 
   beforeEach(async () => {
     statut = 'EnAnalyse';
+    gestionnaire = true;
     api.changerStatut.mockReset();
-    api.changerStatut.mockImplementation(() => of(detail(statut)));
+    api.changerStatut.mockImplementation(() => of(detail(statut, gestionnaire)));
     await TestBed.configureTestingModule({
       imports: [DemandeDetailComponent],
       providers: [
@@ -93,31 +95,51 @@ describe('DemandeDetailComponent', () => {
     );
   });
 
-  it('devrait reporter avec un commentaire et de nouvelles dates', async () => {
+  it('devrait reporter vers la période déplacée dans le calendrier', async () => {
     // Arrange
     await afficher();
-    const formulaires = fixture.nativeElement.querySelectorAll('#traitement form') as NodeListOf<HTMLFormElement>;
-    const report = formulaires[1];
-    saisir(report.querySelector('textarea'), 'Semaine suivante');
-    const dates = report.querySelectorAll('input');
-    saisir(dates[0], '2026-10-06T10:00');
-    saisir(dates[1], '2026-10-06T12:00');
+    const debut = new Date('2026-10-06T10:00');
+    const fin = new Date('2026-10-06T12:00');
+    fixture.componentInstance.proposition.set({ debut, fin });
+    fixture.detectChanges();
+    renseigner('#traitement form textarea', 'Semaine suivante');
 
     // Act
-    (report.querySelector('button') as HTMLButtonElement).click();
+    cliquerDans('#traitement form', 'Reporter');
 
     // Assert
     expect(api.changerStatut).toHaveBeenCalledWith(
       identifiant,
       'Reportee',
       'Semaine suivante',
-      {
-        debut: new Date('2026-10-06T10:00').toISOString(),
-        fin: new Date('2026-10-06T12:00').toISOString(),
-      },
+      { debut: debut.toISOString(), fin: fin.toISOString() },
       null,
       null,
     );
+  });
+
+  it('devrait masquer l acceptation tant que la demande est déplacée', async () => {
+    // Arrange
+    await afficher();
+
+    // Act
+    fixture.componentInstance.proposition.set({ debut: new Date('2026-10-06T10:00'), fin: new Date('2026-10-06T12:00') });
+    fixture.detectChanges();
+
+    // Assert
+    expect(boutons().some((bouton) => bouton.textContent?.trim() === 'Accepter')).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain('nouvelle période proposée');
+  });
+
+  it('devrait masquer le traitement à qui ne gère pas la demande', async () => {
+    // Arrange
+    gestionnaire = false;
+
+    // Act
+    await afficher();
+
+    // Assert
+    expect(fixture.nativeElement.querySelector('#traitement')).toBeNull();
   });
 
   it('devrait planifier un créneau libre', async () => {
@@ -242,7 +264,7 @@ describe('DemandeDetailComponent', () => {
   }
 });
 
-function detail(statut: StatutDemande): DemandeDetail {
+function detail(statut: StatutDemande, estGestionnaire = true): DemandeDetail {
   return {
     id: identifiant,
     demandeurId: 'u1',
@@ -263,6 +285,7 @@ function detail(statut: StatutDemande): DemandeDetail {
     rendezVousId: null,
     reunionId: null,
     participants: [],
+    estGestionnaire,
     historique: [{
       id: 'h1',
       typeEvenement: 'Creation',

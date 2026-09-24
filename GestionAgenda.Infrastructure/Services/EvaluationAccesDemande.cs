@@ -11,18 +11,6 @@ internal sealed class EvaluationAccesDemande(IAccesAgendaRepository acces)
 {
     internal readonly record struct Resultat(bool PeutVoir, bool EstGestionnaire, bool EstDemandeur);
 
-    public async Task ExigerVisibleAsync(
-        DemandeRencontre demande,
-        Guid utilisateurId,
-        CancellationToken cancellationToken)
-    {
-        var droit = await EvaluerAsync(demande, utilisateurId, cancellationToken);
-        if (!droit.PeutVoir)
-        {
-            throw new NotFoundException("Demande introuvable.");
-        }
-    }
-
     public async Task ExigerGestionnaireAsync(
         DemandeRencontre demande,
         Guid utilisateurId,

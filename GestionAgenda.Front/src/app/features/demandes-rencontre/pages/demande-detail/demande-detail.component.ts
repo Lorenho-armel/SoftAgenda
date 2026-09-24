@@ -4,15 +4,15 @@ import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signa
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, catchError, combineLatest, filter, map, of, switchMap, tap } from 'rxjs';
-import { CalendarOptions, EventInput } from '@fullcalendar/angular';
+import { CalendarOptions, EventDropInfo } from '@fullcalendar/angular';
 import { ApiResponse } from '../../../../core/models/api-response.model';
 import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
-import { COULEUR_SELECTION, optionsCalendrier } from '../../../../shared/calendrier/calendrier.config';
+import { COULEUR_SELECTION, PlageHoraire, ajouterMinutes, optionsCalendrier } from '../../../../shared/calendrier/calendrier.config';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { HistoriqueDemandeComponent } from '../../components/historique-demande/historique-demande.component';
 import { CreneauConfirme, PlanificationDemandeComponent } from '../../components/planification-demande/planification-demande.component';
 import { DecisionDemande, TraitementDemandeComponent } from '../../components/traitement-demande/traitement-demande.component';
-import { BilanPlanification, ConflitPlanification } from '../../models/demande.model';
+import { BilanPlanification, ConflitPlanification, DemandeDetail } from '../../models/demande.model';
 import { evenementDemande } from '../../models/evenements-calendrier';
 import { messageApi } from '../../models/message-api';
 import { libelleStatut, tonPriorite, tonUrgence } from '../../models/demande-libelles';
@@ -38,7 +38,10 @@ export class DemandeDetailComponent {
     ]).pipe(
       filter(([id]) => id.length > 0),
       switchMap(([id]) => this.api.obtenir(id).pipe(
-        tap(() => this.erreur.set('')),
+        tap(() => {
+          this.erreur.set('');
+          this.proposition.set(null);
+        }),
         catchError((erreur: unknown) => {
           this.erreur.set(messageApi(erreur));
           return of(null);
@@ -64,32 +67,67 @@ export class DemandeDetailComponent {
       })),
     };
   });
-  readonly evenements = computed<EventInput[]>(() => {
+  readonly proposition = signal<PlageHoraire | null>(null);
+  readonly peutDeplacer = computed(() => {
     const demande = this.demande();
-    return demande ? [{ ...evenementDemande(demande), editable: false }] : [];
+    return !!demande?.estGestionnaire && (demande.statut === 'EnAttente' || demande.statut === 'EnAnalyse');
+  });
+  readonly planificationVisible = computed(() => {
+    const demande = this.demande();
+    return !!demande?.estGestionnaire && (demande.statut === 'Acceptee' || demande.statut === 'Planifiee');
   });
   readonly calendrier = computed<CalendarOptions | null>(() => {
     const demande = this.demande();
-    if (!demande) {
+    if (!demande || this.planificationVisible()) {
       return null;
     }
 
+    const periode = this.proposition() ?? {
+      debut: new Date(demande.dateDebutSouhaitee),
+      fin: new Date(demande.dateFinSouhaitee),
+    };
+    const peutDeplacer = this.peutDeplacer();
     return optionsCalendrier({
       initialView: 'timeGridWeek',
       initialDate: demande.dateDebutSouhaitee,
       headerToolbar: { start: 'prev,next today', center: 'title', end: 'timeGridWeek,timeGridDay' },
+      eventDurationEditable: false,
+      eventDrop: (info: EventDropInfo) => this.deplacer(demande, info),
       events: [
         {
           id: 'periode-souhaitee',
-          start: demande.dateDebutSouhaitee,
-          end: demande.dateFinSouhaitee,
+          start: periode.debut,
+          end: periode.fin,
           display: 'background',
           color: COULEUR_SELECTION,
         },
-        ...this.evenements(),
+        {
+          ...evenementDemande(demande),
+          start: periode.debut,
+          end: ajouterMinutes(periode.debut, demande.dureeMinutes),
+          editable: peutDeplacer,
+        },
       ],
     });
   });
+
+  private deplacer(demande: DemandeDetail, info: EventDropInfo): void {
+    const debut = info.event.start;
+    if (!debut) {
+      info.revert();
+      return;
+    }
+
+    const decalage = debut.getTime() - new Date(demande.dateDebutSouhaitee).getTime();
+    this.proposition.set(decalage === 0 ? null : {
+      debut,
+      fin: new Date(new Date(demande.dateFinSouhaitee).getTime() + decalage),
+    });
+  }
+
+  annulerDeplacement(): void {
+    this.proposition.set(null);
+  }
 
   decider(decision: DecisionDemande): void {
     const id = this.demande()?.id;

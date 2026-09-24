@@ -23,4 +23,7 @@ public record DemandeRencontreResponse(
     string DemandeurNom,
     string SocieteNom,
     IReadOnlyList<ParticipantResponse> Participants,
-    IReadOnlyList<HistoriqueDemandeResponse> Historique);
+    IReadOnlyList<HistoriqueDemandeResponse> Historique)
+{
+    public bool EstGestionnaire { get; init; }
+}

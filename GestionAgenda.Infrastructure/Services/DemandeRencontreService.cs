@@ -81,8 +81,13 @@ public sealed class DemandeRencontreService(
         CancellationToken cancellationToken = default)
     {
         var demande = await ChargerAsync(id, suivi: false, cancellationToken);
-        await evaluationAcces.ExigerVisibleAsync(demande, utilisateurId, cancellationToken);
-        return mapper.Map<DemandeRencontreResponse>(demande);
+        var droit = await evaluationAcces.EvaluerAsync(demande, utilisateurId, cancellationToken);
+        if (!droit.PeutVoir)
+        {
+            throw new NotFoundException("Demande introuvable.");
+        }
+
+        return mapper.Map<DemandeRencontreResponse>(demande) with { EstGestionnaire = droit.EstGestionnaire };
     }
 
     public async Task<BilanPlanificationResponse> VerifierCreneauAsync(
