@@ -1,7 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, untracked } from '@angular/core';
-import { CalendarOptions, DateClickInfo, DateSelectInfo, EventInput } from '@fullcalendar/angular';
+import {
+  CalendarOptions,
+  DateClickInfo,
+  DateSelectInfo,
+  EventClickInfo,
+  EventInput,
+  EventSourceInput,
+} from '@fullcalendar/angular';
 import { CalendrierComponent } from './calendrier.component';
-import { COULEUR_SELECTION, PlageHoraire, ajouterMinutes, dateValide, optionsCalendrier } from './calendrier.config';
+import {
+  COULEUR_SELECTION,
+  EvenementClique,
+  PlageHoraire,
+  ajouterMinutes,
+  dateValide,
+  optionsCalendrier,
+} from './calendrier.config';
 
 export type ModeSaisie = 'periode' | 'creneau';
 
@@ -22,7 +36,9 @@ export class CalendrierSaisieComponent {
   readonly dureeMinutes = input(60);
   readonly fenetre = input<PlageHoraire | null>(null);
   readonly evenements = input<EventInput[]>([]);
+  readonly sources = input<EventSourceInput[]>([]);
   readonly choisir = output<PlageHoraire>();
+  readonly evenementClique = output<EvenementClique>();
 
   readonly aide = computed(() => {
     if (this.mode() === 'periode') {
@@ -47,8 +63,17 @@ export class CalendrierSaisieComponent {
       select: (info: DateSelectInfo) => this.choisir.emit({ debut: info.start, fin: info.end }),
       dateClick: mode === 'creneau' ? (info: DateClickInfo) => this.choisirCreneau(info.date) : undefined,
       events: [...this.fond(fenetre), ...this.selection(), ...this.evenements()],
+      eventSources: this.sources(),
+      eventClick: (info: EventClickInfo) => this.cliquer(info),
     });
   });
+
+  private cliquer(info: EventClickInfo): void {
+    const demandeId: unknown = info.event.extendedProps['demandeId'];
+    if (typeof demandeId === 'string') {
+      this.evenementClique.emit({ demandeId, ancre: info.el.getBoundingClientRect() });
+    }
+  }
 
   private choisirCreneau(debut: Date): void {
     const fin = ajouterMinutes(debut, this.dureeMinutes());

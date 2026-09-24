@@ -45,6 +45,8 @@ public static class DependencyInjection
         services.AddScoped<Application.Services.Interfaces.IDemandeRencontreService, DemandeRencontreService>();
         services.AddScoped<ITableauAssistanteRepository, TableauAssistanteRepository>();
         services.AddScoped<Application.Services.Interfaces.ITableauAssistanteService, TableauAssistanteService>();
+        services.AddScoped<IReferentielRepository, ReferentielRepository>();
+        services.AddScoped<Application.Services.Interfaces.IReferentielService, ReferentielService>();
         services.AddScoped<Application.Services.Interfaces.IAuthService, AuthService>();
         services.AddScoped<DevDataSeeder>();
         services.AddScoped<GenerateurScriptsMigration>();

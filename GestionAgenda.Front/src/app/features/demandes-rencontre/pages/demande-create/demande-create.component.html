@@ -14,10 +14,22 @@
       mode="periode"
       [debut]="form.controls.dateDebutSouhaitee.value"
       [fin]="form.controls.dateFinSouhaitee.value"
+      [sources]="sources()"
       (choisir)="choisirPeriode($event)"
+      (evenementClique)="demandeOuverte.set($event)"
     />
   </div>
 </section>
+
+@if (demandeOuverte(); as ouverte) {
+  <app-demande-apercu
+    [demandeId]="ouverte.demandeId"
+    [ancre]="ouverte.ancre"
+    (fermer)="fermerApercu()"
+    (modifiee)="actualiser()"
+    (supprimee)="apresSuppression()"
+  />
+}
 
 @if (formulaireOuvert()) {
   <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:items-center">
@@ -47,13 +59,34 @@
             <p class="m-0 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">{{ alerte() }}</p>
           }
           <div class="grid gap-3.5 md:grid-cols-2">
-            <div class="grid gap-1">
-              <label>Dirigeant<input formControlName="dirigeantId" placeholder="22222222-2222-2222-2222-222222222222" /></label>
-              <app-field-error [control]="form.controls.dirigeantId" />
-            </div>
-            <div class="grid gap-1">
-              <label>Société<input formControlName="societeId" placeholder="11111111-1111-1111-1111-111111111111" /></label>
+            <div class="grid content-start gap-1">
+              <label>Société
+                <input [formControl]="rechercheSociete" type="search" placeholder="Rechercher une société…" autocomplete="off" />
+              </label>
+              <select formControlName="societeId" aria-label="Société">
+                <option value="">
+                  {{ optionsSocietes().length ? '— Sélectionnez une société —' : 'Aucune société trouvée' }}
+                </option>
+                @for (option of optionsSocietes(); track option.id) {
+                  <option [value]="option.id">{{ option.nom }}</option>
+                }
+              </select>
               <app-field-error [control]="form.controls.societeId" />
+            </div>
+            <div class="grid content-start gap-1">
+              <label>Dirigeant
+                <select formControlName="dirigeantId">
+                  @if (societe(); as detail) {
+                    <option value="">{{ detail.dirigeants.length ? '— Sélectionnez un dirigeant —' : 'Aucun dirigeant dans cette société' }}</option>
+                    @for (dirigeant of detail.dirigeants; track dirigeant.id) {
+                      <option [value]="dirigeant.id">{{ dirigeant.nomComplet }}</option>
+                    }
+                  } @else {
+                    <option value="">Choisissez d'abord une société</option>
+                  }
+                </select>
+              </label>
+              <app-field-error [control]="form.controls.dirigeantId" />
             </div>
           </div>
           <label>Type
@@ -92,7 +125,14 @@
             </label>
           </div>
           <div class="grid gap-1">
-            <label>Salle souhaitée<input formControlName="salleSouhaiteeId" placeholder="66666666-6666-6666-6666-666666666666" /></label>
+            <label>Salle souhaitée
+              <select formControlName="salleSouhaiteeId">
+                <option value="">{{ societe() ? 'Aucune préférence' : 'Choisissez d\'abord une société' }}</option>
+                @for (salle of societe()?.salles ?? []; track salle.id) {
+                  <option [value]="salle.id">{{ salle.nom }} · {{ salle.capacite }} places</option>
+                }
+              </select>
+            </label>
             <app-field-error [control]="form.controls.salleSouhaiteeId" />
           </div>
           <div formArrayName="participants" class="grid gap-3 border-t border-line pt-4">
@@ -103,11 +143,20 @@
             @for (groupe of form.controls.participants.controls; track $index) {
               <div class="grid gap-3 rounded-xl border border-line p-3 md:grid-cols-3" [formGroupName]="$index">
                 <div class="grid gap-1">
-                  <label>Utilisateur interne<input formControlName="utilisateurId" /></label>
+                  <label>Collaborateur
+                    <select formControlName="utilisateurId">
+                      <option value="">— Participant externe —</option>
+                      @for (membre of membres(); track membre.id) {
+                        <option [value]="membre.id">{{ membre.nomComplet }}</option>
+                      }
+                    </select>
+                  </label>
                   <app-field-error [control]="groupe.controls.utilisateurId" />
                 </div>
-                <label>Nom externe<input formControlName="nomComplet" /></label>
-                <label>E-mail externe<input formControlName="email" type="email" /></label>
+                @if (!groupe.controls.utilisateurId.value) {
+                  <label>Nom externe<input formControlName="nomComplet" /></label>
+                  <label>E-mail externe<input formControlName="email" type="email" /></label>
+                }
                 <button type="button" class="btn-secondaire md:col-span-3 md:justify-self-end" (click)="retirerParticipant($index)">Retirer</button>
               </div>
             }

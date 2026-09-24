@@ -1,0 +1,149 @@
+@let bulle = position();
+<div
+  class="fixed inset-0 z-50"
+  [class]="bulle ? '' : 'flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm'"
+>
+  <div class="absolute inset-0" (click)="fermer.emit()"></div>
+  <div
+    class="flex flex-col overflow-hidden rounded-3xl border border-line bg-mist shadow-2xl"
+    [class]="bulle ? 'fixed max-h-[calc(100vh-2rem)]' : 'relative max-h-[calc(100vh-2rem)] w-full max-w-lg'"
+    [style.top.px]="bulle?.top"
+    [style.left.px]="bulle?.left"
+    [style.width.px]="bulle?.largeur"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titre-apercu-demande"
+  >
+    <div class="flex items-center justify-end gap-1 px-3 pt-3">
+      @if (mode() === 'apercu' && demande(); as demande) {
+        @if (modifiable()) {
+          <button type="button" class="bouton-icone" title="Modifier" aria-label="Modifier" (click)="modifier()">
+            <app-icone nom="crayon" [taille]="4.5" />
+          </button>
+        }
+        @if (supprimable()) {
+          <button type="button" class="bouton-icone" title="Supprimer" aria-label="Supprimer" (click)="supprimer()">
+            <app-icone nom="corbeille" [taille]="4.5" />
+          </button>
+        }
+        <a class="bouton-icone" title="Ouvrir le détail" aria-label="Ouvrir le détail" [routerLink]="['/demandes-rencontre', demande.id]">
+          <app-icone nom="ouvrir" [taille]="4.5" />
+        </a>
+      }
+      <button type="button" class="bouton-icone" title="Fermer" aria-label="Fermer" (click)="fermer.emit()">
+        <app-icone nom="croix" [taille]="4.5" />
+      </button>
+    </div>
+
+    <div class="grid min-h-0 gap-4 overflow-y-auto px-6 pt-1 pb-6">
+      @if (alerte()) {
+        <p class="m-0 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">{{ alerte() }}</p>
+      }
+
+      @if (demande(); as demande) {
+        <div class="grid grid-cols-[1.25rem_1fr] items-start gap-x-4">
+          <span class="mt-1.5 size-4 rounded" [style.background-color]="couleur()"></span>
+          <div class="min-w-0">
+            @if (mode() !== 'apercu') {
+              <p class="surtitre">{{ mode() === 'modifier' ? 'Modifier la demande' : 'Supprimer la demande' }}</p>
+            }
+            <h2 id="titre-apercu-demande" class="m-0 text-xl font-normal break-words text-texte">{{ demande.motif }}</h2>
+            <p class="m-0 mt-1 text-sm text-navy-soft">{{ libelleDate() }}</p>
+          </div>
+        </div>
+
+        @switch (mode()) {
+          @case ('modifier') {
+            <form id="form-modifier-demande" class="grid gap-3" [formGroup]="form" (ngSubmit)="enregistrer()">
+              <label>Type
+                <select formControlName="type">
+                  @for (item of types; track item.valeur) { <option [value]="item.valeur">{{ item.libelle }}</option> }
+                </select>
+              </label>
+              <div class="grid gap-1">
+                <label>Motif<textarea formControlName="motif" rows="2"></textarea></label>
+                <app-field-error [control]="form.controls.motif" />
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="grid gap-1">
+                  <label>Début souhaité<input formControlName="dateDebutSouhaitee" type="datetime-local" /></label>
+                  <app-field-error [control]="form.controls.dateDebutSouhaitee" />
+                </div>
+                <div class="grid gap-1">
+                  <label>Fin souhaitée<input formControlName="dateFinSouhaitee" type="datetime-local" /></label>
+                  <app-field-error [control]="form.controls.dateFinSouhaitee" />
+                </div>
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="grid gap-1">
+                  <label>Durée (minutes)<input formControlName="dureeMinutes" type="number" min="15" max="480" /></label>
+                  <app-field-error [control]="form.controls.dureeMinutes" />
+                </div>
+                <label>Salle souhaitée
+                  <select formControlName="salleSouhaiteeId">
+                    <option value="">Aucune préférence</option>
+                    @for (salle of salles(); track salle.id) {
+                      <option [value]="salle.id">{{ salle.nom }} · {{ salle.capacite }} places</option>
+                    }
+                  </select>
+                </label>
+              </div>
+              <div class="flex justify-end gap-2 pt-1">
+                <button type="button" class="btn-secondaire" (click)="basculer('apercu')">Retour</button>
+                <button type="submit" [disabled]="envoi()">{{ envoi() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+              </div>
+            </form>
+          }
+          @case ('supprimer') {
+            <p class="m-0 text-sm">
+              La demande sera annulée et retirée de l'agenda. Son historique reste consultable depuis la liste des demandes.
+            </p>
+            <label>Motif de la suppression
+              <textarea [formControl]="motifSuppression" rows="3" placeholder="Expliquez pourquoi cette demande est supprimée"></textarea>
+            </label>
+            <div class="flex justify-end gap-2">
+              <button type="button" class="btn-secondaire" (click)="basculer('apercu')">Retour</button>
+              <button type="button" class="bg-danger hover:bg-danger/90" [disabled]="envoi()" (click)="confirmerSuppression()">
+                {{ envoi() ? 'Suppression…' : 'Confirmer la suppression' }}
+              </button>
+            </div>
+          }
+          @default {
+            <ul class="m-0 grid list-none gap-3 p-0 text-sm text-texte">
+              <li class="grid grid-cols-[1.25rem_1fr] items-center gap-x-4">
+                <app-icone nom="horloge" [taille]="4.5" class="text-navy-soft" />
+                <span>{{ demande.dureeMinutes }} minutes · {{ libelleStatut(demande.type) }}</span>
+              </li>
+              <li class="grid grid-cols-[1.25rem_1fr] items-center gap-x-4">
+                <app-icone nom="bouclier" [taille]="4.5" class="text-navy-soft" />
+                <span>{{ libelleStatut(demande.statut) }}</span>
+              </li>
+              <li class="grid grid-cols-[1.25rem_1fr] items-center gap-x-4">
+                <app-icone nom="immeuble" [taille]="4.5" class="text-navy-soft" />
+                <span>{{ demande.societeNom }}</span>
+              </li>
+              <li class="grid grid-cols-[1.25rem_1fr] items-center gap-x-4">
+                <app-icone nom="utilisateur" [taille]="4.5" class="text-navy-soft" />
+                <span>{{ demande.demandeurNom }}</span>
+              </li>
+              <li class="grid grid-cols-[1.25rem_1fr] items-center gap-x-4">
+                <app-icone nom="drapeau" [taille]="4.5" class="text-navy-soft" />
+                <span>Priorité {{ demande.priorite }} · Urgence {{ demande.urgence }}</span>
+              </li>
+              @if (demande.participants.length) {
+                <li class="grid grid-cols-[1.25rem_1fr] items-start gap-x-4">
+                  <app-icone nom="courriel" [taille]="4.5" class="mt-0.5 text-navy-soft" />
+                  <span>
+                    {{ demande.participants.length }} participant{{ demande.participants.length > 1 ? 's' : '' }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        }
+      } @else if (!alerte()) {
+        <p class="m-0 text-sm text-navy-soft">Chargement de la demande…</p>
+      }
+    </div>
+  </div>
+</div>

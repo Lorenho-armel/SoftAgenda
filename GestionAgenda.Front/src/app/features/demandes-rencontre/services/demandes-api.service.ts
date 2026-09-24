@@ -11,6 +11,8 @@ import {
   DemandeResume,
   FileDemandes,
   FiltreDemande,
+  ModifierDemandeSaisie,
+  ParticipantSaisie,
   StatutDemande,
 } from '../models/demande.model';
 
@@ -41,6 +43,24 @@ export class DemandesApiService {
     return this.http
       .post<ApiResponse<DemandeDetail>>(this.baseUrl, corpsCreation(saisie))
       .pipe(map((reponse) => reponse.data));
+  }
+
+  modifier(id: string, saisie: ModifierDemandeSaisie): Observable<DemandeDetail> {
+    return this.http
+      .put<ApiResponse<DemandeDetail>>(`${this.baseUrl}/${id}`, {
+        type: saisie.type,
+        motif: saisie.motif,
+        dateDebutSouhaitee: new Date(saisie.dateDebutSouhaitee).toISOString(),
+        dateFinSouhaitee: new Date(saisie.dateFinSouhaitee).toISOString(),
+        dureeMinutes: saisie.dureeMinutes,
+        salleSouhaiteeId: saisie.salleSouhaiteeId || null,
+        participants: saisie.participants.map(corpsParticipant),
+      })
+      .pipe(map((reponse) => reponse.data));
+  }
+
+  annuler(id: string, commentaire: string): Observable<DemandeDetail> {
+    return this.changerStatut(id, 'Annulee', commentaire, { debut: null, fin: null }, null, null);
   }
 
   changerStatut(
@@ -114,10 +134,14 @@ function corpsCreation(saisie: CreerDemandeSaisie): unknown {
     urgence: saisie.urgence,
     priorite: saisie.priorite,
     salleSouhaiteeId: saisie.salleSouhaiteeId || null,
-    participants: saisie.participants.map((participant) => ({
-      utilisateurId: participant.utilisateurId || null,
-      nomComplet: participant.nomComplet || null,
-      email: participant.email || null,
-    })),
+    participants: saisie.participants.map(corpsParticipant),
+  };
+}
+
+function corpsParticipant(participant: ParticipantSaisie): unknown {
+  return {
+    utilisateurId: participant.utilisateurId || null,
+    nomComplet: participant.nomComplet || null,
+    email: participant.email || null,
   };
 }

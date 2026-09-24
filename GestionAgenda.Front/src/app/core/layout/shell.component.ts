@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { FlashComponent } from '../../shared/components/flash/flash.component';
 import { IconeComponent, NomIcone } from '../../shared/components/icone/icone.component';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
@@ -20,7 +21,7 @@ type Panneau = 'notifications' | 'profil';
 
 @Component({
   selector: 'app-shell',
-  imports: [NgOptimizedImage, RouterOutlet, RouterLink, RouterLinkActive, IconeComponent],
+  imports: [NgOptimizedImage, RouterOutlet, RouterLink, RouterLinkActive, IconeComponent, FlashComponent],
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

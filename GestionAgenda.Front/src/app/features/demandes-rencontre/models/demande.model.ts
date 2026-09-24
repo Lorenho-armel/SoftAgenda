@@ -66,6 +66,24 @@ export interface SocieteOption {
   nom: string;
 }
 
+export interface PersonneSociete {
+  id: string;
+  nomComplet: string;
+  email: string;
+}
+
+export interface SalleOption {
+  id: string;
+  nom: string;
+  capacite: number;
+}
+
+export interface SocieteDetail extends SocieteOption {
+  dirigeants: PersonneSociete[];
+  membres: PersonneSociete[];
+  salles: SalleOption[];
+}
+
 export interface CompteursFile {
   nouvelles: number;
   urgentes: number;
@@ -137,6 +155,16 @@ export interface CreerDemandeSaisie {
   dureeMinutes: number;
   urgence: Urgence;
   priorite: Priorite;
+  salleSouhaiteeId: string;
+  participants: ParticipantSaisie[];
+}
+
+export interface ModifierDemandeSaisie {
+  type: TypeDemande;
+  motif: string;
+  dateDebutSouhaitee: string;
+  dateFinSouhaitee: string;
+  dureeMinutes: number;
   salleSouhaiteeId: string;
   participants: ParticipantSaisie[];
 }

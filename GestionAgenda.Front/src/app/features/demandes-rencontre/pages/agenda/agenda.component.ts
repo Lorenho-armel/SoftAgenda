@@ -1,26 +1,20 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import {
-  CalendarOptions,
-  EventClickInfo,
-  EventInput,
-  EventSourceFuncInfo,
-  EventSourceInput,
-} from '@fullcalendar/angular';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { CalendarApi, CalendarOptions, EventClickInfo, EventInput, EventSourceInput } from '@fullcalendar/angular';
 import { Router } from '@angular/router';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
-import { optionsCalendrier } from '../../../../shared/calendrier/calendrier.config';
-import { filtreVide } from '../../models/demande.model';
-import { LEGENDE_AGENDA, evenementDemande, evenementRencontre } from '../../models/evenements-calendrier';
+import { EvenementClique, optionsCalendrier } from '../../../../shared/calendrier/calendrier.config';
+import { DemandeApercuComponent } from '../../components/demande-apercu/demande-apercu.component';
+import { libelleStatut } from '../../models/demande-libelles';
+import { LEGENDE_AGENDA, evenementRencontre } from '../../models/evenements-calendrier';
 import { DemandesApiService } from '../../services/demandes-api.service';
+import { sourceDemandes } from '../../services/source-demandes';
 import { TableauAssistanteApiService } from '../../services/tableau-assistante-api.service';
-
-const TAILLE_PAGE_MAX = 100;
 
 @Component({
   selector: 'app-agenda',
-  imports: [CalendrierComponent],
+  imports: [CalendrierComponent, DemandeApercuComponent],
   templateUrl: './agenda.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,7 +23,9 @@ export class AgendaComponent {
   private readonly tableauApi = inject(TableauAssistanteApiService);
   private readonly router = inject(Router);
   private readonly estAssistante = inject(AuthService).roles().includes('Assistante');
-  readonly legende = LEGENDE_AGENDA;
+  private calendrier: CalendarApi | null = null;
+  readonly demandeOuverte = signal<EvenementClique | null>(null);
+  readonly legende = LEGENDE_AGENDA.filter((entree) => entree.libelle !== libelleStatut('Annulee'));
   readonly options: CalendarOptions = optionsCalendrier({
     initialView: 'timeGridWeek',
     headerToolbar: { start: 'prev,next today', center: 'title', end: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
@@ -43,19 +39,21 @@ export class AgendaComponent {
     eventClick: (info: EventClickInfo) => this.ouvrir(info),
   });
 
+  fermer(): void {
+    this.demandeOuverte.set(null);
+  }
+
+  actualiser(): void {
+    this.calendrier?.refetchEvents();
+  }
+
+  apresSuppression(): void {
+    this.fermer();
+    this.actualiser();
+  }
+
   private sources(): EventSourceInput[] {
-    const demandes: EventSourceInput = {
-      id: 'demandes',
-      events: (info: EventSourceFuncInfo) => firstValueFrom(this.api.lister({
-        ...filtreVide(),
-        dateDebut: info.start.toISOString(),
-        dateFin: info.end.toISOString(),
-        sortBy: 'datedebutsouhaitee',
-      }, 1, TAILLE_PAGE_MAX).pipe(
-        map((page) => page.items.map(evenementDemande)),
-        catchError(() => of<EventInput[]>([])),
-      )),
-    };
+    const demandes = sourceDemandes(this.api);
     if (!this.estAssistante) {
       return [demandes];
     }
@@ -73,7 +71,8 @@ export class AgendaComponent {
   private ouvrir(info: EventClickInfo): void {
     const demandeId: unknown = info.event.extendedProps['demandeId'];
     if (typeof demandeId === 'string') {
-      void this.router.navigate(['/demandes-rencontre', demandeId]);
+      this.calendrier = info.view.calendar;
+      this.demandeOuverte.set({ demandeId, ancre: info.el.getBoundingClientRect() });
     }
   }
 }

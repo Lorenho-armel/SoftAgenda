@@ -6,6 +6,11 @@ import monarchTheme from '@fullcalendar/angular/themes/monarch';
 import timeGridPlugin from '@fullcalendar/angular/timegrid';
 import frLocale from 'fullcalendar/locales/fr';
 
+export interface EvenementClique {
+  demandeId: string;
+  ancre: DOMRect;
+}
+
 export interface PlageHoraire {
   debut: Date;
   fin: Date;

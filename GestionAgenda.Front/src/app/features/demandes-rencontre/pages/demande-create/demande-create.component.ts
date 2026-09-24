@@ -1,26 +1,32 @@
 import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { catchError, debounceTime, distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
+import { FlashService } from '../../../../core/services/flash.service';
 import { CalendrierSaisieComponent } from '../../../../shared/calendrier/calendrier-saisie.component';
-import { PlageHoraire, dateValide, versSaisieLocale } from '../../../../shared/calendrier/calendrier.config';
+import { EvenementClique, PlageHoraire, dateValide, versSaisieLocale } from '../../../../shared/calendrier/calendrier.config';
 import { FieldErrorComponent } from '../../../../shared/components/field-error/field-error.component';
 import { IconeComponent } from '../../../../shared/components/icone/icone.component';
-import { PRIORITES, TYPES, URGENCES } from '../../models/demande.model';
+import { PRIORITES, SocieteDetail, SocieteOption, TYPES, URGENCES } from '../../models/demande.model';
 import { libelleStatut } from '../../models/demande-libelles';
+import { sourceDemandes } from '../../services/source-demandes';
+import { DemandeApercuComponent } from '../../components/demande-apercu/demande-apercu.component';
 import { messageApi } from '../../models/message-api';
 import { DemandesApiService } from '../../services/demandes-api.service';
+import { ReferentielApiService } from '../../services/referentiel-api.service';
 
 @Component({
   selector: 'app-demande-create',
-  imports: [ReactiveFormsModule, FieldErrorComponent, CalendrierSaisieComponent, IconeComponent],
+  imports: [ReactiveFormsModule, FieldErrorComponent, CalendrierSaisieComponent, IconeComponent, DemandeApercuComponent],
   templateUrl: './demande-create.component.html',
   host: { '(document:keydown.escape)': 'fermerFormulaire()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemandeCreateComponent {
   private readonly api = inject(DemandesApiService);
-  private readonly router = inject(Router);
+  private readonly referentiel = inject(ReferentielApiService);
+  private readonly flash = inject(FlashService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   readonly alerte = signal('');
@@ -53,7 +59,45 @@ export class DemandeCreateComponent {
     return debut && fin && fin > debut ? libellePeriode(debut, fin) : '';
   });
 
+  private readonly version = signal(0);
+  readonly sources = computed(() => [sourceDemandes(this.api, `demandes-${this.version()}`)]);
+  readonly demandeOuverte = signal<EvenementClique | null>(null);
+  readonly rechercheSociete = new FormControl('', { nonNullable: true });
+  private readonly resultatsSocietes = signal<SocieteOption[]>([]);
+  readonly societe = signal<SocieteDetail | null>(null);
+  readonly optionsSocietes = computed(() => {
+    const resultats = this.resultatsSocietes();
+    const choisie = this.societe();
+    return choisie && !resultats.some((option) => option.id === choisie.id)
+      ? [{ id: choisie.id, nom: choisie.nom }, ...resultats]
+      : resultats;
+  });
+  readonly membres = computed(() =>
+    (this.societe()?.membres ?? []).filter((membre) => membre.id !== this.valeurs().dirigeantId));
+
   constructor() {
+    this.rechercheSociete.valueChanges.pipe(
+      startWith(this.rechercheSociete.value),
+      debounceTime(250),
+      distinctUntilChanged(),
+      switchMap((terme) => this.referentiel.societes(terme).pipe(catchError(() => of<SocieteOption[]>([])))),
+      takeUntilDestroyed(),
+    ).subscribe((societes) => {
+      this.resultatsSocietes.set(societes);
+      if (societes.length === 1 && !this.form.controls.societeId.value) {
+        this.form.controls.societeId.setValue(societes[0].id);
+      }
+    });
+
+    this.form.controls.societeId.valueChanges.pipe(
+      distinctUntilChanged(),
+      switchMap((id) => {
+        this.societe.set(null);
+        return GUID.test(id) ? this.referentiel.societe(id).pipe(catchError(() => of(null))) : of(null);
+      }),
+      takeUntilDestroyed(),
+    ).subscribe((detail) => this.appliquerSociete(detail));
+
     const debut = dateValide(this.route.snapshot.queryParamMap.get('debut'));
     const fin = dateValide(this.route.snapshot.queryParamMap.get('fin'));
     if (debut && fin && fin > debut) {
@@ -71,6 +115,50 @@ export class DemandeCreateComponent {
     this.form.controls.dateDebutSouhaitee.markAsDirty();
     this.form.controls.dateFinSouhaitee.markAsDirty();
     this.ouvrirFormulaire();
+  }
+
+  private appliquerSociete(detail: SocieteDetail | null): void {
+    this.societe.set(detail);
+    if (!detail) {
+      return;
+    }
+
+    const { dirigeantId, salleSouhaiteeId, participants } = this.form.controls;
+    if (!detail.dirigeants.some((dirigeant) => dirigeant.id === dirigeantId.value)) {
+      dirigeantId.setValue(detail.dirigeants.length === 1 ? detail.dirigeants[0].id : '');
+    }
+
+    if (!detail.salles.some((salle) => salle.id === salleSouhaiteeId.value)) {
+      salleSouhaiteeId.setValue('');
+    }
+
+    for (const participant of participants.controls) {
+      const utilisateur = participant.controls.utilisateurId;
+      if (utilisateur.value && !detail.membres.some((membre) => membre.id === utilisateur.value)) {
+        utilisateur.setValue('');
+      }
+    }
+  }
+
+  actualiser(): void {
+    this.version.update((version) => version + 1);
+  }
+
+  fermerApercu(): void {
+    this.demandeOuverte.set(null);
+  }
+
+  apresSuppression(): void {
+    this.fermerApercu();
+    this.actualiser();
+  }
+
+  private reinitialiser(): void {
+    const { societeId, dirigeantId } = this.form.getRawValue();
+    this.form.controls.participants.clear();
+    this.form.reset({ societeId, dirigeantId });
+    this.alerte.set('');
+    this.fermerFormulaire();
   }
 
   ouvrirFormulaire(): void {
@@ -101,8 +189,9 @@ export class DemandeCreateComponent {
     }
 
     const valeur = this.form.getRawValue();
-    const participants = valeur.participants.filter((participant) =>
-      participant.utilisateurId || participant.nomComplet || participant.email);
+    const participants = valeur.participants
+      .map((participant) => participant.utilisateurId ? { ...participant, nomComplet: '', email: '' } : participant)
+      .filter((participant) => participant.utilisateurId || participant.nomComplet || participant.email);
     const message = messageSaisie(valeur, participants);
     this.alerte.set(message);
     if (message) {
@@ -112,7 +201,11 @@ export class DemandeCreateComponent {
     this.api.creer({ ...valeur, participants })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (demande) => void this.router.navigate(['/demandes-rencontre', demande.id]),
+        next: () => {
+          this.actualiser();
+          this.reinitialiser();
+          this.flash.succes('La demande a été créée avec succès.');
+        },
         error: (erreur: unknown) => this.alerte.set(messageApi(erreur)),
       });
   }
