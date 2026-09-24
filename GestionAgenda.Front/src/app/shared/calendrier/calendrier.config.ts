@@ -32,6 +32,8 @@ export function optionsCalendrier(options: CalendarOptions): CalendarOptions {
     businessHours: { daysOfWeek: [1, 2, 3, 4, 5], startTime: '08:00', endTime: '18:00' },
     eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
     slotHeaderFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    snapDuration: '00:15:00',
+    eventAllow: (plage) => plage.start >= new Date(),
     ...options,
   };
 }

@@ -175,6 +175,7 @@ export const STATUTS: StatutDemande[] = [
   'EnAttente', 'EnAnalyse', 'Acceptee', 'Refusee', 'Reportee', 'Planifiee', 'Terminee', 'Annulee',
 ];
 export const TYPES: TypeDemande[] = ['RendezVous', 'Reunion'];
+export const STATUTS_MODIFIABLES: readonly StatutDemande[] = ['EnAttente', 'EnAnalyse', 'Acceptee', 'Reportee'];
 
 export const VUES: { id: VueFile; libelle: string; compteur: keyof CompteursFile }[] = [
   { id: 'Nouvelles', libelle: 'Nouvelles', compteur: 'nouvelles' },

@@ -7,7 +7,14 @@ import { FlashService } from '../../../../core/services/flash.service';
 import { versSaisieLocale } from '../../../../shared/calendrier/calendrier.config';
 import { FieldErrorComponent } from '../../../../shared/components/field-error/field-error.component';
 import { IconeComponent } from '../../../../shared/components/icone/icone.component';
-import { DemandeDetail, SalleOption, StatutDemande, TYPES, TypeDemande } from '../../models/demande.model';
+import {
+  DemandeDetail,
+  STATUTS_MODIFIABLES,
+  SalleOption,
+  StatutDemande,
+  TYPES,
+  TypeDemande,
+} from '../../models/demande.model';
 import { libelleStatut } from '../../models/demande-libelles';
 import { COULEURS_STATUT } from '../../models/evenements-calendrier';
 import { messageApi } from '../../models/message-api';
@@ -16,7 +23,6 @@ import { ReferentielApiService } from '../../services/referentiel-api.service';
 
 type Mode = 'apercu' | 'modifier' | 'supprimer';
 
-const STATUTS_MODIFIABLES: readonly StatutDemande[] = ['EnAttente', 'EnAnalyse', 'Acceptee', 'Reportee'];
 const STATUTS_TERMINAUX: readonly StatutDemande[] = ['Refusee', 'Terminee', 'Annulee'];
 
 @Component({

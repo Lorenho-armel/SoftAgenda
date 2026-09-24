@@ -2,6 +2,7 @@ import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signa
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { EventDropInfo, EventResizeDoneInfo } from '@fullcalendar/angular';
 import { catchError, debounceTime, distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
 import { FlashService } from '../../../../core/services/flash.service';
 import { CalendrierSaisieComponent } from '../../../../shared/calendrier/calendrier-saisie.component';
@@ -10,6 +11,7 @@ import { FieldErrorComponent } from '../../../../shared/components/field-error/f
 import { IconeComponent } from '../../../../shared/components/icone/icone.component';
 import { PRIORITES, SocieteDetail, SocieteOption, TYPES, URGENCES } from '../../models/demande.model';
 import { libelleStatut } from '../../models/demande-libelles';
+import { DeplacementDemandeService } from '../../services/deplacement-demande.service';
 import { sourceDemandes } from '../../services/source-demandes';
 import { DemandeApercuComponent } from '../../components/demande-apercu/demande-apercu.component';
 import { messageApi } from '../../models/message-api';
@@ -27,6 +29,7 @@ export class DemandeCreateComponent {
   private readonly api = inject(DemandesApiService);
   private readonly referentiel = inject(ReferentielApiService);
   private readonly flash = inject(FlashService);
+  private readonly deplacement = inject(DeplacementDemandeService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   readonly alerte = signal('');
@@ -142,6 +145,10 @@ export class DemandeCreateComponent {
 
   actualiser(): void {
     this.version.update((version) => version + 1);
+  }
+
+  deplacerDemande(info: EventDropInfo | EventResizeDoneInfo): void {
+    this.deplacement.appliquer(info, () => this.actualiser());
   }
 
   fermerApercu(): void {

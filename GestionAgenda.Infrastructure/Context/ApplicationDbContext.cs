@@ -1,3 +1,4 @@
+using GestionAgenda.Domain.Common;
 using GestionAgenda.Domain.Entities;
 using GestionAgenda.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,16 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
 
     public DbSet<AbonnementPush> AbonnementsPush => Set<AbonnementPush>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        // Les identifiants sont attribués par le domaine (Guid v7) : sans ValueGeneratedNever, EF traite
+        // une entité enfant ajoutée à un agrégat suivi comme existante et émet un UPDATE au lieu d'un INSERT.
+        foreach (var entite in modelBuilder.Model.GetEntityTypes()
+                     .Where(type => typeof(BaseEntity).IsAssignableFrom(type.ClrType)))
+        {
+            modelBuilder.Entity(entite.ClrType).Property(nameof(BaseEntity.Id)).ValueGeneratedNever();
+        }
+    }
 }

@@ -1,6 +1,6 @@
 import { EventInput } from '@fullcalendar/angular';
 import { ajouterMinutes } from '../../../shared/calendrier/calendrier.config';
-import { DemandeResume, StatutDemande } from './demande.model';
+import { DemandeResume, STATUTS_MODIFIABLES, StatutDemande } from './demande.model';
 import { libelleStatut } from './demande-libelles';
 import { RencontreTableau } from './tableau-assistante.model';
 
@@ -33,6 +33,7 @@ export function evenementDemande(demande: DemandeResume): EventInput {
     start: debut,
     end: ajouterMinutes(debut, demande.dureeMinutes),
     color: COULEURS_STATUT[demande.statut],
+    editable: STATUTS_MODIFIABLES.includes(demande.statut),
     extendedProps: { demandeId: demande.id },
   };
 }
@@ -44,6 +45,7 @@ export function evenementRencontre(rencontre: RencontreTableau): EventInput {
     start: rencontre.debut,
     end: rencontre.fin,
     color: COULEUR_RENCONTRE,
+    editable: false,
     extendedProps: { demandeId: rencontre.demandeId },
   };
 }

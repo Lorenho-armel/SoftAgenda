@@ -1,5 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { CalendarApi, CalendarOptions, EventClickInfo, EventInput, EventSourceInput } from '@fullcalendar/angular';
+import {
+  CalendarApi,
+  CalendarOptions,
+  EventClickInfo,
+  EventDropInfo,
+  EventInput,
+  EventResizeDoneInfo,
+  EventSourceInput,
+} from '@fullcalendar/angular';
 import { Router } from '@angular/router';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -9,6 +17,7 @@ import { DemandeApercuComponent } from '../../components/demande-apercu/demande-
 import { libelleStatut } from '../../models/demande-libelles';
 import { LEGENDE_AGENDA, evenementRencontre } from '../../models/evenements-calendrier';
 import { DemandesApiService } from '../../services/demandes-api.service';
+import { DeplacementDemandeService } from '../../services/deplacement-demande.service';
 import { sourceDemandes } from '../../services/source-demandes';
 import { TableauAssistanteApiService } from '../../services/tableau-assistante-api.service';
 
@@ -22,6 +31,7 @@ export class AgendaComponent {
   private readonly api = inject(DemandesApiService);
   private readonly tableauApi = inject(TableauAssistanteApiService);
   private readonly router = inject(Router);
+  private readonly deplacement = inject(DeplacementDemandeService);
   private readonly estAssistante = inject(AuthService).roles().includes('Assistante');
   private calendrier: CalendarApi | null = null;
   readonly demandeOuverte = signal<EvenementClique | null>(null);
@@ -37,6 +47,8 @@ export class AgendaComponent {
       queryParams: { debut: info.start.toISOString(), fin: info.end.toISOString() },
     }),
     eventClick: (info: EventClickInfo) => this.ouvrir(info),
+    eventDrop: (info: EventDropInfo) => this.deplacer(info),
+    eventResize: (info: EventResizeDoneInfo) => this.deplacer(info),
   });
 
   fermer(): void {
@@ -66,6 +78,11 @@ export class AgendaComponent {
       )),
     };
     return [demandes, rencontres];
+  }
+
+  private deplacer(info: EventDropInfo | EventResizeDoneInfo): void {
+    const calendrier = info.view.calendar;
+    this.deplacement.appliquer(info, () => calendrier.refetchEvents());
   }
 
   private ouvrir(info: EventClickInfo): void {

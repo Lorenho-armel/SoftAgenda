@@ -25,7 +25,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.AbonnementPush", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Auth")
@@ -65,7 +64,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.AffectationAssistante", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AssistanteId")
@@ -101,7 +99,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.DemandeParticipant", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -145,7 +142,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.DemandeRencontre", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -223,7 +219,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.HistoriqueDemande", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AuteurId")
@@ -307,7 +302,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -354,7 +348,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -394,7 +387,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.RendezVous", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -450,7 +442,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Reunion", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -506,7 +497,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Salle", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Capacite")
@@ -539,7 +529,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Societe", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -561,7 +550,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Utilisateur", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")
@@ -601,7 +589,6 @@ namespace GestionAgenda.Infrastructure.Migrations
             modelBuilder.Entity("GestionAgenda.Domain.Entities.UtilisateurSociete", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("DateCreation")

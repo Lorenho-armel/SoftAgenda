@@ -4,7 +4,9 @@ import {
   DateClickInfo,
   DateSelectInfo,
   EventClickInfo,
+  EventDropInfo,
   EventInput,
+  EventResizeDoneInfo,
   EventSourceInput,
 } from '@fullcalendar/angular';
 import { CalendrierComponent } from './calendrier.component';
@@ -39,10 +41,11 @@ export class CalendrierSaisieComponent {
   readonly sources = input<EventSourceInput[]>([]);
   readonly choisir = output<PlageHoraire>();
   readonly evenementClique = output<EvenementClique>();
+  readonly evenementModifie = output<EventDropInfo | EventResizeDoneInfo>();
 
   readonly aide = computed(() => {
     if (this.mode() === 'periode') {
-      return 'Faites glisser sur le calendrier pour définir la période, ou saisissez les dates ci-dessous.';
+      return 'Faites glisser sur une plage libre pour définir la période. Déplacez une demande existante pour changer sa date, ou tirez son bord inférieur pour changer sa durée.';
     }
 
     return this.fenetre()
@@ -65,6 +68,8 @@ export class CalendrierSaisieComponent {
       events: [...this.fond(fenetre), ...this.selection(), ...this.evenements()],
       eventSources: this.sources(),
       eventClick: (info: EventClickInfo) => this.cliquer(info),
+      eventDrop: (info: EventDropInfo) => this.evenementModifie.emit(info),
+      eventResize: (info: EventResizeDoneInfo) => this.evenementModifie.emit(info),
     });
   });
 
