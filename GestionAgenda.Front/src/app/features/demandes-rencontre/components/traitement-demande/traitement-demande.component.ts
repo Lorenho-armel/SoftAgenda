@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CalendrierSaisieComponent } from '../../../../shared/calendrier/calendrier-saisie.component';
+import { PlageHoraire, versSaisieLocale } from '../../../../shared/calendrier/calendrier.config';
 import { FieldErrorComponent } from '../../../../shared/components/field-error/field-error.component';
 import { StatutDemande } from '../../models/demande.model';
 
@@ -12,7 +14,7 @@ export interface DecisionDemande {
 
 @Component({
   selector: 'app-traitement-demande',
-  imports: [ReactiveFormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, FieldErrorComponent, CalendrierSaisieComponent],
   templateUrl: './traitement-demande.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -47,6 +49,13 @@ export class TraitementDemandeComponent {
       commentaire: this.refus.controls.commentaire.value,
       dateDebutSouhaitee: null,
       dateFinSouhaitee: null,
+    });
+  }
+
+  choisirReport(plage: PlageHoraire): void {
+    this.report.patchValue({
+      dateDebutSouhaitee: versSaisieLocale(plage.debut),
+      dateFinSouhaitee: versSaisieLocale(plage.fin),
     });
   }
 

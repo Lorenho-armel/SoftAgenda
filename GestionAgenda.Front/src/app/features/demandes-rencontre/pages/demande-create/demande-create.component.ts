@@ -1,8 +1,11 @@
-import { DestroyRef, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CalendrierSaisieComponent } from '../../../../shared/calendrier/calendrier-saisie.component';
+import { PlageHoraire, dateValide, versSaisieLocale } from '../../../../shared/calendrier/calendrier.config';
 import { FieldErrorComponent } from '../../../../shared/components/field-error/field-error.component';
+import { IconeComponent } from '../../../../shared/components/icone/icone.component';
 import { PRIORITES, TYPES, URGENCES } from '../../models/demande.model';
 import { libelleStatut } from '../../models/demande-libelles';
 import { messageApi } from '../../models/message-api';
@@ -10,13 +13,15 @@ import { DemandesApiService } from '../../services/demandes-api.service';
 
 @Component({
   selector: 'app-demande-create',
-  imports: [ReactiveFormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, FieldErrorComponent, CalendrierSaisieComponent, IconeComponent],
   templateUrl: './demande-create.component.html',
+  host: { '(document:keydown.escape)': 'fermerFormulaire()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemandeCreateComponent {
   private readonly api = inject(DemandesApiService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   readonly alerte = signal('');
   readonly urgences = URGENCES;
@@ -40,6 +45,42 @@ export class DemandeCreateComponent {
     }>>([]),
   });
 
+  readonly formulaireOuvert = signal(false);
+  private readonly valeurs = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  readonly resumePeriode = computed(() => {
+    const debut = dateValide(this.valeurs().dateDebutSouhaitee);
+    const fin = dateValide(this.valeurs().dateFinSouhaitee);
+    return debut && fin && fin > debut ? libellePeriode(debut, fin) : '';
+  });
+
+  constructor() {
+    const debut = dateValide(this.route.snapshot.queryParamMap.get('debut'));
+    const fin = dateValide(this.route.snapshot.queryParamMap.get('fin'));
+    if (debut && fin && fin > debut) {
+      this.choisirPeriode({ debut, fin });
+    }
+  }
+
+  choisirPeriode(plage: PlageHoraire): void {
+    const minutes = Math.round((plage.fin.getTime() - plage.debut.getTime()) / 60_000);
+    this.form.patchValue({
+      dateDebutSouhaitee: versSaisieLocale(plage.debut),
+      dateFinSouhaitee: versSaisieLocale(plage.fin),
+      dureeMinutes: Math.max(DUREE_MIN, Math.min(this.form.controls.dureeMinutes.value, minutes)),
+    });
+    this.form.controls.dateDebutSouhaitee.markAsDirty();
+    this.form.controls.dateFinSouhaitee.markAsDirty();
+    this.ouvrirFormulaire();
+  }
+
+  ouvrirFormulaire(): void {
+    this.formulaireOuvert.set(true);
+  }
+
+  fermerFormulaire(): void {
+    this.formulaireOuvert.set(false);
+  }
+
   ajouterParticipant(): void {
     this.form.controls.participants.push(new FormGroup({
       utilisateurId: new FormControl('', { nonNullable: true, validators: [guidOptionnel] }),
@@ -53,6 +94,7 @@ export class DemandeCreateComponent {
   }
 
   enregistrer(): void {
+    this.ouvrirFormulaire();
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -74,6 +116,17 @@ export class DemandeCreateComponent {
         error: (erreur: unknown) => this.alerte.set(messageApi(erreur)),
       });
   }
+}
+
+const DUREE_MIN = 15;
+
+function libellePeriode(debut: Date, fin: Date): string {
+  const jour = (date: Date) => date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const heure = (date: Date) => date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const texte = debut.toDateString() === fin.toDateString()
+    ? `${jour(debut)} · ${heure(debut)} – ${heure(fin)}`
+    : `Du ${jour(debut)} ${heure(debut)} au ${jour(fin)} ${heure(fin)}`;
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
 }
 
 const GUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;

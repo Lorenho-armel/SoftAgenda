@@ -29,6 +29,9 @@
       [visible]="vue.demande.statut === 'Acceptee' || vue.demande.statut === 'Planifiee'"
       [confirmerLibelle]="vue.demande.statut === 'Planifiee' ? 'Déplacer' : 'Planifier'"
       [bilan]="bilan()"
+      [debutSouhaite]="vue.demande.dateDebutSouhaitee"
+      [finSouhaitee]="vue.demande.dateFinSouhaitee"
+      [dureeMinutes]="vue.demande.dureeMinutes"
       (verifier)="verifier($event)"
       (planifier)="planifier($event)"
     />

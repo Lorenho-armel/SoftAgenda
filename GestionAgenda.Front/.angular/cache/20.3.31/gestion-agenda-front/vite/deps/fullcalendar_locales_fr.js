@@ -1,0 +1,28 @@
+import "./chunk-J25FJFZE.js";
+
+// node_modules/fullcalendar/chunks/52f4a863.js
+var l31 = {
+  code: "fr",
+  week: {
+    dow: 1,
+    // Monday is the first day of the week.
+    doy: 4
+    // The week that contains Jan 4th is the first week of the year.
+  },
+  prevText: "Précédent",
+  nextText: "Suivant",
+  todayText: "Aujourd'hui",
+  yearText: "Année",
+  monthText: "Mois",
+  weekTextLong: "Semaine",
+  weekTextShort: "Sem.",
+  dayText: "Jour",
+  listText: "Planning",
+  allDayText: "Toute la\njournée",
+  moreLinkText: "en plus",
+  noEventsText: "Aucun évènement à afficher"
+};
+export {
+  l31 as default
+};
+//# sourceMappingURL=fullcalendar_locales_fr.js.map

@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
 import { DemandeDetail, StatutDemande } from '../../models/demande.model';
 import { DemandesApiService } from '../../services/demandes-api.service';
 import { DemandeDetailComponent } from './demande-detail.component';
@@ -33,7 +34,9 @@ describe('DemandeDetailComponent', () => {
         { provide: DemandesApiService, useValue: api },
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: identifiant })) } },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(CalendrierComponent, { set: { imports: [], template: '' } })
+      .compileComponents();
   });
 
   it('devrait afficher le motif, l urgence et la priorité', async () => {

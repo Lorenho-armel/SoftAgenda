@@ -1,6 +1,15 @@
 @if (visible()) {
   <section class="carte" id="planification">
     <h2>Planification</h2>
+    <app-calendrier-saisie
+      class="mb-4"
+      mode="creneau"
+      [debut]="form.controls.debutPlanifie.value"
+      [dureeMinutes]="dureeMinutes()"
+      [fenetre]="fenetre()"
+      [evenements]="conflits()"
+      (choisir)="choisirCreneau($event)"
+    />
     <form class="grille" [formGroup]="form">
       <label>Date et heure<input formControlName="debutPlanifie" type="datetime-local" /></label>
       <app-field-error [control]="form.controls.debutPlanifie" />

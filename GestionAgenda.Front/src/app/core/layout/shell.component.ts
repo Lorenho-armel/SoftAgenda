@@ -49,6 +49,7 @@ export class ShellComponent {
     ...(this.estAssistante()
       ? [{ libelle: 'Tableau de bord', route: '/demandes-rencontre/tableau', icone: 'tableau' as const, exact: false }]
       : []),
+    { libelle: 'Agenda', route: '/demandes-rencontre/agenda', icone: 'calendrier', exact: false },
     { libelle: 'File des demandes', route: '/demandes-rencontre/file', icone: 'file', exact: false },
     { libelle: 'Liste des demandes', route: '/demandes-rencontre', icone: 'liste', exact: true },
     { libelle: 'Nouvelle demande', route: '/demandes-rencontre/nouvelle', icone: 'plus', exact: false },

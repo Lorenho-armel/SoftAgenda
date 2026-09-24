@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
 import { DemandesApiService } from '../../services/demandes-api.service';
 import { DemandeCreateComponent } from './demande-create.component';
 
@@ -20,7 +21,9 @@ describe('DemandeCreateComponent', () => {
         provideRouter([]),
         { provide: DemandesApiService, useValue: api },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(CalendrierComponent, { set: { imports: [], template: '' } })
+      .compileComponents();
     fixture = TestBed.createComponent(DemandeCreateComponent);
     fixture.detectChanges();
   });

@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@fullcalendar/angular": "^7.1.0",
+    "fullcalendar": "^7.1.0",
+    "temporal-polyfill": "^1.0.5"
+  }
+}

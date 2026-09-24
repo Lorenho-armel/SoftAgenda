@@ -2,52 +2,123 @@
   <header class="entete-page">
     <p class="surtitre">Gestion</p>
     <h1>Nouvelle demande</h1>
-    <p class="sous-titre">Renseignez les informations de la rencontre souhaitée.</p>
+    <p class="sous-titre">Sélectionnez la période souhaitée sur le calendrier pour renseigner la demande.</p>
   </header>
-  <form class="carte grille" [formGroup]="form" (ngSubmit)="enregistrer()">
-    @if (alerte()) { <p class="text-sm text-danger">{{ alerte() }}</p> }
-    <label>Dirigeant<input formControlName="dirigeantId" placeholder="22222222-2222-2222-2222-222222222222" /></label>
-    <app-field-error [control]="form.controls.dirigeantId" />
-    <label>Société<input formControlName="societeId" placeholder="11111111-1111-1111-1111-111111111111" /></label>
-    <app-field-error [control]="form.controls.societeId" />
-    <label>Type
-      <select formControlName="type">
-        @for (item of types; track item.valeur) { <option [value]="item.valeur">{{ item.libelle }}</option> }
-      </select>
-    </label>
-    <label>Motif<textarea formControlName="motif" rows="3"></textarea></label>
-    <app-field-error [control]="form.controls.motif" />
-    <label>Début souhaité<input formControlName="dateDebutSouhaitee" type="datetime-local" /></label>
-    <app-field-error [control]="form.controls.dateDebutSouhaitee" />
-    <label>Fin souhaitée<input formControlName="dateFinSouhaitee" type="datetime-local" /></label>
-    <app-field-error [control]="form.controls.dateFinSouhaitee" />
-    <label>Durée (minutes)<input formControlName="dureeMinutes" type="number" min="15" max="480" /></label>
-    <app-field-error [control]="form.controls.dureeMinutes" />
-    <label>Urgence
-      <select formControlName="urgence">
-        @for (valeur of urgences; track valeur) { <option [value]="valeur">{{ valeur }}</option> }
-      </select>
-    </label>
-    <label>Priorité
-      <select formControlName="priorite">
-        @for (valeur of priorites; track valeur) { <option [value]="valeur">{{ valeur }}</option> }
-      </select>
-    </label>
-    <label>Salle souhaitée<input formControlName="salleSouhaiteeId" placeholder="66666666-6666-6666-6666-666666666666" /></label>
-    <app-field-error [control]="form.controls.salleSouhaiteeId" />
-    <div formArrayName="participants" class="grid gap-3">
-      <h2>Participants</h2>
-      <button type="button" class="btn-secondaire" (click)="ajouterParticipant()">Ajouter</button>
-      @for (groupe of form.controls.participants.controls; track $index) {
-        <div class="grille" [formGroupName]="$index">
-          <label>Utilisateur interne<input formControlName="utilisateurId" /></label>
-          <app-field-error [control]="groupe.controls.utilisateurId" />
-          <label>Nom externe<input formControlName="nomComplet" /></label>
-          <label>E-mail externe<input formControlName="email" type="email" /></label>
-          <button type="button" class="btn-secondaire" (click)="retirerParticipant($index)">Retirer</button>
-        </div>
-      }
+
+  <div class="carte grid gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 class="mb-0">Période souhaitée</h2>
+      <button type="button" class="btn-secondaire" (click)="ouvrirFormulaire()">Saisir sans le calendrier</button>
     </div>
-    <button type="submit">Créer la demande</button>
-  </form>
+    <app-calendrier-saisie
+      mode="periode"
+      [debut]="form.controls.dateDebutSouhaitee.value"
+      [fin]="form.controls.dateFinSouhaitee.value"
+      (choisir)="choisirPeriode($event)"
+    />
+  </div>
 </section>
+
+@if (formulaireOuvert()) {
+  <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:items-center">
+    <div class="absolute inset-0" (click)="fermerFormulaire()"></div>
+    <div
+      class="relative my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-3xl flex-col rounded-2xl border border-line bg-paper shadow-2xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titre-nouvelle-demande"
+    >
+      <header class="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
+        <div>
+          <p class="surtitre">Nouvelle demande</p>
+          <h2 id="titre-nouvelle-demande" class="m-0">Informations de la rencontre</h2>
+          @if (resumePeriode(); as resume) {
+            <p class="sous-titre mt-1">{{ resume }}</p>
+          }
+        </div>
+        <button type="button" class="bouton-icone" aria-label="Fermer" (click)="fermerFormulaire()">
+          <app-icone nom="croix" />
+        </button>
+      </header>
+
+      <form class="flex min-h-0 flex-1 flex-col" [formGroup]="form" (ngSubmit)="enregistrer()">
+        <div class="grid min-h-0 flex-1 gap-3.5 overflow-y-auto px-6 py-5">
+          @if (alerte()) {
+            <p class="m-0 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">{{ alerte() }}</p>
+          }
+          <div class="grid gap-3.5 md:grid-cols-2">
+            <div class="grid gap-1">
+              <label>Dirigeant<input formControlName="dirigeantId" placeholder="22222222-2222-2222-2222-222222222222" /></label>
+              <app-field-error [control]="form.controls.dirigeantId" />
+            </div>
+            <div class="grid gap-1">
+              <label>Société<input formControlName="societeId" placeholder="11111111-1111-1111-1111-111111111111" /></label>
+              <app-field-error [control]="form.controls.societeId" />
+            </div>
+          </div>
+          <label>Type
+            <select formControlName="type">
+              @for (item of types; track item.valeur) { <option [value]="item.valeur">{{ item.libelle }}</option> }
+            </select>
+          </label>
+          <div class="grid gap-1">
+            <label>Motif<textarea formControlName="motif" rows="3"></textarea></label>
+            <app-field-error [control]="form.controls.motif" />
+          </div>
+          <div class="grid gap-3.5 md:grid-cols-2">
+            <div class="grid gap-1">
+              <label>Début souhaité<input formControlName="dateDebutSouhaitee" type="datetime-local" /></label>
+              <app-field-error [control]="form.controls.dateDebutSouhaitee" />
+            </div>
+            <div class="grid gap-1">
+              <label>Fin souhaitée<input formControlName="dateFinSouhaitee" type="datetime-local" /></label>
+              <app-field-error [control]="form.controls.dateFinSouhaitee" />
+            </div>
+          </div>
+          <div class="grid gap-3.5 md:grid-cols-3">
+            <div class="grid gap-1">
+              <label>Durée (minutes)<input formControlName="dureeMinutes" type="number" min="15" max="480" /></label>
+              <app-field-error [control]="form.controls.dureeMinutes" />
+            </div>
+            <label>Urgence
+              <select formControlName="urgence">
+                @for (valeur of urgences; track valeur) { <option [value]="valeur">{{ valeur }}</option> }
+              </select>
+            </label>
+            <label>Priorité
+              <select formControlName="priorite">
+                @for (valeur of priorites; track valeur) { <option [value]="valeur">{{ valeur }}</option> }
+              </select>
+            </label>
+          </div>
+          <div class="grid gap-1">
+            <label>Salle souhaitée<input formControlName="salleSouhaiteeId" placeholder="66666666-6666-6666-6666-666666666666" /></label>
+            <app-field-error [control]="form.controls.salleSouhaiteeId" />
+          </div>
+          <div formArrayName="participants" class="grid gap-3 border-t border-line pt-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="m-0">Participants</h3>
+              <button type="button" class="btn-secondaire" (click)="ajouterParticipant()">Ajouter</button>
+            </div>
+            @for (groupe of form.controls.participants.controls; track $index) {
+              <div class="grid gap-3 rounded-xl border border-line p-3 md:grid-cols-3" [formGroupName]="$index">
+                <div class="grid gap-1">
+                  <label>Utilisateur interne<input formControlName="utilisateurId" /></label>
+                  <app-field-error [control]="groupe.controls.utilisateurId" />
+                </div>
+                <label>Nom externe<input formControlName="nomComplet" /></label>
+                <label>E-mail externe<input formControlName="email" type="email" /></label>
+                <button type="button" class="btn-secondaire md:col-span-3 md:justify-self-end" (click)="retirerParticipant($index)">Retirer</button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <footer class="flex justify-end gap-3 border-t border-line px-6 py-4">
+          <button type="button" class="btn-secondaire" (click)="fermerFormulaire()">Annuler</button>
+          <button type="submit">Créer la demande</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+}

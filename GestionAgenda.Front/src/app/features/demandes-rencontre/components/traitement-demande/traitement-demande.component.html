@@ -19,15 +19,23 @@
       <app-field-error [control]="refus.controls.commentaire" />
       <button type="submit">Refuser</button>
     </form>
-    <form class="grid gap-2.5" [formGroup]="report" (ngSubmit)="reporter()">
+    <div class="grid gap-2.5">
       <h3>Reporter</h3>
-      <label>Commentaire<textarea formControlName="commentaire" rows="3"></textarea></label>
-      <app-field-error [control]="report.controls.commentaire" />
-      <label>Nouveau début<input formControlName="dateDebutSouhaitee" type="datetime-local" /></label>
-      <app-field-error [control]="report.controls.dateDebutSouhaitee" />
-      <label>Nouvelle fin<input formControlName="dateFinSouhaitee" type="datetime-local" /></label>
-      <app-field-error [control]="report.controls.dateFinSouhaitee" />
-      <button type="submit">Reporter</button>
-    </form>
+      <app-calendrier-saisie
+        mode="periode"
+        [debut]="report.controls.dateDebutSouhaitee.value"
+        [fin]="report.controls.dateFinSouhaitee.value"
+        (choisir)="choisirReport($event)"
+      />
+      <form class="grid gap-2.5" [formGroup]="report" (ngSubmit)="reporter()">
+        <label>Commentaire<textarea formControlName="commentaire" rows="3"></textarea></label>
+        <app-field-error [control]="report.controls.commentaire" />
+        <label>Nouveau début<input formControlName="dateDebutSouhaitee" type="datetime-local" /></label>
+        <app-field-error [control]="report.controls.dateDebutSouhaitee" />
+        <label>Nouvelle fin<input formControlName="dateFinSouhaitee" type="datetime-local" /></label>
+        <app-field-error [control]="report.controls.dateFinSouhaitee" />
+        <button type="submit">Reporter</button>
+      </form>
+    </div>
   }
 </section>

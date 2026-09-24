@@ -1,0 +1,18 @@
+<section class="page">
+  <header class="entete-page">
+    <p class="surtitre">Gestion</p>
+    <h1>Agenda</h1>
+    <p class="sous-titre">Les demandes apparaissent sur leur créneau souhaité. Sélectionnez une plage horaire pour créer une demande.</p>
+  </header>
+  <div class="carte">
+    <app-calendrier [options]="options" />
+  </div>
+  <ul class="m-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-xs text-navy-soft">
+    @for (entree of legende; track entree.libelle) {
+      <li class="flex items-center gap-1.5">
+        <span class="size-2.5 rounded-full" [style.background-color]="entree.couleur"></span>
+        {{ entree.libelle }}
+      </li>
+    }
+  </ul>
+</section>

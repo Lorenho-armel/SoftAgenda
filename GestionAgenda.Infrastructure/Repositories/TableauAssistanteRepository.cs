@@ -63,6 +63,8 @@ public sealed class TableauAssistanteRepository(ApplicationDbContext context) : 
         CancellationToken cancellationToken) =>
         await perimetre
             .Where(critere)
+            .OrderBy(demande => demande.RendezVous != null ? demande.RendezVous.Debut : demande.Reunion!.Debut)
+            .Take(taille)
             .Select(demande => new RencontreTableau(
                 demande.Id,
                 demande.Motif,
@@ -72,7 +74,5 @@ public sealed class TableauAssistanteRepository(ApplicationDbContext context) : 
                 demande.RendezVous != null ? demande.RendezVous.Fin : demande.Reunion!.Fin,
                 demande.Dirigeant!.Prenom + " " + demande.Dirigeant.Nom,
                 demande.Societe!.Nom))
-            .OrderBy(rencontre => rencontre.Debut)
-            .Take(taille)
             .ToListAsync(cancellationToken);
 }

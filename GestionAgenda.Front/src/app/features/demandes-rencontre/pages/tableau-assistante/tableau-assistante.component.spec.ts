@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
 import { DemandeResume } from '../../models/demande.model';
 import { TableauAssistante } from '../../models/tableau-assistante.model';
 import { TableauAssistanteApiService } from '../../services/tableau-assistante-api.service';
@@ -36,7 +37,9 @@ describe('TableauAssistanteComponent', () => {
         provideRouter([]),
         { provide: TableauAssistanteApiService, useValue: { obtenir: vi.fn(() => of(tableau())) } },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(CalendrierComponent, { set: { imports: [], template: '' } })
+      .compileComponents();
     fixture = TestBed.createComponent(TableauAssistanteComponent);
     fixture.detectChanges();
     await fixture.whenStable();

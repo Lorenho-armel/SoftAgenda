@@ -104,6 +104,43 @@
   }
 }
 
+:root {
+  --fc-monarch-primary: var(--color-primaire);
+  --fc-monarch-primary-foreground: var(--color-sur-primaire);
+  --fc-monarch-primary-over: var(--color-primaire-survol);
+  --fc-monarch-primary-down: var(--color-primaire-survol);
+  --fc-monarch-secondary: color-mix(in srgb, var(--color-gold) 16%, var(--color-paper));
+  --fc-monarch-secondary-foreground: var(--color-navy);
+  --fc-monarch-secondary-over: color-mix(in srgb, var(--color-gold) 24%, var(--color-paper));
+  --fc-monarch-secondary-down: color-mix(in srgb, var(--color-gold) 32%, var(--color-paper));
+  --fc-monarch-tertiary: var(--color-gold);
+  --fc-monarch-tertiary-foreground: #131d3b;
+  --fc-monarch-tertiary-over: var(--color-gold-light);
+  --fc-monarch-tertiary-down: var(--color-gold-light);
+  --fc-monarch-event: #2e427b;
+  --fc-monarch-event-contrast: #ffffff;
+  --fc-monarch-highlight: color-mix(in srgb, var(--color-gold) 22%, transparent);
+  --fc-monarch-now: #b42318;
+  --fc-monarch-selected: var(--color-primaire);
+  --fc-monarch-selected-foreground: var(--color-sur-primaire);
+  --fc-monarch-selected-over: var(--color-primaire-survol);
+  --fc-monarch-selected-down: var(--color-primaire-survol);
+  --fc-monarch-outline: var(--color-gold);
+  --fc-monarch-popover: var(--color-paper);
+  --fc-monarch-popover-foreground: var(--color-texte);
+  --fc-monarch-background: var(--color-paper);
+  --fc-monarch-faint: color-mix(in srgb, var(--color-navy-soft) 8%, transparent);
+  --fc-monarch-muted: color-mix(in srgb, var(--color-navy-soft) 14%, transparent);
+  --fc-monarch-strong: color-mix(in srgb, var(--color-navy-soft) 26%, transparent);
+  --fc-monarch-stronger: color-mix(in srgb, var(--color-navy-soft) 32%, transparent);
+  --fc-monarch-strongest: color-mix(in srgb, var(--color-navy-soft) 40%, transparent);
+  --fc-monarch-foreground: var(--color-texte);
+  --fc-monarch-faint-foreground: color-mix(in srgb, var(--color-navy-soft) 60%, transparent);
+  --fc-monarch-muted-foreground: var(--color-navy-soft);
+  --fc-monarch-border: var(--color-line);
+  --fc-monarch-strong-border: color-mix(in srgb, var(--color-navy-soft) 45%, var(--color-line));
+}
+
 @layer components {
   .lien-menu {
     @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 no-underline transition-colors hover:bg-white/5 hover:text-white;
