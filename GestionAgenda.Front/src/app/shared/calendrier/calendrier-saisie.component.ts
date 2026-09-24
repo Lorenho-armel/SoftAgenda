@@ -65,8 +65,8 @@ export class CalendrierSaisieComponent {
       selectAllow: fenetre ? (plage) => plage.start >= fenetre.debut && plage.end <= fenetre.fin : undefined,
       select: (info: DateSelectInfo) => this.choisir.emit({ debut: info.start, fin: info.end }),
       dateClick: mode === 'creneau' ? (info: DateClickInfo) => this.choisirCreneau(info.date) : undefined,
-      events: [...this.fond(fenetre), ...this.selection(), ...this.evenements()],
-      eventSources: this.sources(),
+      // Pas d'option `events` : chaque changement de celle-ci retire toutes les autres sources du calendrier.
+      eventSources: [[...this.fond(fenetre), ...this.selection(), ...this.evenements()], ...this.sources()],
       eventClick: (info: EventClickInfo) => this.cliquer(info),
       eventDrop: (info: EventDropInfo) => this.evenementModifie.emit(info),
       eventResize: (info: EventResizeDoneInfo) => this.evenementModifie.emit(info),

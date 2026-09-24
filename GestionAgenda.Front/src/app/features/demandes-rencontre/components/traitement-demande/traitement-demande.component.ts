@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CalendrierSaisieComponent } from '../../../../shared/calendrier/calendrier-saisie.component';
 import { PlageHoraire, versSaisieLocale } from '../../../../shared/calendrier/calendrier.config';
@@ -21,6 +21,7 @@ export interface DecisionDemande {
 export class TraitementDemandeComponent {
   readonly statut = input.required<StatutDemande>();
   readonly decider = output<DecisionDemande>();
+  readonly peutDecider = computed(() => this.statut() === 'EnAttente' || this.statut() === 'EnAnalyse');
   readonly refus = new FormGroup({
     commentaire: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(2000)] }),
   });

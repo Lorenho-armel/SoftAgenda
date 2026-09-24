@@ -64,7 +64,7 @@ internal static class InvariantsDemande
         if (texte.Length > LimitesDemande.CommentaireMax)
         {
             throw new DomainException(
-                $"Le commentaire interne dépasse {LimitesDemande.CommentaireMax} caractères.");
+                $"Le commentaire dépasse {LimitesDemande.CommentaireMax} caractères.");
         }
 
         return texte;
@@ -75,7 +75,7 @@ internal static class InvariantsDemande
         var texte = NormaliserCommentaire(commentaire);
         if (texte is null)
         {
-            throw new DomainException("Un commentaire interne est obligatoire.");
+            throw new DomainException("Un commentaire est obligatoire.");
         }
 
         return texte;

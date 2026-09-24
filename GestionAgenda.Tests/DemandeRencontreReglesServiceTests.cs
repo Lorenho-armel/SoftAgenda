@@ -182,18 +182,17 @@ public class DemandeRencontreReglesServiceTests
     }
 
     [Fact]
-    public async Task ChangerStatutAsync_AcceptationDepuisEnAttente_ThrowsDomainException()
+    public async Task ChangerStatutAsync_AcceptationDepuisEnAttente_PasseAAcceptee()
     {
         // Arrange
         var contexte = ContexteAssistante(StatutDemande.EnAttente);
 
         // Act
-        var act = () => contexte.Service.ChangerStatutAsync(
+        await contexte.Service.ChangerStatutAsync(
             contexte.Demande.Id, Statut(StatutDemande.Acceptee), contexte.AssistanteId, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<DomainException>();
-        contexte.Demande.Statut.Should().Be(StatutDemande.EnAttente);
+        contexte.Demande.Statut.Should().Be(StatutDemande.Acceptee);
     }
 
     [Fact]

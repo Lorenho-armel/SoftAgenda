@@ -14,7 +14,7 @@ public sealed class ChangerStatutDemandeRequestValidator : AbstractValidator<Cha
         RuleFor(x => x.Commentaire)
             .NotEmpty()
             .When(x => x.Statut is StatutDemande.Refusee or StatutDemande.Reportee or StatutDemande.Annulee)
-            .WithMessage("Un commentaire interne est obligatoire.");
+            .WithMessage("Un commentaire est obligatoire : il est transmis au demandeur.");
         RuleFor(x => x.DateDebutSouhaitee).NotNull().When(x => x.Statut == StatutDemande.Reportee);
         RuleFor(x => x.DateFinSouhaitee).NotNull().When(x => x.Statut == StatutDemande.Reportee);
         RuleFor(x => x)

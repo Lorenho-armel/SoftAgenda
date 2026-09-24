@@ -69,6 +69,12 @@ public sealed class NotificationsDemande(
             return;
         }
 
+        if (evenement is EvenementNotification.Acceptee or EvenementNotification.Refusee or EvenementNotification.Reportee)
+        {
+            await PublierDecisionAsync(demande, evenement.Value, cancellationToken);
+            return;
+        }
+
         var cibles = evenement == EvenementNotification.Annulation
             ? await CiblesAnnulationAsync(demande, cancellationToken)
             : evenement == EvenementNotification.Planifiee
@@ -76,6 +82,34 @@ public sealed class NotificationsDemande(
                 : await CiblesDemandeurAsync(demande, cancellationToken);
         await PublierAsync(demande, evenement.Value, cibles, cancellationToken);
     }
+
+    private async Task PublierDecisionAsync(
+        DemandeRencontre demande,
+        EvenementNotification evenement,
+        CancellationToken cancellationToken)
+    {
+        var decision = demande.Historique
+            .Where(entree => entree.StatutApres == demande.Statut)
+            .OrderBy(entree => entree.DateCreation)
+            .ThenBy(entree => entree.Id)
+            .LastOrDefault();
+        var message = TexteNotification.MessageDecision(
+            evenement,
+            demande.Motif,
+            decision?.Commentaire,
+            HeureLocale(decision?.DateDebutApres),
+            HeureLocale(decision?.DateFinApres));
+        await PublierPrepareAsync(
+            demande,
+            evenement,
+            TexteNotification.Titre(evenement),
+            message,
+            await CiblesDemandeurAsync(demande, cancellationToken),
+            cancellationToken);
+    }
+
+    private static DateTimeOffset? HeureLocale(DateTimeOffset? date) =>
+        date.HasValue ? TimeZoneInfo.ConvertTime(date.Value, TimeZoneInfo.Local) : null;
 
     private async Task PublierModificationAsync(Guid demandeId, CancellationToken cancellationToken)
     {

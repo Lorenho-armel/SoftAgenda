@@ -65,17 +65,16 @@ public class DemandeRencontreTests
     }
 
     [Fact]
-    public void Accepter_DepuisEnAttente_ThrowsDomainException()
+    public void Accepter_DepuisEnAttente_PasseAAcceptee()
     {
         // Arrange
         var sut = DemandeRencontre.Creer(DemandeValide());
 
         // Act
-        var act = () => sut.Accepter(Guid.CreateVersion7(), null);
+        sut.Accepter(Guid.CreateVersion7(), null);
 
         // Assert
-        act.Should().Throw<DomainException>();
-        sut.Statut.Should().Be(StatutDemande.EnAttente);
+        sut.Statut.Should().Be(StatutDemande.Acceptee);
     }
 
     [Fact]

@@ -60,4 +60,41 @@ public class CiblageNotificationTests
         evenement.Should().Be(EvenementNotification.Acceptee);
         TexteNotification.Titre(evenement!.Value).Should().Be("Demande acceptée");
     }
+
+    [Fact]
+    public void MessageDecision_Refus_TransmetLeMotifDuRefus()
+    {
+        // Act
+        var message = TexteNotification.MessageDecision(
+            EvenementNotification.Refusee, "Point budget", "Agenda complet cette semaine", null, null);
+
+        // Assert
+        message.Should().Be("Votre demande a été refusée : Point budget. Motif du refus : Agenda complet cette semaine");
+    }
+
+    [Fact]
+    public void MessageDecision_Report_TransmetLaNouvellePeriodeEtLeCommentaire()
+    {
+        // Arrange
+        var debut = new DateTimeOffset(2026, 10, 1, 9, 0, 0, TimeSpan.FromHours(3));
+
+        // Act
+        var message = TexteNotification.MessageDecision(
+            EvenementNotification.Reportee, "Point budget", "Semaine suivante", debut, debut.AddHours(2));
+
+        // Assert
+        message.Should().Be(
+            "Votre demande a été reportée : Point budget. Nouvelle période proposée : du 01/10/2026 à 09:00 "
+            + "au 01/10/2026 à 11:00. Commentaire : Semaine suivante");
+    }
+
+    [Fact]
+    public void MessageDecision_AcceptationSansCommentaire_GardeLeMessageSimple()
+    {
+        // Act
+        var message = TexteNotification.MessageDecision(EvenementNotification.Acceptee, "Point budget", null, null, null);
+
+        // Assert
+        message.Should().Be("Votre demande a été acceptée : Point budget.");
+    }
 }

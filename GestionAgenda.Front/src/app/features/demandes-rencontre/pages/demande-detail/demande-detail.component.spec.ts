@@ -65,6 +65,20 @@ describe('DemandeDetailComponent', () => {
     );
   });
 
+  it('devrait accepter directement une demande en attente', async () => {
+    // Arrange
+    statut = 'EnAttente';
+    await afficher();
+
+    // Act
+    cliquer('Accepter');
+
+    // Assert
+    expect(api.changerStatut).toHaveBeenCalledWith(
+      identifiant, 'Acceptee', null, { debut: null, fin: null }, null, null,
+    );
+  });
+
   it('devrait refuser avec un commentaire', async () => {
     // Arrange
     await afficher();

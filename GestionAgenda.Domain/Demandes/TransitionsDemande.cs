@@ -10,6 +10,9 @@ public static class TransitionsDemande
             [StatutDemande.EnAttente] =
             [
                 StatutDemande.EnAnalyse,
+                StatutDemande.Acceptee,
+                StatutDemande.Refusee,
+                StatutDemande.Reportee,
                 StatutDemande.Annulee,
             ],
             [StatutDemande.EnAnalyse] =

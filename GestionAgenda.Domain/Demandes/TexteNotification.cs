@@ -46,6 +46,31 @@ public static class TexteNotification
         _ => motif,
     };
 
+    public static string MessageDecision(
+        EvenementNotification evenement,
+        string motif,
+        string? commentaire,
+        DateTimeOffset? nouveauDebut,
+        DateTimeOffset? nouvelleFin)
+    {
+        var message = Message(evenement, motif);
+        if (evenement == EvenementNotification.Reportee && nouveauDebut.HasValue && nouvelleFin.HasValue)
+        {
+            message += $" Nouvelle période proposée : du {Horodatage(nouveauDebut.Value)} au {Horodatage(nouvelleFin.Value)}.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(commentaire))
+        {
+            var libelle = evenement == EvenementNotification.Refusee ? "Motif du refus" : "Commentaire";
+            message += $" {libelle} : {commentaire.Trim()}";
+        }
+
+        return message;
+    }
+
+    private static string Horodatage(DateTimeOffset date) =>
+        date.ToString("dd/MM/yyyy 'à' HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fr-FR"));
+
     public static string MessageRappel(HorizonRappel horizon, string motif) => horizon switch
     {
         HorizonRappel.Heure => $"Votre rencontre commence dans moins d'une heure : {motif}.",

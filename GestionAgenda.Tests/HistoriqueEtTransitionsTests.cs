@@ -69,17 +69,17 @@ public class HistoriqueEtTransitionsTests
     }
 
     [Fact]
-    public void Refuser_DepuisEnAttente_ThrowsDomainException()
+    public void Refuser_DepuisEnAttente_PasseARefusee()
     {
         // Arrange
         var sut = DemandeRencontre.Creer(Nouvelle());
 
         // Act
-        var act = () => sut.Refuser(Guid.CreateVersion7(), "Trop tôt");
+        sut.Refuser(Guid.CreateVersion7(), "Trop tôt");
 
         // Assert
-        act.Should().Throw<DomainException>();
-        sut.Statut.Should().Be(StatutDemande.EnAttente);
+        sut.Statut.Should().Be(StatutDemande.Refusee);
+        sut.Historique.Should().Contain(h => h.StatutApres == StatutDemande.Refusee && h.Commentaire == "Trop tôt");
     }
 
     [Fact]
