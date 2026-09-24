@@ -1,7 +1,8 @@
 <section class="page">
-  <header class="carte">
-    <h1 class="mt-0">Tableau de bord</h1>
-    <p class="m-0 text-navy-soft">L'urgence et la priorité restent deux informations distinctes.</p>
+  <header class="entete-page">
+    <p class="surtitre">Assistante</p>
+    <h1>Tableau de bord</h1>
+    <p class="sous-titre">L'urgence et la priorité restent deux informations distinctes.</p>
   </header>
   @if (tableau() === undefined) {
     <p class="carte">Chargement…</p>
@@ -13,14 +14,14 @@
     <div class="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-3.5">
       @for (carte of cartes(); track carte.libelle) {
         @if (carte.ancre) {
-          <a class="carte no-underline" [href]="carte.ancre">
+          <a class="carte border-l-4 border-l-gold no-underline transition hover:-translate-y-0.5 hover:shadow-md" [href]="carte.ancre">
             <p class="m-0 text-sm text-navy-soft">{{ carte.libelle }}</p>
-            <p class="m-0 text-3xl font-semibold text-navy">{{ carte.valeur }}</p>
+            <p class="m-0 mt-1 text-3xl font-bold text-navy">{{ carte.valeur }}</p>
           </a>
         } @else {
-          <a class="carte no-underline" [routerLink]="carte.route" [queryParams]="carte.params">
+          <a class="carte border-l-4 border-l-gold no-underline transition hover:-translate-y-0.5 hover:shadow-md" [routerLink]="carte.route" [queryParams]="carte.params">
             <p class="m-0 text-sm text-navy-soft">{{ carte.libelle }}</p>
-            <p class="m-0 text-3xl font-semibold text-navy">{{ carte.valeur }}</p>
+            <p class="m-0 mt-1 text-3xl font-bold text-navy">{{ carte.valeur }}</p>
           </a>
         }
       }

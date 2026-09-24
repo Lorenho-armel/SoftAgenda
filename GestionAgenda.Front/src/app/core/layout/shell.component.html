@@ -1,24 +1,133 @@
-<header class="flex flex-wrap items-center gap-6 border-b-4 border-gold bg-paper px-6 py-3">
-  <a routerLink="/" class="shrink-0">
-    <img ngSrc="assets/softwell.png" width="179" height="96" alt="Softwell" priority class="h-12 w-auto" />
-  </a>
-  <nav class="flex flex-1 flex-wrap gap-4">
-    @if (estAssistante()) {
-      <a routerLink="/demandes-rencontre/tableau" routerLinkActive="!text-gold-deep" class="font-semibold no-underline">Tableau</a>
+<div class="flex min-h-screen">
+  @if (menuMobile()) {
+    <div class="fixed inset-0 z-30 bg-black/50 lg:hidden" (click)="menuMobile.set(false)"></div>
+  }
+
+  <aside
+    class="group fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-linear-to-b from-barre to-barre-fonce text-white shadow-xl transition-all duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none lg:data-[reduit=true]:w-20"
+    [class.-translate-x-full]="!menuMobile()"
+    [attr.data-reduit]="reduit()"
+  >
+    <a routerLink="/" class="flex items-center gap-3 px-4 py-5 no-underline hover:text-white lg:group-data-[reduit=true]:justify-center">
+      <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-white p-1.5 shadow">
+        <img ngSrc="assets/softwell.png" width="179" height="96" alt="Softwell" priority class="h-auto w-full" />
+      </span>
+      <span class="leading-tight lg:group-data-[reduit=true]:hidden">
+        <strong class="block text-sm font-semibold text-white">Gestion Agenda</strong>
+        <span class="text-xs font-normal text-white/60">Softwell</span>
+      </span>
+    </a>
+
+    <nav class="grid gap-1 px-3" aria-label="Navigation principale">
+      <p class="m-0 px-3 pt-3 pb-2 text-[0.68rem] font-semibold tracking-widest text-white/40 uppercase lg:group-data-[reduit=true]:text-center">
+        Gestion
+      </p>
+      @for (lien of liens(); track lien.route) {
+        <a
+          class="lien-menu lg:group-data-[reduit=true]:justify-center"
+          [routerLink]="lien.route"
+          routerLinkActive="lien-actif"
+          [routerLinkActiveOptions]="{ exact: lien.exact }"
+          [title]="lien.libelle"
+          (click)="menuMobile.set(false)"
+        >
+          <app-icone [nom]="lien.icone" />
+          <span class="lg:group-data-[reduit=true]:hidden">{{ lien.libelle }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="mt-auto border-t border-white/10 p-4 text-xs text-white/40 lg:group-data-[reduit=true]:hidden">
+      © Softwell
+    </div>
+  </aside>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    @if (panneau()) {
+      <div class="fixed inset-0 z-10" (click)="panneau.set(null)"></div>
     }
-    <a routerLink="/demandes-rencontre/file" routerLinkActive="!text-gold-deep" class="font-semibold no-underline">File</a>
-    <a routerLink="/demandes-rencontre" routerLinkActive="!text-gold-deep" [routerLinkActiveOptions]="{ exact: true }" class="font-semibold no-underline">Liste</a>
-    <a routerLink="/demandes-rencontre/nouvelle" routerLinkActive="!text-gold-deep" class="font-semibold no-underline">Nouvelle demande</a>
-  </nav>
-  <p class="m-0 text-navy-soft">{{ email() }}</p>
-  <button type="button" class="btn-secondaire" (click)="deconnecter()">Quitter</button>
-</header>
-@if (notifications.message(); as message) {
-  <p class="m-0 flex items-center justify-between gap-4 bg-alert px-6 py-3 text-navy" role="status">
-    {{ message }}
-    <button type="button" class="btn-secondaire" (click)="notifications.effacer()">Fermer</button>
-  </p>
-}
-<main class="mx-auto max-w-6xl p-6">
-  <router-outlet />
-</main>
+    <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-paper/90 px-4 backdrop-blur lg:px-6">
+      <button type="button" class="bouton-icone" aria-label="Afficher ou masquer le menu" (click)="basculerMenu()">
+        <app-icone nom="menu" />
+      </button>
+      <p class="m-0 truncate text-sm font-semibold text-navy">{{ titre() }}</p>
+
+      <div class="ml-auto flex items-center gap-1">
+        <button
+          type="button"
+          class="bouton-icone"
+          [attr.aria-label]="theme.sombre() ? 'Passer en thème clair' : 'Passer en thème sombre'"
+          (click)="theme.basculer()"
+        >
+          <app-icone [nom]="theme.sombre() ? 'soleil' : 'lune'" />
+        </button>
+
+        <div class="relative">
+          <button type="button" class="bouton-icone" aria-label="Notifications" (click)="basculerPanneau('notifications')">
+            <app-icone nom="cloche" />
+            @if (notifications.message()) {
+              <span class="absolute top-2 right-2 size-2 rounded-full bg-gold ring-2 ring-paper"></span>
+            }
+          </button>
+          @if (panneau() === 'notifications') {
+            <div class="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-line bg-paper p-4 shadow-lg">
+              <p class="m-0 mb-2 text-sm font-semibold text-navy">Notifications</p>
+              @if (notifications.message(); as message) {
+                <p class="m-0 text-sm">{{ message }}</p>
+                <button type="button" class="btn-secondaire mt-3 w-full" (click)="notifications.effacer(); panneau.set(null)">Effacer</button>
+              } @else {
+                <p class="m-0 text-sm text-navy-soft">Aucune notification.</p>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <button
+            type="button"
+            class="ml-1 gap-2 rounded-full border-0 bg-transparent py-1 pr-2 pl-1 text-navy shadow-none hover:bg-mist"
+            aria-label="Menu du compte"
+            (click)="basculerPanneau('profil')"
+          >
+            <span class="grid size-9 place-items-center rounded-full bg-primaire text-xs font-bold text-sur-primaire">{{ initiales() }}</span>
+            <span class="hidden text-left leading-tight sm:block">
+              <span class="block text-sm font-semibold text-navy">{{ nom() }}</span>
+              <span class="block text-xs font-normal text-navy-soft">{{ role() }}</span>
+            </span>
+            <app-icone nom="chevron" [taille]="4" class="text-navy-soft" />
+          </button>
+          @if (panneau() === 'profil') {
+            <div class="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-line bg-paper p-2 shadow-lg">
+              <div class="border-b border-line px-3 pt-2 pb-3">
+                <p class="m-0 text-sm font-semibold text-navy">{{ nom() }}</p>
+                <p class="m-0 truncate text-xs text-navy-soft">{{ email() }}</p>
+              </div>
+              <button
+                type="button"
+                class="mt-1 w-full justify-start border-0 bg-transparent px-3 text-danger shadow-none hover:bg-mist"
+                (click)="deconnecter()"
+              >
+                <app-icone nom="deconnexion" [taille]="4" />
+                Se déconnecter
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    @if (notifications.message(); as message) {
+      <div class="mx-4 mt-4 flex items-center justify-between gap-4 rounded-xl border border-gold/40 bg-alert px-4 py-3 text-sm text-navy lg:mx-6" role="status">
+        <span class="flex items-center gap-2">
+          <app-icone nom="cloche" [taille]="4" class="text-gold-deep" />
+          {{ message }}
+        </span>
+        <button type="button" class="btn-secondaire" (click)="notifications.effacer()">Fermer</button>
+      </div>
+    }
+
+    <main class="mx-auto w-full max-w-7xl flex-1 p-4 lg:p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>

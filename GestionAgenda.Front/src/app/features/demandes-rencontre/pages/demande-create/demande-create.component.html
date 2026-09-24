@@ -1,6 +1,10 @@
 <section class="page">
+  <header class="entete-page">
+    <p class="surtitre">Gestion</p>
+    <h1>Nouvelle demande</h1>
+    <p class="sous-titre">Renseignez les informations de la rencontre souhaitée.</p>
+  </header>
   <form class="carte grille" [formGroup]="form" (ngSubmit)="enregistrer()">
-    <h1 class="mt-0">Nouvelle demande</h1>
     @if (alerte()) { <p class="text-sm text-danger">{{ alerte() }}</p> }
     <label>Dirigeant<input formControlName="dirigeantId" placeholder="22222222-2222-2222-2222-222222222222" /></label>
     <app-field-error [control]="form.controls.dirigeantId" />

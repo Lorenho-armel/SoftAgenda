@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Poppins", ui-sans-serif, sans-serif;
   --color-navy: #2e427b;
@@ -9,36 +11,79 @@
   --color-gold-deep: #aa9e39;
   --color-sage: #aeb091;
   --color-ink: #000000;
+  --color-texte: #1f2940;
   --color-paper: #ffffff;
-  --color-mist: #f6f4ee;
-  --color-line: #e4e0d4;
+  --color-mist: #f5f6fa;
+  --color-line: #e3e6ef;
   --color-alert: #fff6d8;
   --color-danger: #8a1f2b;
+  --color-primaire: #2e427b;
+  --color-primaire-survol: #24366a;
+  --color-sur-primaire: #ffffff;
+  --color-champ: #ffffff;
+  --color-barre: #1c2a52;
+  --color-barre-fonce: #131d3b;
 }
 
 @layer base {
+  .dark {
+    --color-navy: #d5ddf3;
+    --color-navy-soft: #95a2c6;
+    --color-gold-deep: #e1c340;
+    --color-texte: #e4e8f4;
+    --color-paper: #17223f;
+    --color-mist: #0f172e;
+    --color-line: #26345a;
+    --color-alert: #3a3218;
+    --color-danger: #f29aa4;
+    --color-primaire: #bc9c22;
+    --color-primaire-survol: #d0ad2a;
+    --color-sur-primaire: #131d3b;
+    --color-champ: #111a33;
+    --color-barre: #0d1530;
+    --color-barre-fonce: #09101f;
+    color-scheme: dark;
+  }
+
+  .theme-clair {
+    --color-navy: #2e427b;
+    --color-navy-soft: #575d8f;
+    --color-gold-deep: #aa9e39;
+    --color-texte: #1f2940;
+    --color-paper: #ffffff;
+    --color-mist: #f5f6fa;
+    --color-line: #e3e6ef;
+    --color-alert: #fff6d8;
+    --color-danger: #8a1f2b;
+    --color-primaire: #2e427b;
+    --color-primaire-survol: #24366a;
+    --color-sur-primaire: #ffffff;
+    --color-champ: #ffffff;
+    color-scheme: light;
+  }
+
   body {
-    @apply m-0 min-h-screen bg-mist font-sans text-ink;
+    @apply m-0 min-h-screen bg-mist font-sans text-texte antialiased;
   }
 
   h1 {
-    @apply text-2xl font-bold text-navy;
+    @apply m-0 text-2xl font-bold text-navy;
   }
 
   h2 {
-    @apply text-xl font-bold text-navy;
+    @apply mt-0 mb-3 text-lg font-semibold text-navy;
   }
 
   h3 {
-    @apply text-lg font-bold text-navy;
+    @apply mt-0 mb-1 text-base font-semibold text-navy;
   }
 
   a {
-    @apply text-navy;
+    @apply font-medium text-navy transition-colors hover:text-gold-deep;
   }
 
   label {
-    @apply grid gap-1 text-sm font-semibold text-navy;
+    @apply grid gap-1.5 text-sm font-medium text-navy;
   }
 
   button,
@@ -51,20 +96,34 @@
   input,
   select,
   textarea {
-    @apply w-full rounded border border-sage bg-paper px-2.5 py-2;
+    @apply w-full rounded-lg border border-line bg-champ px-3 py-2 text-sm text-texte transition outline-none placeholder:text-navy-soft/60 focus:border-gold focus:ring-2 focus:ring-gold/25;
   }
 
   button {
-    @apply cursor-pointer rounded bg-navy px-3.5 py-2 text-paper disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-transparent bg-primaire px-4 py-2 text-sm font-semibold text-sur-primaire shadow-sm transition hover:bg-primaire-survol disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
+
+@layer components {
+  .lien-menu {
+    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 no-underline transition-colors hover:bg-white/5 hover:text-white;
+  }
+
+  .lien-menu.lien-actif {
+    @apply bg-white/10 text-gold-light before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r before:bg-gold before:content-[''];
   }
 }
 
 @utility btn-secondaire {
-  @apply cursor-pointer rounded border border-navy bg-transparent px-3.5 py-2 text-navy disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-line bg-paper px-3.5 py-2 text-sm font-medium text-navy shadow-none transition hover:border-gold hover:bg-mist disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility bouton-icone {
+  @apply relative inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent p-0 text-navy-soft shadow-none transition hover:bg-mist hover:text-navy;
 }
 
 @utility carte {
-  @apply border border-line border-t-4 border-t-gold bg-paper p-5;
+  @apply rounded-xl border border-line bg-paper p-5 shadow-sm;
 }
 
 @utility page {
@@ -73,4 +132,16 @@
 
 @utility grille {
   @apply grid gap-3.5;
+}
+
+@utility entete-page {
+  @apply grid gap-1;
+}
+
+@utility surtitre {
+  @apply m-0 text-xs font-semibold tracking-widest text-gold-deep uppercase;
+}
+
+@utility sous-titre {
+  @apply m-0 text-sm text-navy-soft;
 }

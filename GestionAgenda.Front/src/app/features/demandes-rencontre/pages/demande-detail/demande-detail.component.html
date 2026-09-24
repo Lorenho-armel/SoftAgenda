@@ -4,7 +4,8 @@
 @if (entete(); as vue) {
   <section class="page">
     <header class="carte">
-      <h1 class="mt-0">{{ vue.demande.motif }}</h1>
+      <p class="surtitre">Détail de la demande</p>
+      <h1 class="mt-1">{{ vue.demande.motif }}</h1>
       <p class="flex flex-wrap items-center gap-2">
         <app-badge [label]="vue.demande.urgence" [tone]="vue.tonUrgence" />
         <app-badge [label]="vue.demande.priorite" [tone]="vue.tonPriorite" />
