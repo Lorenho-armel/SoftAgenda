@@ -24,7 +24,14 @@
       @if (vue.demande.rendezVousId) { <p>Rendez-vous lié : {{ vue.demande.rendezVousId }}</p> }
       @if (vue.demande.reunionId) { <p>Réunion liée : {{ vue.demande.reunionId }}</p> }
     </header>
-    <app-traitement-demande [statut]="vue.demande.statut" (decider)="decider($event)" />
+    @if (calendrier(); as options) {
+      <section class="carte">
+        <h2>Calendrier</h2>
+        <p class="m-0 mb-3 text-xs text-navy-soft">La demande apparaît à sa date souhaitée ; la période souhaitée est surlignée en doré.</p>
+        <app-calendrier [options]="options" />
+      </section>
+    }
+    <app-traitement-demande [statut]="vue.demande.statut" [evenements]="evenements()" (decider)="decider($event)" />
     <app-planification-demande
       [visible]="vue.demande.statut === 'Acceptee' || vue.demande.statut === 'Planifiee'"
       [confirmerLibelle]="vue.demande.statut === 'Planifiee' ? 'Déplacer' : 'Planifier'"

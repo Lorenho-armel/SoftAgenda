@@ -4,19 +4,23 @@ import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signa
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, catchError, combineLatest, filter, map, of, switchMap, tap } from 'rxjs';
+import { CalendarOptions, EventInput } from '@fullcalendar/angular';
 import { ApiResponse } from '../../../../core/models/api-response.model';
+import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
+import { COULEUR_SELECTION, optionsCalendrier } from '../../../../shared/calendrier/calendrier.config';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { HistoriqueDemandeComponent } from '../../components/historique-demande/historique-demande.component';
 import { CreneauConfirme, PlanificationDemandeComponent } from '../../components/planification-demande/planification-demande.component';
 import { DecisionDemande, TraitementDemandeComponent } from '../../components/traitement-demande/traitement-demande.component';
 import { BilanPlanification, ConflitPlanification } from '../../models/demande.model';
+import { evenementDemande } from '../../models/evenements-calendrier';
 import { messageApi } from '../../models/message-api';
 import { libelleStatut, tonPriorite, tonUrgence } from '../../models/demande-libelles';
 import { DemandesApiService } from '../../services/demandes-api.service';
 
 @Component({
   selector: 'app-demande-detail',
-  imports: [DatePipe, BadgeComponent, TraitementDemandeComponent, PlanificationDemandeComponent, HistoriqueDemandeComponent],
+  imports: [DatePipe, BadgeComponent, CalendrierComponent, TraitementDemandeComponent, PlanificationDemandeComponent, HistoriqueDemandeComponent],
   templateUrl: './demande-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -59,6 +63,32 @@ export class DemandeDetailComponent {
         libelle: participant.nomComplet || participant.email || participant.utilisateurId || 'Participant',
       })),
     };
+  });
+  readonly evenements = computed<EventInput[]>(() => {
+    const demande = this.demande();
+    return demande ? [{ ...evenementDemande(demande), editable: false }] : [];
+  });
+  readonly calendrier = computed<CalendarOptions | null>(() => {
+    const demande = this.demande();
+    if (!demande) {
+      return null;
+    }
+
+    return optionsCalendrier({
+      initialView: 'timeGridWeek',
+      initialDate: demande.dateDebutSouhaitee,
+      headerToolbar: { start: 'prev,next today', center: 'title', end: 'timeGridWeek,timeGridDay' },
+      events: [
+        {
+          id: 'periode-souhaitee',
+          start: demande.dateDebutSouhaitee,
+          end: demande.dateFinSouhaitee,
+          display: 'background',
+          color: COULEUR_SELECTION,
+        },
+        ...this.evenements(),
+      ],
+    });
   });
 
   decider(decision: DecisionDemande): void {

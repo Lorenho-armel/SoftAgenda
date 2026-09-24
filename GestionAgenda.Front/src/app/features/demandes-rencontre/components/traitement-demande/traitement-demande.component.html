@@ -28,6 +28,7 @@
         mode="periode"
         [debut]="report.controls.dateDebutSouhaitee.value"
         [fin]="report.controls.dateFinSouhaitee.value"
+        [evenements]="evenements()"
         (choisir)="choisirReport($event)"
       />
       <form class="grid gap-2.5" [formGroup]="report" (ngSubmit)="reporter()">
