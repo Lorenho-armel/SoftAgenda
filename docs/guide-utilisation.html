@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>GestionAgenda — Guide d'utilisation</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; color: #1b2a41; font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 26pt; margin: 0 0 6px; color: #0f1e36; }
+  h2 { font-size: 15pt; color: #0f1e36; border-bottom: 2px solid #c9a44c; padding-bottom: 4px; margin: 26px 0 10px; page-break-after: avoid; }
+  h3 { font-size: 12pt; color: #0f1e36; margin: 16px 0 6px; page-break-after: avoid; }
+  p { margin: 6px 0; }
+  ul, ol { margin: 6px 0 6px 20px; padding: 0; }
+  li { margin: 3px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.5pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #d8dde6; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #0f1e36; color: #fff; font-weight: 600; }
+  tr:nth-child(even) td { background: #f6f7fa; }
+  code { background: #eef1f6; padding: 1px 5px; border-radius: 4px; font-size: 9.5pt; }
+  .couverture { height: 245mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+  .couverture .bande { width: 70px; height: 6px; background: #c9a44c; margin-bottom: 18px; }
+  .couverture .sous { font-size: 14pt; color: #4a5a75; margin-bottom: 40px; }
+  .couverture .meta { font-size: 10pt; color: #4a5a75; }
+  .sommaire li { margin: 4px 0; }
+  .encadre { border-left: 4px solid #c9a44c; background: #fbf7ec; padding: 8px 12px; margin: 10px 0; page-break-inside: avoid; }
+  .attention { border-left-color: #b3261e; background: #fcefee; }
+  .saut { page-break-before: always; }
+  .flux { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0; }
+  .statut { display: inline-block; padding: 5px 10px; border-radius: 999px; font-weight: 600; font-size: 9pt; color: #fff; white-space: nowrap; }
+  .fleche { color: #4a5a75; font-weight: 700; }
+  .s-attente { background: #7a869a; } .s-analyse { background: #2f6fb3; } .s-acceptee { background: #2e7d4f; }
+  .s-refusee { background: #b3261e; } .s-reportee { background: #c98a1a; } .s-planifiee { background: #5b3fa6; }
+  .s-terminee { background: #0f1e36; } .s-annulee { background: #9aa3b2; }
+  .etapes { counter-reset: etape; list-style: none; margin-left: 0; }
+  .etapes > li { counter-increment: etape; position: relative; padding-left: 34px; margin: 10px 0; page-break-inside: avoid; }
+  .etapes > li::before { content: counter(etape); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: #0f1e36; color: #fff; font-weight: 700; font-size: 10pt; display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<section class="couverture">
+  <div class="bande"></div>
+  <h1>GestionAgenda</h1>
+  <div class="sous">Guide d'utilisation et déroulement du workflow des demandes de rencontre</div>
+  <div class="meta">Version du 24 septembre 2026<br />Application web Angular + API .NET 10</div>
+</section>
+
+<h2>Sommaire</h2>
+<ol class="sommaire">
+  <li>Présentation</li>
+  <li>Les rôles</li>
+  <li>Démarrer et se connecter</li>
+  <li>Le cycle de vie d'une demande</li>
+  <li>Le workflow pas à pas</li>
+  <li>Les écrans de l'application</li>
+  <li>Travailler avec le calendrier</li>
+  <li>Les notifications</li>
+  <li>Règles de gestion à connaître</li>
+</ol>
+
+<h2>1. Présentation</h2>
+<p>GestionAgenda centralise les <strong>demandes de rencontre</strong> adressées aux dirigeants d'une société. Un collaborateur demande un rendez-vous ou une réunion avec un dirigeant, sur une période souhaitée. L'assistante du dirigeant reçoit la demande. Elle l'accepte, la refuse ou la reporte, puis planifie la rencontre. Chaque personne concernée est notifiée à chaque étape.</p>
+<p>Chaque demande garde un <strong>historique</strong> complet : qui a fait quoi, quand, avec quel commentaire, et quelle période avant et après.</p>
+
+<h2>2. Les rôles</h2>
+<p>Les rôles sont définis <strong>par société</strong> : une même personne peut être dirigeant dans une société et collaborateur dans une autre.</p>
+<table>
+  <tr><th style="width:22%">Rôle</th><th>Ce qu'il fait</th></tr>
+  <tr><td><strong>Collaborateur</strong> (demandeur)</td><td>Crée des demandes, suit leur avancement, modifie ses souhaits ou annule sa demande tant qu'elle n'est pas planifiée. Il reçoit les décisions de l'assistante.</td></tr>
+  <tr><td><strong>Assistante</strong></td><td>Gère les demandes adressées aux dirigeants qui lui sont affectés : acceptation, refus, report, planification, clôture. Elle a accès au <em>Tableau de bord</em>.</td></tr>
+  <tr><td><strong>Dirigeant</strong></td><td>Destinataire des demandes. Il voit les demandes qui le concernent. S'il <strong>n'a pas d'assistante active</strong>, il traite lui-même ses demandes.</td></tr>
+  <tr><td><strong>Externe</strong></td><td>Participant extérieur à la société (nom + e-mail). Il n'a pas besoin de se connecter : il est informé par e-mail de la planification, des modifications, des rappels et des annulations.</td></tr>
+</table>
+<div class="encadre">Une demande n'est visible que par son <strong>demandeur</strong>, le <strong>dirigeant</strong> concerné et les <strong>assistantes actives</strong> de ce dirigeant. Le « gestionnaire » d'une demande est l'assistante active du dirigeant ou, à défaut, le dirigeant lui-même.</div>
+
+<h2>3. Démarrer et se connecter</h2>
+<h3>Lancer l'application (poste de développement)</h3>
+<ol>
+  <li>API : dans <code>GestionAgenda.API</code>, lancer <code>dotnet run</code> (<code>http://localhost:5272</code>, documentation Swagger sur <code>/swagger</code>).</li>
+  <li>Interface : dans <code>GestionAgenda.Front</code>, lancer <code>npm start</code> puis ouvrir <code>http://localhost:4200</code>.</li>
+</ol>
+<h3>Comptes de démonstration</h3>
+<p>Société « Holding Démo ». Mot de passe commun : celui défini dans <code>Seed:Password</code> (<code>appsettings.Development.json</code>).</p>
+<table>
+  <tr><th>E-mail</th><th>Personne</th><th>Rôle</th></tr>
+  <tr><td><code>collaborateur@demo.local</code></td><td>Louis Petit</td><td>Collaborateur (demandeur)</td></tr>
+  <tr><td><code>assistante@demo.local</code></td><td>Alice Bernard</td><td>Assistante de Claire Martin</td></tr>
+  <tr><td><code>dirigeant@demo.local</code></td><td>Claire Martin</td><td>Dirigeante, avec assistante</td></tr>
+  <tr><td><code>dirigeant.seul@demo.local</code></td><td>Marc Roux</td><td>Dirigeant sans assistante (traite lui-même)</td></tr>
+</table>
+<p>La session reste ouverte après une actualisation de la page. Le bouton de déconnexion la ferme.</p>
+
+<h2 class="saut">4. Le cycle de vie d'une demande</h2>
+<h3>Parcours principal</h3>
+<div class="flux">
+  <span class="statut s-attente">En attente</span><span class="fleche">→</span>
+  <span class="statut s-analyse">En analyse <small>(facultatif)</small></span><span class="fleche">→</span>
+  <span class="statut s-acceptee">Acceptée</span><span class="fleche">→</span>
+  <span class="statut s-planifiee">Planifiée</span><span class="fleche">→</span>
+  <span class="statut s-terminee">Terminée</span>
+</div>
+<h3>Parcours alternatifs</h3>
+<div class="flux">
+  <span class="statut s-attente">En attente</span> / <span class="statut s-analyse">En analyse</span><span class="fleche">→</span>
+  <span class="statut s-refusee">Refusée</span> <small>(fin)</small>
+</div>
+<div class="flux">
+  <span class="statut s-attente">En attente</span> / <span class="statut s-analyse">En analyse</span><span class="fleche">→</span>
+  <span class="statut s-reportee">Reportée</span><span class="fleche">→</span>
+  <span class="statut s-analyse">En analyse</span><span class="fleche">→</span> …
+</div>
+<div class="flux">
+  Tout statut non terminé <span class="fleche">→</span> <span class="statut s-annulee">Annulée</span> <small>(fin)</small>
+</div>
+
+<h3>Transitions autorisées</h3>
+<table>
+  <tr><th style="width:18%">Statut actuel</th><th style="width:40%">Peut passer à</th><th>Signification</th></tr>
+  <tr><td>En attente</td><td>En analyse, Acceptée, Refusée, Reportée, Annulée</td><td>Demande reçue, pas encore traitée.</td></tr>
+  <tr><td>En analyse</td><td>Acceptée, Refusée, Reportée, Annulée</td><td>L'assistante étudie la demande.</td></tr>
+  <tr><td>Acceptée</td><td>Planifiée, Annulée</td><td>Le principe de la rencontre est validé ; il reste à fixer le créneau.</td></tr>
+  <tr><td>Reportée</td><td>En analyse, Annulée</td><td>Une autre période a été proposée au demandeur.</td></tr>
+  <tr><td>Planifiée</td><td>Terminée, Annulée</td><td>Le créneau et la salle sont réservés.</td></tr>
+  <tr><td>Refusée, Terminée, Annulée</td><td>—</td><td>Statuts finaux : la demande est close.</td></tr>
+</table>
+<p>Toute autre transition est refusée par le serveur (« La transition de X vers Y est interdite »).</p>
+
+<h2 class="saut">5. Le workflow pas à pas</h2>
+<ol class="etapes">
+  <li>
+    <strong>Le collaborateur crée la demande</strong> — menu <em>Nouvelle demande</em>.
+    <ul>
+      <li>Il fait glisser la souris sur le calendrier pour définir la <strong>période souhaitée</strong>. Une fenêtre s'ouvre (le bouton <em>Saisir sans le calendrier</em> l'ouvre aussi).</li>
+      <li>Il recherche et choisit la <strong>société</strong>. Les listes <em>Dirigeant</em>, <em>Salle souhaitée</em> et <em>Collaborateurs</em> se remplissent alors avec les données de cette société.</li>
+      <li>Il renseigne le type (rendez-vous ou réunion), le motif, la durée, l'urgence, la priorité et les participants (collaborateurs internes ou externes avec nom et e-mail).</li>
+      <li>Il clique sur <em>Créer la demande</em> : la fenêtre se ferme, un message de confirmation s'affiche et la demande apparaît sur le calendrier au statut <span class="statut s-attente">En attente</span>.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Notification de l'assistante.</strong> Les assistantes actives du dirigeant reçoivent « Nouvelle demande de rencontre » (dans l'application et par e-mail). Si le dirigeant n'a pas d'assistante, c'est lui qui la reçoit.
+  </li>
+  <li>
+    <strong>L'assistante trouve la demande</strong> dans son <em>Tableau de bord</em>, la <em>File des demandes</em> (vues Nouvelles, Urgentes, Critiques, Prioritaires…) ou l'<em>Agenda</em>, puis ouvre le détail.
+  </li>
+  <li>
+    <strong>L'assistante décide</strong>, dans la section <em>Traitement</em> du détail :
+    <ul>
+      <li><strong>Accepter</strong> : la demande passe à <span class="statut s-acceptee">Acceptée</span>.</li>
+      <li><strong>Prendre en analyse</strong> (facultatif) : elle signale qu'elle étudie la demande.</li>
+      <li><strong>Refuser</strong> : le <strong>motif du refus est obligatoire</strong> et il est transmis au demandeur.</li>
+      <li><strong>Reporter</strong> : elle choisit une <strong>nouvelle période</strong> sur le calendrier et saisit un <strong>commentaire obligatoire</strong>. Les deux sont transmis au demandeur.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Le demandeur est notifié</strong> de la décision : « Demande acceptée / refusée / reportée », avec le motif, le commentaire et, en cas de report, la phrase « Nouvelle période proposée : du … au … ».
+  </li>
+  <li>
+    <strong>Cas du report.</strong> Une demande <span class="statut s-reportee">Reportée</span> peut être reprise avec <em>Reprendre en analyse</em>, puis acceptée, refusée ou reportée de nouveau.
+  </li>
+  <li>
+    <strong>Planification</strong> (demande acceptée) — section <em>Planification</em> du détail.
+    <ul>
+      <li>La période souhaitée apparaît en doré. L'assistante clique sur une heure à l'intérieur pour choisir le créneau, qui a la durée demandée.</li>
+      <li>Elle indique une salle si nécessaire, puis clique sur <em>Vérifier les conflits</em> (occupation du dirigeant, des participants et de la salle).</li>
+      <li>Si aucun conflit n'est bloquant, elle confirme : la demande passe à <span class="statut s-planifiee">Planifiée</span> et un rendez-vous ou une réunion est créé.</li>
+      <li>Le dirigeant et les participants (internes et externes) reçoivent « Rencontre planifiée ».</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Rappels automatiques.</strong> Le dirigeant et les participants sont rappelés moins de 24 heures avant la rencontre, puis moins d'une heure avant.
+  </li>
+  <li>
+    <strong>Clôture.</strong> Après la rencontre, l'assistante clique sur <em>Marquer terminée</em> : la demande passe à <span class="statut s-terminee">Terminée</span>.
+  </li>
+</ol>
+<div class="encadre"><strong>Annulation.</strong> Le demandeur peut annuler sa demande tant qu'elle est <em>En attente</em>, <em>En analyse</em>, <em>Acceptée</em> ou <em>Reportée</em>. Il le fait depuis le calendrier (bouton corbeille) en indiquant un motif. Une fois la demande planifiée, seule la personne qui la gère peut l'annuler. Le demandeur, le dirigeant, les assistantes et les participants sont prévenus.</div>
+
+<h2 class="saut">6. Les écrans de l'application</h2>
+<table>
+  <tr><th style="width:22%">Menu</th><th style="width:18%">Pour qui</th><th>Contenu</th></tr>
+  <tr><td>Tableau de bord</td><td>Assistante</td><td>Compteurs et demandes à traiter pour ses dirigeants, rencontres à venir.</td></tr>
+  <tr><td>Agenda</td><td>Tous</td><td>Calendrier des demandes (couleur selon le statut) et, pour l'assistante, des rencontres planifiées. Clic, glisser-déposer et redimensionnement.</td></tr>
+  <tr><td>File des demandes</td><td>Tous</td><td>Demandes classées par vue : Nouvelles, Urgentes, Critiques, Prioritaires, En attente, Planifiées.</td></tr>
+  <tr><td>Liste des demandes</td><td>Tous</td><td>Liste paginée, avec filtres (statut, dates, recherche…).</td></tr>
+  <tr><td>Nouvelle demande</td><td>Tous</td><td>Calendrier « Période souhaitée » et formulaire de création dans une fenêtre.</td></tr>
+  <tr><td>Détail d'une demande</td><td>Personnes autorisées</td><td>Informations, participants, <em>Traitement</em> (décisions), <em>Planification</em> et <em>Historique</em>.</td></tr>
+</table>
+
+<h2>7. Travailler avec le calendrier</h2>
+<ul>
+  <li><strong>Créer</strong> : glisser sur une plage libre (vue Semaine ou Jour). Les créneaux passés ne sont pas sélectionnables.</li>
+  <li><strong>Consulter</strong> : un clic sur une demande ouvre un aperçu (type « Google Agenda ») avec quatre actions : <em>Modifier</em> (crayon), <em>Supprimer</em> (corbeille, c'est-à-dire annuler avec un motif), <em>Ouvrir le détail</em> et <em>Fermer</em>.</li>
+  <li><strong>Déplacer</strong> : glisser une demande vers un autre moment. Toute la période est décalée, par pas de 15 minutes.</li>
+  <li><strong>Changer la durée</strong> : tirer le bord inférieur de la demande.</li>
+  <li>Le déplacement n'est possible que pour les demandes <em>En attente</em>, <em>En analyse</em>, <em>Acceptée</em> ou <em>Reportée</em>, et vers une date future. En cas d'erreur, la demande revient à sa place et un message l'explique.</li>
+  <li>Chaque création, modification ou suppression affiche un message de confirmation en haut à droite.</li>
+</ul>
+
+<h2>8. Les notifications</h2>
+<p>Chaque notification est affichée <strong>immédiatement dans l'application</strong> (temps réel) pour les utilisateurs connectés. Elle est aussi envoyée <strong>par e-mail</strong>, via une file d'envoi en arrière-plan. Les externes la reçoivent uniquement par e-mail.</p>
+<table>
+  <tr><th style="width:26%">Événement</th><th style="width:34%">Destinataires</th><th>Contenu</th></tr>
+  <tr><td>Nouvelle demande</td><td>Assistantes actives du dirigeant (ou le dirigeant)</td><td>« Une demande vous est adressée : motif. »</td></tr>
+  <tr><td>Acceptée</td><td>Demandeur</td><td>Motif et commentaire éventuel.</td></tr>
+  <tr><td>Refusée</td><td>Demandeur</td><td>Motif de la demande et motif du refus.</td></tr>
+  <tr><td>Reportée</td><td>Demandeur</td><td>Nouvelle période proposée et commentaire.</td></tr>
+  <tr><td>Planifiée</td><td>Dirigeant et participants</td><td>« Une rencontre a été planifiée : motif. »</td></tr>
+  <tr><td>Rendez-vous modifié</td><td>Dirigeant et participants</td><td>Quand une rencontre acceptée ou planifiée est modifiée.</td></tr>
+  <tr><td>Rappel</td><td>Dirigeant et participants</td><td>Moins de 24 h avant, puis moins d'1 h avant.</td></tr>
+  <tr><td>Annulée</td><td>Demandeur, dirigeant, assistantes et participants</td><td>« La demande a été annulée : motif. »</td></tr>
+</table>
+
+<h2>9. Règles de gestion à connaître</h2>
+<ul>
+  <li>La période souhaitée doit commencer <strong>dans le futur</strong>, et la fin doit être après le début.</li>
+  <li>La <strong>durée</strong> (15 à 480 minutes) ne peut pas dépasser la période souhaitée.</li>
+  <li>Une <strong>réunion</strong> comporte au moins un participant en plus du dirigeant.</li>
+  <li>Un participant est soit <strong>interne</strong> (un collaborateur de la société), soit <strong>externe</strong> (nom et e-mail obligatoires).</li>
+  <li>Le motif fait entre 3 et 500 caractères.</li>
+  <li>Le refus et le report exigent un <strong>commentaire</strong>, qui est transmis au demandeur.</li>
+  <li>Les souhaits (dates, durée, salle…) ne sont modifiables qu'aux statuts <em>En attente</em>, <em>En analyse</em>, <em>Acceptée</em> et <em>Reportée</em>.</li>
+  <li>La planification est bloquée en cas de conflit (dirigeant, participant ou salle déjà occupé).</li>
+</ul>
+<div class="encadre attention"><strong>Limites actuelles.</strong> La section <em>Traitement</em> est affichée à tous les utilisateurs qui ouvrent une demande. Si une personne qui ne gère pas la demande tente une action, le serveur la refuse. Dans la planification, la salle se saisit encore par son identifiant.</div>
+
+</body>
+</html>
