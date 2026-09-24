@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options => options.AddDocumentTransformer<SecuriteOpenApi>());
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -52,6 +52,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "GestionAgenda API v1"));
     await using var scope = app.Services.CreateAsyncScope();
     var generateur = scope.ServiceProvider.GetRequiredService<GenerateurScriptsMigration>();
     await generateur.EcrireAsync();

@@ -13,7 +13,7 @@ export const routes: Routes = [
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', canActivate: [accueilGuard] },
+      { path: '', pathMatch: 'full', canActivate: [accueilGuard], children: [] },
       {
         path: 'demandes-rencontre',
         loadChildren: () => import('./features/demandes-rencontre/demandes-rencontre.routes').then((module) => module.DEMANDES_ROUTES),
