@@ -1,4 +1,4 @@
-﻿BEGIN TRANSACTION;
+BEGIN TRANSACTION;
 CREATE TABLE [AbonnementsPush] (
     [Id] uniqueidentifier NOT NULL,
     [UtilisateurId] uniqueidentifier NOT NULL,
