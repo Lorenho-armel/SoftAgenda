@@ -1,0 +1,60 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:items-center">
+  <div class="absolute inset-0" (click)="fermer.emit()"></div>
+  <div
+    class="relative my-auto flex w-full max-w-xl flex-col rounded-2xl border border-line bg-paper shadow-2xl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titre-indisponibilite"
+  >
+    <header class="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
+      <div>
+        <p class="surtitre">Agenda du dirigeant</p>
+        <h2 id="titre-indisponibilite" class="m-0">Nouvelle indisponibilité</h2>
+        <p class="sous-titre mt-1">Déplacement, temps bloqué, rendez-vous personnel… Le créneau ne pourra plus être planifié.</p>
+      </div>
+      <button type="button" class="bouton-icone" aria-label="Fermer" (click)="fermer.emit()">
+        <app-icone nom="croix" />
+      </button>
+    </header>
+
+    <form class="grid gap-3.5 px-6 py-5" [formGroup]="form" (ngSubmit)="enregistrer()">
+      @if (alerte()) {
+        <p class="m-0 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">{{ alerte() }}</p>
+      }
+      <div class="grid gap-1">
+        <label>Dirigeant
+          <select formControlName="dirigeant">
+            <option value="">{{ dirigeants().length ? '— Sélectionnez un dirigeant —' : 'Aucun agenda géré' }}</option>
+            @for (dirigeant of dirigeants(); track cle(dirigeant)) {
+              <option [value]="cle(dirigeant)">{{ dirigeant.dirigeantNom }} · {{ dirigeant.societeNom }}</option>
+            }
+          </select>
+        </label>
+        <app-field-error [control]="form.controls.dirigeant" />
+      </div>
+      <label>Type
+        <select formControlName="type">
+          @for (type of types; track type.valeur) { <option [value]="type.valeur">{{ type.libelle }}</option> }
+        </select>
+      </label>
+      <div class="grid gap-1">
+        <label>Motif<input formControlName="motif" placeholder="Ex. : Salon à Paris, préparation du conseil…" /></label>
+        <app-field-error [control]="form.controls.motif" />
+      </div>
+      <div class="grid gap-3.5 md:grid-cols-2">
+        <div class="grid gap-1">
+          <label>Début<input formControlName="debut" type="datetime-local" /></label>
+          <app-field-error [control]="form.controls.debut" />
+        </div>
+        <div class="grid gap-1">
+          <label>Fin<input formControlName="fin" type="datetime-local" /></label>
+          <app-field-error [control]="form.controls.fin" />
+        </div>
+      </div>
+      <footer class="flex justify-end gap-3 pt-2">
+        <button type="button" class="btn-secondaire" (click)="fermer.emit()">Annuler</button>
+        <button type="submit" [disabled]="envoi()">Ajouter</button>
+      </footer>
+    </form>
+  </div>
+</div>

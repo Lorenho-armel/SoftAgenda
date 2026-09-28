@@ -38,6 +38,8 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
 
     public DbSet<AbonnementPush> AbonnementsPush => Set<AbonnementPush>();
 
+    public DbSet<Indisponibilite> Indisponibilites => Set<Indisponibilite>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

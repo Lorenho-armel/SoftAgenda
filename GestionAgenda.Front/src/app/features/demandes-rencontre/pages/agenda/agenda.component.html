@@ -1,9 +1,17 @@
 <section class="page">
-  <header class="entete-page">
-    <p class="surtitre">Gestion</p>
-    <h1>Agenda</h1>
-    <p class="sous-titre">Les demandes apparaissent sur leur créneau souhaité. Sélectionnez une plage horaire pour créer une demande, cliquez sur une demande pour la modifier ou la supprimer, ou faites-la glisser pour la déplacer.</p>
+  <header class="entete-page flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <p class="surtitre">Gestion</p>
+      <h1>Agenda</h1>
+      <p class="sous-titre">Les demandes apparaissent sur leur créneau souhaité. Sélectionnez une plage horaire pour créer une demande, cliquez sur une demande pour la modifier ou la supprimer, ou faites-la glisser pour la déplacer.</p>
+    </div>
+    @if (estGestionnaire) {
+      <button type="button" class="btn-secondaire" (click)="saisieIndisponibilite.set(true)">Ajouter une indisponibilité</button>
+    }
   </header>
+  @if (estGestionnaire) {
+    <app-google-sheets-panneau (importe)="actualiser()" />
+  }
   <div class="carte">
     <app-calendrier [options]="options" />
   </div>
@@ -25,4 +33,36 @@
     (modifiee)="actualiser()"
     (supprimee)="apresSuppression()"
   />
+}
+
+@if (saisieIndisponibilite()) {
+  <app-indisponibilite-modale (fermer)="saisieIndisponibilite.set(false)" (creee)="apresAjoutIndisponibilite()" />
+}
+
+@if (indisponibiliteOuverte(); as indisponibilite) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="absolute inset-0" (click)="indisponibiliteOuverte.set(null)"></div>
+    <div class="relative w-full max-w-md rounded-2xl border border-line bg-paper p-6 shadow-2xl" role="dialog" aria-modal="true">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="surtitre">Indisponibilité</p>
+          <h2 class="m-0">{{ indisponibilite.titre }}</h2>
+          @if (indisponibilite.debut && indisponibilite.fin) {
+            <p class="sous-titre mt-1">
+              Du {{ indisponibilite.debut.toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' }) }}
+              au {{ indisponibilite.fin.toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' }) }}
+            </p>
+          }
+        </div>
+        <button type="button" class="bouton-icone" aria-label="Fermer" (click)="indisponibiliteOuverte.set(null)">
+          <app-icone nom="croix" />
+        </button>
+      </div>
+      <p class="text-sm text-navy-soft">Aucune rencontre ne peut être planifiée sur ce créneau pour ce dirigeant.</p>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="btn-secondaire" (click)="indisponibiliteOuverte.set(null)">Fermer</button>
+        <button type="button" (click)="supprimerIndisponibilite(indisponibilite.id)">Supprimer</button>
+      </div>
+    </div>
+  </div>
 }

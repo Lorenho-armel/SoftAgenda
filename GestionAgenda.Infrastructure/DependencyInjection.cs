@@ -9,6 +9,7 @@ using GestionAgenda.Infrastructure.Repositories;
 using GestionAgenda.Infrastructure.Migrations;
 using GestionAgenda.Infrastructure.Seeding;
 using GestionAgenda.Infrastructure.Services;
+using GestionAgenda.Infrastructure.Synchronisation;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,13 @@ public static class DependencyInjection
         services.AddScoped<IReferentielRepository, ReferentielRepository>();
         services.AddScoped<Application.Services.Interfaces.IReferentielService, ReferentielService>();
         services.AddScoped<Application.Services.Interfaces.IAuthService, AuthService>();
+        services.AddScoped<IIndisponibiliteRepository, IndisponibiliteRepository>();
+        services.AddScoped<Application.Services.Interfaces.IIndisponibiliteService, IndisponibiliteService>();
+        services.Configure<GoogleSheetsOptions>(configuration.GetSection(GoogleSheetsOptions.SectionName));
+        services.AddScoped<ISynchronisationAgenda, EnfileurSynchronisationHangfire>();
+        services.AddScoped<IClientFeuille, ClientGoogleSheets>();
+        services.AddScoped<SynchronisationFeuille>();
+        services.AddScoped<Application.Services.Interfaces.IFeuilleAgendaService, ImportFeuille>();
         services.AddScoped<DevDataSeeder>();
         services.AddScoped<GenerateurScriptsMigration>();
         services.AddApplication();
@@ -63,7 +71,8 @@ public static class DependencyInjection
     {
         services.Configure<NotificationsOptions>(configuration.GetSection(NotificationsOptions.SectionName));
         services.AddScoped<INotificationRepository, NotificationRepository>();
-        services.AddScoped<INotificationsDemande, NotificationsDemande>();
+        services.AddScoped<NotificationsDemande>();
+        services.AddScoped<INotificationsDemande, NotificationsAvecSynchronisation>();
         services.AddScoped<ICentreNotifications, CentreNotifications>();
         services.AddScoped<IEnvoiEmail, EnvoiEmailSmtp>();
         services.AddScoped<IEnvoiPush, EnvoiPushNavigateur>();

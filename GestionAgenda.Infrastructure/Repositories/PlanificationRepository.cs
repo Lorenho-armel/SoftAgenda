@@ -21,7 +21,8 @@ public sealed class PlanificationRepository(ApplicationDbContext context) : IPla
         var identifiants = new[] { dirigeantId };
         var rendezVous = await RendezVousDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken);
         var reunions = await ReunionsDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken);
-        return rendezVous.Concat(reunions).ToList();
+        var indisponibilites = await IndisponibilitesAsync(identifiants, creneau, cancellationToken);
+        return rendezVous.Concat(reunions).Concat(indisponibilites).ToList();
     }
 
     public async Task<IReadOnlyList<OccupationCalendrier>> OccupationsParticipantsAsync(
@@ -38,6 +39,7 @@ public sealed class PlanificationRepository(ApplicationDbContext context) : IPla
         var identifiants = utilisateurIds.Distinct().ToList();
         var commeDirigeants = await RendezVousDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken);
         commeDirigeants.AddRange(await ReunionsDesDirigeantsAsync(identifiants, creneau, demandeExclueId, cancellationToken));
+        commeDirigeants.AddRange(await IndisponibilitesAsync(identifiants, creneau, cancellationToken));
         var commeInvites = await RendezVousDesInvitesAsync(identifiants, creneau, demandeExclueId, cancellationToken);
         commeInvites.AddRange(await ReunionsDesInvitesAsync(identifiants, creneau, demandeExclueId, cancellationToken));
         return commeDirigeants
@@ -160,6 +162,38 @@ public sealed class PlanificationRepository(ApplicationDbContext context) : IPla
                 reunion.Titre,
                 reunion.Debut,
                 reunion.Fin)).ToListAsync(cancellationToken);
+
+    private async Task<List<OccupationCalendrier>> IndisponibilitesAsync(
+        IReadOnlyCollection<Guid> identifiants,
+        Intervalle creneau,
+        CancellationToken cancellationToken)
+    {
+        var lignes = await (
+            from indisponibilite in context.Indisponibilites
+            join utilisateur in context.Utilisateurs on indisponibilite.DirigeantId equals utilisateur.Id
+            where identifiants.Contains(indisponibilite.DirigeantId)
+                && indisponibilite.Debut < creneau.Fin
+                && indisponibilite.Fin > creneau.Debut
+            select new
+            {
+                indisponibilite.Id,
+                indisponibilite.DirigeantId,
+                utilisateur.Prenom,
+                utilisateur.Nom,
+                indisponibilite.Type,
+                indisponibilite.Motif,
+                indisponibilite.Debut,
+                indisponibilite.Fin,
+            }).ToListAsync(cancellationToken);
+        return lignes.Select(ligne => new OccupationCalendrier(
+                ligne.Id,
+                ligne.DirigeantId,
+                $"{ligne.Prenom} {ligne.Nom}",
+                LibellesIndisponibilite.Titre(ligne.Type, ligne.Motif),
+                ligne.Debut,
+                ligne.Fin))
+            .ToList();
+    }
 
     private IQueryable<RendezVous> RendezVousOccupes(Intervalle creneau, Guid demandeExclueId) =>
         context.RendezVous.Where(rendezVous =>

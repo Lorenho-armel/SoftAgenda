@@ -2,9 +2,11 @@ import { EventInput } from '@fullcalendar/angular';
 import { ajouterMinutes } from '../../../shared/calendrier/calendrier.config';
 import { DemandeResume, STATUTS_MODIFIABLES, StatutDemande } from './demande.model';
 import { libelleStatut } from './demande-libelles';
+import { Indisponibilite, libelleIndisponibilite } from './indisponibilite.model';
 import { RencontreTableau } from './tableau-assistante.model';
 
 export const COULEUR_RENCONTRE = '#1c2a52';
+export const COULEUR_INDISPONIBILITE = '#6b7280';
 
 export const COULEURS_STATUT: Record<StatutDemande, string> = {
   EnAttente: '#575d8f',
@@ -23,7 +25,21 @@ export const LEGENDE_AGENDA: readonly { libelle: string; couleur: string }[] = [
     couleur: COULEURS_STATUT[statut],
   })),
   { libelle: 'Rencontre confirmée', couleur: COULEUR_RENCONTRE },
+  { libelle: 'Indisponibilité du dirigeant', couleur: COULEUR_INDISPONIBILITE },
 ];
+
+export function evenementIndisponibilite(indisponibilite: Indisponibilite): EventInput {
+  return {
+    id: `indisponibilite-${indisponibilite.id}`,
+    title: `${libelleIndisponibilite(indisponibilite.type)} · ${indisponibilite.dirigeantNom}`,
+    start: indisponibilite.debut,
+    end: indisponibilite.fin,
+    color: COULEUR_INDISPONIBILITE,
+    classNames: ['evenement-indisponibilite'],
+    editable: false,
+    extendedProps: { indisponibiliteId: indisponibilite.id },
+  };
+}
 
 export function evenementDemande(demande: DemandeResume): EventInput {
   const debut = new Date(demande.dateDebutSouhaitee);

@@ -1,0 +1,45 @@
+@if (etat(); as etat) {
+  <section class="carte grid gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="m-0">Google Sheets</h2>
+        <p class="m-0 text-xs text-navy-soft">
+          @if (etat.configuree) {
+            L'onglet « {{ etat.onglet }} » est mis à jour automatiquement. Les colonnes Préparation et Suivi restent libres.
+          } @else {
+            Synchronisation non configurée sur le serveur (voir docs/google-sheets.md).
+          }
+        </p>
+      </div>
+      @if (etat.configuree) {
+        <div class="flex flex-wrap gap-2">
+          @if (etat.lien) {
+            <a class="btn-secondaire" [href]="etat.lien" target="_blank" rel="noopener">Ouvrir le Sheet</a>
+          }
+          <button type="button" class="btn-secondaire" (click)="resynchroniser()">Resynchroniser</button>
+          <button type="button" [disabled]="enCours()" (click)="importer()">
+            {{ enCours() ? 'Import en cours…' : 'Importer les lignes à venir' }}
+          </button>
+        </div>
+      }
+    </div>
+    @if (rapport(); as rapport) {
+      <div class="grid gap-2 rounded-lg border border-line p-3 text-sm">
+        <p class="m-0">
+          <strong>{{ rapport.demandesCreees }}</strong> demande(s) et
+          <strong>{{ rapport.indisponibilitesCreees }}</strong> indisponibilité(s) importées ·
+          {{ rapport.lignesIgnorees }} ligne(s) ignorée(s) (passées, annulées ou terminées).
+        </p>
+        @if (rapport.messages.length) {
+          <ul class="m-0 grid list-none gap-1 p-0">
+            @for (message of rapport.messages; track $index) {
+              <li [class]="message.niveau === 'Erreur' ? 'text-danger' : 'text-navy-soft'">
+                Ligne {{ message.ligne }} · {{ message.niveau }} : {{ message.texte }}
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </section>
+}

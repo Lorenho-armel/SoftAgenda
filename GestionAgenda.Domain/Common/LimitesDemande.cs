@@ -17,4 +17,6 @@ public static class LimitesDemande
     public const int EmailMax = 256;
 
     public const int PageSizeMax = 100;
+
+    public const int IndisponibiliteJoursMax = 31;
 }

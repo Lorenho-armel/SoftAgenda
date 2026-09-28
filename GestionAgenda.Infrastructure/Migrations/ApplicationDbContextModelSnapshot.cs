@@ -299,6 +299,56 @@ namespace GestionAgenda.Infrastructure.Migrations
                     b.ToTable("HistoriqueDemandes", (string)null);
                 });
 
+            modelBuilder.Entity("GestionAgenda.Domain.Entities.Indisponibilite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuteurId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("DateCreation")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("DateModification")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("Debut")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DirigeantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("Fin")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Motif")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("SocieteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuteurId");
+
+                    b.HasIndex("SocieteId");
+
+                    b.HasIndex("DirigeantId", "Debut", "Fin");
+
+                    b.ToTable("Indisponibilites", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Indisponibilites_Creneau", "[Fin] > [Debut]");
+                        });
+                });
+
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -715,6 +765,27 @@ namespace GestionAgenda.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Demande");
+                });
+
+            modelBuilder.Entity("GestionAgenda.Domain.Entities.Indisponibilite", b =>
+                {
+                    b.HasOne("GestionAgenda.Domain.Entities.Utilisateur", null)
+                        .WithMany()
+                        .HasForeignKey("AuteurId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GestionAgenda.Domain.Entities.Utilisateur", null)
+                        .WithMany()
+                        .HasForeignKey("DirigeantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GestionAgenda.Domain.Entities.Societe", null)
+                        .WithMany()
+                        .HasForeignKey("SocieteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GestionAgenda.Domain.Entities.Notification", b =>
