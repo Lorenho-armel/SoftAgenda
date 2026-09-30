@@ -54,6 +54,29 @@ describe('DemandeDetailComponent', () => {
     expect(texte).toContain('Nina Leroy');
   });
 
+  it('devrait afficher les noms et la rencontre planifiée plutôt que des identifiants', async () => {
+    // Arrange
+    const rendezVousId = '99999999-9999-9999-9999-999999999999';
+    api.obtenir.mockReturnValueOnce(of({
+      ...detail('Planifiee'),
+      rendezVousId,
+      participants: [{ id: 'p1', utilisateurId: '88888888-8888-8888-8888-888888888888', nomComplet: 'Louis Petit', email: null }],
+      rencontre: { type: 'RendezVous', debut: '2026-10-27T12:00:00Z', fin: '2026-10-27T13:00:00Z', salleNom: 'Salle Atlas', statut: 'Planifie' },
+    }));
+
+    // Act
+    await afficher();
+
+    // Assert
+    const texte = fixture.nativeElement.textContent as string;
+    expect(texte).toContain('Claire Martin');
+    expect(texte).toContain('Louis Petit');
+    expect(texte).toContain('Salle Atlas');
+    expect(texte).toContain('par Nina Leroy');
+    expect(texte).not.toContain(rendezVousId);
+    expect(texte).not.toContain('88888888');
+  });
+
   it('devrait accepter la demande en analyse', async () => {
     // Arrange
     await afficher();
@@ -286,6 +309,8 @@ function detail(statut: StatutDemande, estGestionnaire = true): DemandeDetail {
     reunionId: null,
     participants: [],
     estGestionnaire,
+    dirigeantNom: 'Claire Martin',
+    rencontre: null,
     historique: [{
       id: 'h1',
       typeEvenement: 'Creation',
@@ -293,6 +318,7 @@ function detail(statut: StatutDemande, estGestionnaire = true): DemandeDetail {
       statutAvant: null,
       statutApres: 'EnAttente',
       dateCreation: '2026-09-23T08:00:00Z',
+      auteurNom: 'Nina Leroy',
     }],
   };
 }

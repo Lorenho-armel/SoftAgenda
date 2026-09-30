@@ -17,6 +17,7 @@ public sealed class DemandeRencontreService(
     IDemandeRencontreRepository demandes,
     IAccesAgendaRepository acces,
     IPlanificationRepository planification,
+    IUtilisateurRepository utilisateurs,
     PlanificationDemande planificationDemande,
     IUnitOfWork unitOfWork,
     IValidator<CreerDemandeRencontreRequest> creerValidator,
@@ -87,7 +88,7 @@ public sealed class DemandeRencontreService(
             throw new NotFoundException("Demande introuvable.");
         }
 
-        return mapper.Map<DemandeRencontreResponse>(demande) with { EstGestionnaire = droit.EstGestionnaire };
+        return await DetailAsync(demande, droit.EstGestionnaire, cancellationToken);
     }
 
     public async Task<BilanPlanificationResponse> VerifierCreneauAsync(
@@ -306,6 +307,53 @@ public sealed class DemandeRencontreService(
         {
             throw new DomainException("Un participant n'appartient pas à la société.");
         }
+    }
+
+    private async Task<DemandeRencontreResponse> DetailAsync(
+        DemandeRencontre demande,
+        bool estGestionnaire,
+        CancellationToken cancellationToken)
+    {
+        var reponse = mapper.Map<DemandeRencontreResponse>(demande);
+        var identifiants = reponse.Participants
+            .Where(p => p.UtilisateurId.HasValue)
+            .Select(p => p.UtilisateurId!.Value)
+            .Concat(reponse.Historique.Select(h => h.AuteurId))
+            .Append(demande.DirigeantId)
+            .Distinct()
+            .ToList();
+        var noms = (await utilisateurs.GetByIdsAsync(identifiants, cancellationToken))
+            .ToDictionary(u => u.Id, u => $"{u.Prenom} {u.Nom}".Trim());
+        string Nom(Guid id) => noms.GetValueOrDefault(id, string.Empty);
+
+        return reponse with
+        {
+            EstGestionnaire = estGestionnaire,
+            DirigeantNom = Nom(demande.DirigeantId),
+            Participants = reponse.Participants
+                .Select(p => p.UtilisateurId is { } id && string.IsNullOrWhiteSpace(p.NomComplet) ? p with { NomComplet = Nom(id) } : p)
+                .ToList(),
+            Historique = reponse.Historique.Select(h => h with { AuteurNom = Nom(h.AuteurId) }).ToList(),
+            Rencontre = await RencontreAsync(demande, cancellationToken),
+        };
+    }
+
+    private async Task<RencontreResponse?> RencontreAsync(DemandeRencontre demande, CancellationToken cancellationToken)
+    {
+        RencontreResponse? rencontre = demande switch
+        {
+            { RendezVous: { } r } => new(TypeDemande.RendezVous, r.Debut, r.Fin, null, r.Statut),
+            { Reunion: { } r } => new(TypeDemande.Reunion, r.Debut, r.Fin, null, r.Statut),
+            _ => null,
+        };
+        var salleId = demande.RendezVous?.SalleId ?? demande.Reunion?.SalleId;
+        if (rencontre is null || salleId is null)
+        {
+            return rencontre;
+        }
+
+        var salle = await planification.GetSalleAsync(salleId.Value, cancellationToken);
+        return rencontre with { SalleNom = salle?.Nom };
     }
 
     private async Task<DemandeRencontre> ChargerAsync(Guid id, bool suivi, CancellationToken cancellationToken) =>

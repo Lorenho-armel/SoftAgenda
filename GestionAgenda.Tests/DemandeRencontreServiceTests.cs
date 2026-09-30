@@ -76,6 +76,7 @@ public class DemandeRencontreServiceTests
             demandes.Object,
             acces.Object,
             planification.Object,
+            new Mock<IUtilisateurRepository>().Object,
             new PlanificationDemande(planification.Object),
             unitOfWork.Object,
             new CreerDemandeRencontreRequestValidator(),

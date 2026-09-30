@@ -26,4 +26,8 @@ public record DemandeRencontreResponse(
     IReadOnlyList<HistoriqueDemandeResponse> Historique)
 {
     public bool EstGestionnaire { get; init; }
+
+    public string DirigeantNom { get; init; } = string.Empty;
+
+    public RencontreResponse? Rencontre { get; init; }
 }

@@ -63,8 +63,13 @@ export class DemandeDetailComponent {
       type: libelleStatut(demande.type),
       participants: demande.participants.map((participant) => ({
         id: participant.id,
-        libelle: participant.nomComplet || participant.email || participant.utilisateurId || 'Participant',
+        libelle: participant.nomComplet || participant.email || 'Participant',
       })),
+      rencontre: demande.rencontre && {
+        ...demande.rencontre,
+        type: libelleStatut(demande.rencontre.type),
+        annulee: demande.rencontre.statut === 'Annule',
+      },
     };
   });
   readonly proposition = signal<PlageHoraire | null>(null);

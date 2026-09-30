@@ -117,6 +117,7 @@ internal static class ReglesDemandeFixture
             (demandes ?? new Mock<IDemandeRencontreRepository>()).Object,
             (acces ?? new Mock<IAccesAgendaRepository>()).Object,
             depotPlanification.Object,
+            new Mock<IUtilisateurRepository>().Object,
             new PlanificationDemande(depotPlanification.Object),
             new Mock<IUnitOfWork>().Object,
             new CreerDemandeRencontreRequestValidator(),

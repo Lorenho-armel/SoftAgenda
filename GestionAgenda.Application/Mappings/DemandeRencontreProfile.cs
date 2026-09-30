@@ -9,7 +9,8 @@ public sealed class DemandeRencontreProfile : Profile
     public DemandeRencontreProfile()
     {
         CreateMap<DemandeParticipant, ParticipantResponse>();
-        CreateMap<HistoriqueDemande, HistoriqueDemandeResponse>();
+        CreateMap<HistoriqueDemande, HistoriqueDemandeResponse>()
+            .ForMember(destination => destination.AuteurNom, option => option.Ignore());
         // Réponses positionnelles : sans ForCtorParam, AutoMapper aplatit DemandeurNom en Demandeur.Nom.
         CreateMap<DemandeRencontre, DemandeRencontreResumeResponse>()
             .ForCtorParam(
@@ -36,6 +37,8 @@ public sealed class DemandeRencontreProfile : Profile
             .ForCtorParam(
                 nameof(DemandeRencontreResponse.Historique),
                 option => option.MapFrom(source => source.Historique.OrderBy(item => item.DateCreation)))
-            .ForMember(destination => destination.EstGestionnaire, option => option.Ignore());
+            .ForMember(destination => destination.EstGestionnaire, option => option.Ignore())
+            .ForMember(destination => destination.DirigeantNom, option => option.Ignore())
+            .ForMember(destination => destination.Rencontre, option => option.Ignore());
     }
 }

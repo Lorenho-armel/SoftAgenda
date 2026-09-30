@@ -7,7 +7,10 @@
     @for (evenement of lignes(); track evenement.id) {
       <li class="border-l-[3px] border-gold pl-3">
         <strong>{{ evenement.typeEvenement }}</strong>
-        <time class="block text-sm text-navy-soft">{{ evenement.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</time>
+        <time class="block text-sm text-navy-soft">
+          {{ evenement.dateCreation | date: 'dd/MM/yyyy HH:mm' }}
+          @if (evenement.auteur) { · par {{ evenement.auteur }} }
+        </time>
         @if (evenement.statut) {
           <span class="block text-sm text-navy-soft">{{ evenement.statut }}</span>
         }

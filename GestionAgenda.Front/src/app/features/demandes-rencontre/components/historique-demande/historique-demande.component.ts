@@ -16,6 +16,7 @@ export class HistoriqueDemandeComponent {
     typeEvenement: evenement.typeEvenement,
     dateCreation: evenement.dateCreation,
     commentaire: evenement.commentaire,
+    auteur: evenement.auteurNom,
     statut: evenement.statutApres ? libelleStatut(evenement.statutApres) : '',
   })));
 }

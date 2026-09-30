@@ -28,6 +28,15 @@ export interface HistoriqueDemande {
   statutAvant: StatutDemande | null;
   statutApres: StatutDemande | null;
   dateCreation: string;
+  auteurNom: string;
+}
+
+export interface Rencontre {
+  type: TypeDemande;
+  debut: string;
+  fin: string;
+  salleNom: string | null;
+  statut: 'Planifie' | 'Annule' | 'Termine';
 }
 
 export interface DemandeResume {
@@ -55,6 +64,8 @@ export interface DemandeDetail extends DemandeResume {
   participants: Participant[];
   historique: HistoriqueDemande[];
   estGestionnaire: boolean;
+  dirigeantNom: string;
+  rencontre: Rencontre | null;
 }
 
 export interface PersonneOption {

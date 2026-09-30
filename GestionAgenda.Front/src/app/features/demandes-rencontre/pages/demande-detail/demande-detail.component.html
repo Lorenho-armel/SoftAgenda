@@ -12,7 +12,11 @@
         <span>{{ vue.statut }}</span>
         <span>{{ vue.type }}</span>
       </p>
-      <p>{{ vue.demande.demandeurNom }} · {{ vue.demande.societeNom }}</p>
+      <p>
+        Demandé par <strong>{{ vue.demande.demandeurNom }}</strong>
+        @if (vue.demande.dirigeantNom) { à <strong>{{ vue.demande.dirigeantNom }}</strong> }
+        · {{ vue.demande.societeNom }}
+      </p>
       <p>Souhaité le {{ vue.demande.dateDebutSouhaitee | date: 'dd/MM/yyyy HH:mm' }} · {{ vue.demande.dureeMinutes }} min</p>
       @if (vue.participants.length > 0) {
         <ul>
@@ -21,8 +25,14 @@
           }
         </ul>
       }
-      @if (vue.demande.rendezVousId) { <p>Rendez-vous lié : {{ vue.demande.rendezVousId }}</p> }
-      @if (vue.demande.reunionId) { <p>Réunion liée : {{ vue.demande.reunionId }}</p> }
+      @if (vue.rencontre; as rencontre) {
+        <p [class.line-through]="rencontre.annulee">
+          Rencontre planifiée : {{ rencontre.type }} le {{ rencontre.debut | date: 'dd/MM/yyyy' }}
+          de {{ rencontre.debut | date: 'HH:mm' }} à {{ rencontre.fin | date: 'HH:mm' }}
+          @if (rencontre.salleNom) { · {{ rencontre.salleNom }} }
+          @if (rencontre.annulee) { (annulé) }
+        </p>
+      }
     </header>
     @if (calendrier(); as options) {
       <section class="carte">

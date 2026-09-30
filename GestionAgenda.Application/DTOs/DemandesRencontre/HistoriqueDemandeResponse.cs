@@ -21,4 +21,7 @@ public record HistoriqueDemandeResponse(
     Guid? SalleApresId,
     Guid? RendezVousId,
     Guid? ReunionId,
-    DateTimeOffset DateCreation);
+    DateTimeOffset DateCreation)
+{
+    public string AuteurNom { get; init; } = string.Empty;
+}
