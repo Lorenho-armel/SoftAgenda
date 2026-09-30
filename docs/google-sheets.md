@@ -43,6 +43,38 @@ Placer la clé hors du dépôt (ou dans un dossier `secrets/`, ignoré par git),
 
 Redémarrer l'API. Le panneau **Google Sheets** apparaît dans l'Agenda pour l'assistante et le dirigeant, avec les boutons **Ouvrir le Sheet**, **Resynchroniser** et **Importer les lignes à venir**.
 
+## Pare-feu avec inspection SSL (FortiGate…)
+
+Symptôme : « Connexion à Google refusée : le certificat présenté n'est pas reconnu », et dans les journaux `The remote certificate is invalid ... PartialChain`. Le pare-feu remplace le certificat de Google par le sien.
+
+Solutions, par ordre de préférence :
+
+1. **Exclure `*.googleapis.com` de l'inspection SSL** sur le pare-feu (service informatique). Rien à changer dans l'application.
+2. **Installer le certificat racine du pare-feu** dans *Ordinateur local > Autorités de certification racines de confiance* du serveur.
+3. **Le déclarer à l'application seulement** : obtenir le certificat racine du pare-feu (fichier `.cer`/`.crt`, fourni par le service informatique ou exporté depuis le navigateur : cadenas > certificat > chemin d'accès > certificat racine > exporter), le placer dans `GestionAgenda.API/secrets/`, puis :
+
+```json
+"CertificatRacineSupplementaire": "D:\\...\\GestionAgenda.API\\secrets\\fortigate-ca.cer"
+```
+
+Ce certificat n'est alors accepté que pour les appels Google ; le nom d'hôte et les dates restent vérifiés.
+
+## Simulation de bout en bout
+
+`outils/simulation/Simulation-SynchroSheet.ps1` rejoue le workflow réel via l'API en cours d'exécution :
+collaborateur (création) → assistante (consultation, acceptation, validation) → autres vues → relecture du Sheet
+(`GET /api/google-sheets/lignes/{id}`) après chaque étape, avec contrôle d'absence de doublon.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File outils\simulation\Simulation-SynchroSheet.ps1            # garde la demande de test
+powershell -ExecutionPolicy Bypass -File outils\simulation\Simulation-SynchroSheet.ps1 -Nettoyer  # l'annule à la fin
+```
+
+- Données de test marquées `[SIMULATION-SYNC <horodatage>]` ; refus de s'exécuter contre une API non locale sans `-AutoriserHorsLocal`.
+- Journal et rapport avant / après dans `outils/simulation/resultats/` (non versionné).
+- Côté API, les lignes `[Sync Sheet]` retracent la mise en file Hangfire, l'exécution et la ligne écrite.
+- Verdict : RÉUSSI, PARTIEL (application validée mais Sheet injoignable) ou ÉCHEC.
+
 ## Règles de l'import
 
 - Seules les lignes **sans ID**, **datées dans le futur** et dont le statut n'est pas Annulé, Refusé ou Terminé sont importées.

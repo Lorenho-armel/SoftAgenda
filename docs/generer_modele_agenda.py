@@ -18,7 +18,7 @@ ENTETES = [
 ]
 TYPES = ["Rendez-vous", "Réunion", "Appel", "Visio", "Déjeuner", "Déplacement", "Événement", "Temps bloqué", "Personnel"]
 PRIORITES = ["Basse", "Moyenne", "Haute", "Critique"]
-STATUTS = ["À confirmer", "Confirmé", "Reporté", "Refusé", "Annulé", "Terminé"]
+STATUTS = ["À confirmer", "Accepté", "Confirmé", "Reporté", "Refusé", "Annulé", "Terminé"]
 OUI_NON = ["Oui", "Non"]
 LARGEURS = [14, 12, 11, 11, 11, 9, 14, 38, 20, 22, 26, 40, 22, 11, 13, 28, 11, 24, 40]
 
@@ -117,6 +117,7 @@ regles = [
     ('$O2="Terminé"', PatternFill("solid", fgColor="F3F4F6"), Font(color="4B5563")),
     ('$O2="À confirmer"', PatternFill("solid", fgColor="FEF3C7"), None),
     ('$O2="Reporté"', PatternFill("solid", fgColor="FFEDD5"), None),
+    ('$O2="Accepté"', PatternFill("solid", fgColor="DBEAFE"), None),
     ('OR($G2="Déplacement",$G2="Temps bloqué",$G2="Personnel",$G2="Événement")',
      PatternFill("solid", fgColor="EEF0F3"), Font(color="374151", italic=True)),
 ]

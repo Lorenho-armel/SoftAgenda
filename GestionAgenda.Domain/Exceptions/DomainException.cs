@@ -6,4 +6,9 @@ public class DomainException : Exception
         : base(message)
     {
     }
+
+    public DomainException(string message, Exception? cause)
+        : base(message, cause)
+    {
+    }
 }

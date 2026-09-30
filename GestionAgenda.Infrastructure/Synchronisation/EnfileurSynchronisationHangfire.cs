@@ -1,11 +1,14 @@
 using GestionAgenda.Application.Services.Interfaces;
 using GestionAgenda.Infrastructure.Options;
 using Hangfire;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace GestionAgenda.Infrastructure.Synchronisation;
 
-public sealed class EnfileurSynchronisationHangfire(IOptions<GoogleSheetsOptions> options) : ISynchronisationAgenda
+public sealed class EnfileurSynchronisationHangfire(
+    IOptions<GoogleSheetsOptions> options,
+    ILogger<EnfileurSynchronisationHangfire> journal) : ISynchronisationAgenda
 {
     private readonly bool actif = options.Value.EstConfigure;
 
@@ -13,7 +16,8 @@ public sealed class EnfileurSynchronisationHangfire(IOptions<GoogleSheetsOptions
     {
         if (actif)
         {
-            BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.SynchroniserDemandeAsync(demandeId));
+            var job = BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.SynchroniserDemandeAsync(demandeId));
+            journal.LogInformation("[Sync Sheet] Demande {Id} mise en file (job Hangfire {Job})", demandeId, job);
         }
     }
 
@@ -21,7 +25,8 @@ public sealed class EnfileurSynchronisationHangfire(IOptions<GoogleSheetsOptions
     {
         if (actif)
         {
-            BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.SynchroniserIndisponibiliteAsync(indisponibiliteId));
+            var job = BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.SynchroniserIndisponibiliteAsync(indisponibiliteId));
+            journal.LogInformation("[Sync Sheet] Indisponibilité {Id} mise en file (job Hangfire {Job})", indisponibiliteId, job);
         }
     }
 
@@ -29,7 +34,8 @@ public sealed class EnfileurSynchronisationHangfire(IOptions<GoogleSheetsOptions
     {
         if (actif)
         {
-            BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.MarquerIndisponibiliteSupprimeeAsync(indisponibiliteId));
+            var job = BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.MarquerIndisponibiliteSupprimeeAsync(indisponibiliteId));
+            journal.LogInformation("[Sync Sheet] Suppression de l'indisponibilité {Id} mise en file (job Hangfire {Job})", indisponibiliteId, job);
         }
     }
 }

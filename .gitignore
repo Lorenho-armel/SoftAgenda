@@ -4,4 +4,5 @@
 **/node_modules
 **/dist
 **/secrets/
+outils/simulation/resultats/
 **/*compte-service*.json

@@ -40,6 +40,36 @@ public sealed class ImportFeuille(
         BackgroundJob.Enqueue<SynchronisationFeuille>(s => s.ResynchroniserToutAsync());
     }
 
+    public async Task<LignesFeuilleResponse> LignesAsync(Guid id, Guid utilisateurId, CancellationToken cancellationToken = default)
+    {
+        ExigerConfiguration();
+        await ExigerGestionnaireAsync(utilisateurId, cancellationToken);
+        var lignes = await feuille.LireAsync(
+            FeuilleAgenda.Plage(configuration.Onglet, $"A{FeuilleAgenda.PremiereLigne}:O"),
+            cancellationToken);
+        var identifiant = id.ToString();
+        var trouvees = lignes
+            .Select((valeurs, index) => new LigneLue(index + FeuilleAgenda.PremiereLigne, valeurs))
+            .Where(ligne => string.Equals(ligne.Texte(0), identifiant, StringComparison.OrdinalIgnoreCase))
+            .Select(ligne => new LigneFeuilleResponse(
+                ligne.Numero,
+                FeuilleAgenda.LireDate(ligne.Cellule(1))?.ToString("yyyy-MM-dd"),
+                FeuilleAgenda.LireHeure(ligne.Cellule(3))?.ToString("HH:mm"),
+                FeuilleAgenda.LireHeure(ligne.Cellule(4))?.ToString("HH:mm"),
+                ligne.Texte(6),
+                ligne.Texte(7),
+                ligne.Texte(8),
+                ligne.Texte(9),
+                ligne.Texte(10),
+                ligne.Texte(11),
+                ligne.Texte(12),
+                ligne.Texte(13),
+                ligne.Texte(14)))
+            .ToList();
+        journal.LogInformation("Lecture du Sheet pour {Id} : {Nombre} ligne(s) trouvée(s)", id, trouvees.Count);
+        return new LignesFeuilleResponse(id, configuration.Onglet, trouvees);
+    }
+
     public async Task<RapportImportResponse> ImporterAsync(Guid utilisateurId, CancellationToken cancellationToken = default)
     {
         ExigerConfiguration();
@@ -173,6 +203,10 @@ public sealed class ImportFeuille(
         if (lue.Statut == "confirme")
         {
             await ConfirmerAsync(demande, utilisateurId, ligne.Numero, rapport, cancellationToken);
+        }
+        else if (lue.Statut == "accepte")
+        {
+            demande.Accepter(utilisateurId, CommentaireImport);
         }
 
         await contexte.SaveChangesAsync(cancellationToken);

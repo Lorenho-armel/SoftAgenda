@@ -14,6 +14,8 @@ public sealed class GoogleSheetsOptions
 
     public string FuseauHoraire { get; set; } = string.Empty;
 
+    public string CertificatRacineSupplementaire { get; set; } = string.Empty;
+
     public bool EstConfigure =>
         Actif && !string.IsNullOrWhiteSpace(SpreadsheetId) && !string.IsNullOrWhiteSpace(FichierCleCompteService);
 

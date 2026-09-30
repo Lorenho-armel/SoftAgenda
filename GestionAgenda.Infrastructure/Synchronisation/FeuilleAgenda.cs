@@ -58,7 +58,7 @@ public static class FeuilleAgenda
     public static readonly IReadOnlyList<string> Priorites = ["Basse", "Moyenne", "Haute", "Critique"];
 
     public static readonly IReadOnlyList<string> Statuts =
-        ["À confirmer", "Confirmé", "Reporté", "Refusé", "Annulé", "Terminé"];
+        ["À confirmer", "Accepté", "Confirmé", "Reporté", "Refusé", "Annulé", "Terminé"];
 
     private static readonly DateTime Origine = new(1899, 12, 30);
     private static readonly CultureInfo Francais = CultureInfo.GetCultureInfo("fr-FR");
@@ -129,6 +129,7 @@ public static class FeuilleAgenda
 
     public static string Statut(StatutDemande statut) => statut switch
     {
+        StatutDemande.Acceptee => "Accepté",
         StatutDemande.Planifiee => "Confirmé",
         StatutDemande.Reportee => "Reporté",
         StatutDemande.Refusee => "Refusé",

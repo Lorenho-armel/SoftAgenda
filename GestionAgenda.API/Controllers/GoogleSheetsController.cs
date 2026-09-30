@@ -24,6 +24,15 @@ public sealed class GoogleSheetsController(IFeuilleAgendaService service, ICurre
         return Ok(ApiResponse<RapportImportResponse>.Ok(result));
     }
 
+    [HttpGet("lignes/{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<LignesFeuilleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> Lignes(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.LignesAsync(id, currentUser.UserId, cancellationToken);
+        return Ok(ApiResponse<LignesFeuilleResponse>.Ok(result));
+    }
+
     [HttpPost("resynchronisation")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<IActionResult> Resynchroniser(CancellationToken cancellationToken)

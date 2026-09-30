@@ -20,11 +20,15 @@ public sealed class SynchronisationFeuille(
 
     public async Task SynchroniserDemandeAsync(Guid demandeId)
     {
+        journal.LogInformation("[Sync Sheet] Début de la synchronisation de la demande {Id}", demandeId);
         var element = await ElementDemandeAsync(demandeId);
-        if (element is not null)
+        if (element is null)
         {
-            await EcrireAsync(element);
+            journal.LogWarning("[Sync Sheet] Demande {Id} introuvable : rien à écrire", demandeId);
+            return;
         }
+
+        await EcrireAsync(element);
     }
 
     public async Task SynchroniserIndisponibiliteAsync(Guid indisponibiliteId)
@@ -92,6 +96,7 @@ public sealed class SynchronisationFeuille(
     {
         if (!configuration.EstConfigure)
         {
+            journal.LogInformation("[Sync Sheet] Sheet non configuré : {Id} non écrit", element.Id);
             return;
         }
 
@@ -102,6 +107,15 @@ public sealed class SynchronisationFeuille(
             var existante = FeuilleAgenda.LigneDe(identifiants, element.Id);
             var ligne = existante ?? FeuilleAgenda.PremiereLigneLibre(identifiants);
             await feuille.EcrireAsync(FeuilleAgenda.Blocs(configuration.Onglet, ligne, element, existante is null));
+            journal.LogInformation(
+                "[Sync Sheet] {Id} écrit ligne {Ligne} ({Operation}) : statut « {Statut} », {Debut:dd/MM/yyyy HH:mm}-{Fin:HH:mm}, demandeur « {Demandeur} »",
+                element.Id,
+                ligne,
+                existante is null ? "création" : "mise à jour",
+                element.Statut,
+                element.DebutLocal,
+                element.FinLocal,
+                element.Demandeur);
         }
         finally
         {

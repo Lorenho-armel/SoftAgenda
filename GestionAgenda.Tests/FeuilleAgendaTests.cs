@@ -111,8 +111,10 @@ public sealed class FeuilleAgendaTests
     public void Statut_EtPriorite_SuiventLesListesDuSheet()
     {
         // Act & Assert
-        FeuilleAgenda.Statuts.Should().Contain(FeuilleAgenda.Statut(StatutDemande.EnAnalyse));
-        FeuilleAgenda.Statuts.Should().Contain(FeuilleAgenda.Statut(StatutDemande.Planifiee));
+        Enum.GetValues<StatutDemande>().Should().OnlyContain(s => FeuilleAgenda.Statuts.Contains(FeuilleAgenda.Statut(s)));
+        FeuilleAgenda.Statut(StatutDemande.EnAttente).Should().Be("À confirmer");
+        FeuilleAgenda.Statut(StatutDemande.Acceptee).Should().Be("Accepté");
+        FeuilleAgenda.Statut(StatutDemande.Planifiee).Should().Be("Confirmé");
         FeuilleAgenda.Priorites.Should().Contain(FeuilleAgenda.Priorite(Priorite.Faible));
         FeuilleAgenda.LirePriorite("basse").Should().Be(Priorite.Faible);
     }

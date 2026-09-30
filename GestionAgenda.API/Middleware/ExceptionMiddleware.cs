@@ -40,6 +40,7 @@ public sealed class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionM
             NotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             UnauthorizedException ex => (StatusCodes.Status401Unauthorized, ex.Message),
             ForbiddenException ex => (StatusCodes.Status403Forbidden, ex.Message),
+            ServiceExterneException ex => (StatusCodes.Status503ServiceUnavailable, ex.Message),
             DomainException ex => (StatusCodes.Status400BadRequest, ex.Message),
             _ => (StatusCodes.Status500InternalServerError, "Une erreur interne est survenue."),
         };
