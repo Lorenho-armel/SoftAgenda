@@ -35,6 +35,7 @@ export interface Rencontre {
   type: TypeDemande;
   debut: string;
   fin: string;
+  salleId: string | null;
   salleNom: string | null;
   statut: 'Planifie' | 'Annule' | 'Termine';
 }

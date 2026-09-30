@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, catchError, combineLatest, filter, map, of, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, combineLatest, distinctUntilChanged, filter, map, of, switchMap, tap } from 'rxjs';
 import { CalendarOptions, EventDropInfo } from '@fullcalendar/angular';
 import { ApiResponse } from '../../../../core/models/api-response.model';
 import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
@@ -12,11 +12,12 @@ import { BadgeComponent } from '../../../../shared/components/badge/badge.compon
 import { HistoriqueDemandeComponent } from '../../components/historique-demande/historique-demande.component';
 import { CreneauConfirme, PlanificationDemandeComponent } from '../../components/planification-demande/planification-demande.component';
 import { DecisionDemande, TraitementDemandeComponent } from '../../components/traitement-demande/traitement-demande.component';
-import { BilanPlanification, ConflitPlanification, DemandeDetail } from '../../models/demande.model';
+import { BilanPlanification, ConflitPlanification, DemandeDetail, SalleOption } from '../../models/demande.model';
 import { evenementDemande } from '../../models/evenements-calendrier';
 import { messageApi } from '../../models/message-api';
 import { libelleStatut, tonPriorite, tonUrgence } from '../../models/demande-libelles';
 import { DemandesApiService } from '../../services/demandes-api.service';
+import { ReferentielApiService } from '../../services/referentiel-api.service';
 
 @Component({
   selector: 'app-demande-detail',
@@ -26,6 +27,7 @@ import { DemandesApiService } from '../../services/demandes-api.service';
 })
 export class DemandeDetailComponent {
   private readonly api = inject(DemandesApiService);
+  private readonly referentiel = inject(ReferentielApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly version = signal(0);
@@ -48,6 +50,16 @@ export class DemandeDetailComponent {
         }),
       )),
     ),
+  );
+  readonly salles = toSignal(
+    toObservable(this.demande).pipe(
+      map((demande) => (demande?.estGestionnaire ? demande.societeId : '')),
+      distinctUntilChanged(),
+      switchMap((societeId) => societeId
+        ? this.referentiel.societe(societeId).pipe(map((societe) => societe.salles), catchError(() => of([])))
+        : of([])),
+    ),
+    { initialValue: [] as SalleOption[] },
   );
   readonly entete = computed(() => {
     const demande = this.demande();

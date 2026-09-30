@@ -11,9 +11,28 @@
       (choisir)="choisirCreneau($event)"
     />
     <form class="grille" [formGroup]="form">
-      <label>Date et heure<input formControlName="debutPlanifie" type="datetime-local" /></label>
+      <label>
+        Date et heure de début
+        <input
+          formControlName="debutPlanifie"
+          type="datetime-local"
+          [attr.min]="bornes()?.min ?? null"
+          [attr.max]="bornes()?.max ?? null"
+        />
+      </label>
       <app-field-error [control]="form.controls.debutPlanifie" />
-      <label>Salle, si nécessaire<input formControlName="salleId" placeholder="Identifiant de salle" /></label>
+      <label>
+        Salle, si nécessaire
+        <select formControlName="salleId">
+          <option value="">Aucune salle</option>
+          @for (salle of salles(); track salle.id) {
+            <option [value]="salle.id">{{ salle.nom }} ({{ salle.capacite }} places)</option>
+          }
+        </select>
+      </label>
+      @if (erreurCreneau()) {
+        <p class="m-0 text-sm text-danger" role="alert">{{ erreurCreneau() }}</p>
+      }
       <div class="flex flex-wrap gap-3">
         <button type="button" class="btn-secondaire" (click)="controler()">Vérifier les conflits</button>
         <button type="button" (click)="confirmer()" [disabled]="bilan() !== null && !bilan()!.peutPlanifier">{{ confirmerLibelle() }}</button>

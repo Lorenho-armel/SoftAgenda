@@ -62,6 +62,9 @@
       [debutSouhaite]="vue.demande.dateDebutSouhaitee"
       [finSouhaitee]="vue.demande.dateFinSouhaitee"
       [dureeMinutes]="vue.demande.dureeMinutes"
+      [debutActuel]="vue.demande.rencontre?.debut ?? null"
+      [salleActuelle]="vue.demande.rencontre?.salleId ?? vue.demande.salleSouhaiteeId"
+      [salles]="salles()"
       (verifier)="verifier($event)"
       (planifier)="planifier($event)"
     />

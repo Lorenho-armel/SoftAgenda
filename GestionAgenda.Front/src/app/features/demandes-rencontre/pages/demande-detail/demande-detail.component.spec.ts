@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.component';
 import { DemandeDetail, StatutDemande } from '../../models/demande.model';
 import { DemandesApiService } from '../../services/demandes-api.service';
+import { ReferentielApiService } from '../../services/referentiel-api.service';
 import { DemandeDetailComponent } from './demande-detail.component';
 
 const identifiant = '11111111-1111-1111-1111-111111111111';
@@ -24,6 +25,9 @@ describe('DemandeDetailComponent', () => {
       conflits: [],
     })),
   };
+  const referentiel = {
+    societe: vi.fn(() => of({ salles: [{ id: 'salle-atlas', nom: 'Salle Atlas', capacite: 8 }] })),
+  };
 
   beforeEach(async () => {
     statut = 'EnAnalyse';
@@ -34,6 +38,7 @@ describe('DemandeDetailComponent', () => {
       imports: [DemandeDetailComponent],
       providers: [
         { provide: DemandesApiService, useValue: api },
+        { provide: ReferentielApiService, useValue: referentiel },
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: identifiant })) } },
       ],
     })
@@ -61,7 +66,7 @@ describe('DemandeDetailComponent', () => {
       ...detail('Planifiee'),
       rendezVousId,
       participants: [{ id: 'p1', utilisateurId: '88888888-8888-8888-8888-888888888888', nomComplet: 'Louis Petit', email: null }],
-      rencontre: { type: 'RendezVous', debut: '2026-10-27T12:00:00Z', fin: '2026-10-27T13:00:00Z', salleNom: 'Salle Atlas', statut: 'Planifie' },
+      rencontre: { type: 'RendezVous', debut: '2026-10-27T12:00:00Z', fin: '2026-10-27T13:00:00Z', salleId: null, salleNom: 'Salle Atlas', statut: 'Planifie' },
     }));
 
     // Act
@@ -165,11 +170,10 @@ describe('DemandeDetailComponent', () => {
     expect(fixture.nativeElement.querySelector('#traitement')).toBeNull();
   });
 
-  it('devrait planifier un créneau libre', async () => {
+  it('devrait planifier au début souhaité proposé par défaut', async () => {
     // Arrange
     statut = 'Acceptee';
     await afficher();
-    saisir(fixture.nativeElement.querySelector('#planification input'), '2026-10-01T10:00');
 
     // Act
     cliquer('Planifier');
@@ -180,9 +184,42 @@ describe('DemandeDetailComponent', () => {
       'Planifiee',
       null,
       { debut: null, fin: null },
-      new Date('2026-10-01T10:00').toISOString(),
+      '2026-09-24T08:00:00.000Z',
       null,
     );
+  });
+
+  it('devrait planifier dans la salle choisie par son nom', async () => {
+    // Arrange
+    statut = 'Acceptee';
+    await afficher();
+    const liste = fixture.nativeElement.querySelector('#planification select') as HTMLSelectElement;
+
+    // Act
+    liste.value = liste.options[1].value;
+    liste.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    cliquer('Vérifier les conflits');
+
+    // Assert
+    expect(liste.options[1].textContent).toContain('Salle Atlas');
+    expect(api.verifierCreneau).toHaveBeenCalledWith(identifiant, '2026-09-24T08:00:00.000Z', 'salle-atlas');
+  });
+
+  it('devrait refuser un début hors de la période souhaitée sans appeler l API', async () => {
+    // Arrange
+    statut = 'Acceptee';
+    api.verifierCreneau.mockClear();
+    await afficher();
+    saisir(fixture.nativeElement.querySelector('#planification input'), '2026-10-01T10:00');
+
+    // Act
+    cliquer('Vérifier les conflits');
+    fixture.detectChanges();
+
+    // Assert
+    expect(api.verifierCreneau).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('doit tenir dans la période souhaitée');
   });
 
   it('devrait afficher l erreur de chargement', async () => {
@@ -242,7 +279,6 @@ describe('DemandeDetailComponent', () => {
       },
     })));
     await afficher();
-    saisir(fixture.nativeElement.querySelector('#planification input'), '2026-10-01T10:00');
 
     // Act
     cliquer('Planifier');

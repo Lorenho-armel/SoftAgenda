@@ -342,17 +342,16 @@ public sealed class DemandeRencontreService(
     {
         RencontreResponse? rencontre = demande switch
         {
-            { RendezVous: { } r } => new(TypeDemande.RendezVous, r.Debut, r.Fin, null, r.Statut),
-            { Reunion: { } r } => new(TypeDemande.Reunion, r.Debut, r.Fin, null, r.Statut),
+            { RendezVous: { } r } => new(TypeDemande.RendezVous, r.Debut, r.Fin, r.SalleId, null, r.Statut),
+            { Reunion: { } r } => new(TypeDemande.Reunion, r.Debut, r.Fin, r.SalleId, null, r.Statut),
             _ => null,
         };
-        var salleId = demande.RendezVous?.SalleId ?? demande.Reunion?.SalleId;
-        if (rencontre is null || salleId is null)
+        if (rencontre?.SalleId is not { } salleId)
         {
             return rencontre;
         }
 
-        var salle = await planification.GetSalleAsync(salleId.Value, cancellationToken);
+        var salle = await planification.GetSalleAsync(salleId, cancellationToken);
         return rencontre with { SalleNom = salle?.Nom };
     }
 
