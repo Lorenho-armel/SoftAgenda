@@ -107,7 +107,8 @@ internal static class ReglesDemandeFixture
     internal static DemandeRencontreService Service(
         Mock<IDemandeRencontreRepository>? demandes = null,
         Mock<IAccesAgendaRepository>? acces = null,
-        Mock<IPlanificationRepository>? planification = null)
+        Mock<IPlanificationRepository>? planification = null,
+        Mock<ISynchronisationAgenda>? synchronisation = null)
     {
         var depotPlanification = planification ?? CalendrierLibre();
         var notifications = new Mock<INotificationsDemande>();
@@ -129,6 +130,7 @@ internal static class ReglesDemandeFixture
             new VerifierCreneauRequestValidator(),
             mapper,
             notifications.Object,
+            (synchronisation ?? new Mock<ISynchronisationAgenda>()).Object,
             NullLogger<DemandeRencontreService>.Instance);
     }
 

@@ -12,6 +12,8 @@ public sealed class GoogleCalendarOptions
 
     public string UrlApplication { get; set; } = string.Empty;
 
+    public bool LireDisponibilites { get; set; } = true;
+
     /// <summary>E-mail du dirigeant → identifiant de l'agenda Google. Par défaut, l'agenda principal (son e-mail).</summary>
     public Dictionary<string, string> Agendas { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 

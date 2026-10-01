@@ -79,7 +79,64 @@ public sealed class ClientGoogleCalendar(IOptions<GoogleCalendarOptions> options
         }
     }
 
+    public Task<IReadOnlyList<EvenementLu>> ListerAsync(
+        string agendaId,
+        DateTimeOffset debut,
+        DateTimeOffset fin,
+        CancellationToken cancellationToken = default) =>
+        ExecuterAsync<IReadOnlyList<EvenementLu>>(agendaId, async () =>
+        {
+            var lus = new List<EvenementLu>();
+            string? page = null;
+            do
+            {
+                var requete = Service().Events.List(agendaId);
+                requete.TimeMinDateTimeOffset = debut;
+                requete.TimeMaxDateTimeOffset = fin;
+                requete.SingleEvents = true;
+                requete.ShowDeleted = false;
+                requete.MaxResults = 250;
+                requete.PageToken = page;
+                var reponse = await requete.ExecuteAsync(cancellationToken);
+                lus.AddRange((reponse.Items ?? []).Select(Lire).OfType<EvenementLu>());
+                page = reponse.NextPageToken;
+            }
+            while (page is not null);
+
+            return lus;
+        });
+
     public void Dispose() => service?.Dispose();
+
+    private static EvenementLu? Lire(Event evenement)
+    {
+        var debut = Moment(evenement.Start);
+        var fin = Moment(evenement.End);
+        if (evenement.Id is null || debut is null || fin is null)
+        {
+            return null;
+        }
+
+        var refuse = evenement.Attendees?.Any(a => a.Self == true && a.ResponseStatus == "declined") == true;
+        var libre = evenement.Transparency == "transparent" || evenement.Status == "cancelled" || refuse;
+        return new EvenementLu(evenement.Id, evenement.Summary, debut.Value, fin.Value, libre);
+    }
+
+    private static DateTimeOffset? Moment(EventDateTime? moment)
+    {
+        if (moment?.DateTimeDateTimeOffset is { } precis)
+        {
+            return precis;
+        }
+
+        if (DateOnly.TryParseExact(moment?.Date, "yyyy-MM-dd", out var jour))
+        {
+            var minuit = jour.ToDateTime(TimeOnly.MinValue);
+            return new DateTimeOffset(minuit, TimeZoneInfo.Local.GetUtcOffset(minuit));
+        }
+
+        return null;
+    }
 
     private static Event Convertir(EvenementAgenda evenement) =>
         new()

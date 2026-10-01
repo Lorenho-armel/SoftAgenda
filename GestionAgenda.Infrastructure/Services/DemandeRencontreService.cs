@@ -29,6 +29,7 @@ public sealed class DemandeRencontreService(
     IValidator<VerifierCreneauRequest> creneauValidator,
     IMapper mapper,
     INotificationsDemande notifications,
+    ISynchronisationAgenda synchronisation,
     ILogger<DemandeRencontreService> logger) : IDemandeRencontreService
 {
     private readonly EvaluationAccesDemande evaluationAcces = new(acces);
@@ -212,6 +213,7 @@ public sealed class DemandeRencontreService(
         await evaluationAcces.ExigerGestionnaireAsync(demande, utilisateurId, cancellationToken);
         qualification.Appliquer(demande, utilisateurId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        synchronisation.DemandeModifiee(demande.Id);
         return mapper.Map<DemandeRencontreResponse>(demande);
     }
 

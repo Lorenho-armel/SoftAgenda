@@ -1,5 +1,6 @@
 using FluentAssertions;
 using GestionAgenda.Application.DTOs.DemandesRencontre;
+using GestionAgenda.Application.Services.Interfaces;
 using GestionAgenda.Domain.Demandes;
 using GestionAgenda.Domain.Entities;
 using GestionAgenda.Domain.Enums;
@@ -100,7 +101,8 @@ public class DemandeRencontreReglesServiceTests
         // Arrange
         var demande = Demande(StatutDemande.EnAnalyse);
         var assistante = Guid.CreateVersion7();
-        var sut = Service(Depot(demande), Assistante(assistante, demande));
+        var synchronisation = new Mock<ISynchronisationAgenda>();
+        var sut = Service(Depot(demande), Assistante(assistante, demande), synchronisation: synchronisation);
 
         // Act
         var resultat = await sut.ChangerUrgenceAsync(
@@ -109,6 +111,7 @@ public class DemandeRencontreReglesServiceTests
         // Assert
         resultat.Urgence.Should().Be(Urgence.Critique);
         resultat.Historique.Should().Contain(h => h.TypeEvenement == TypeEvenementDemande.ChangementUrgence);
+        synchronisation.Verify(s => s.DemandeModifiee(demande.Id), Times.Once);
     }
 
     [Fact]
@@ -117,7 +120,8 @@ public class DemandeRencontreReglesServiceTests
         // Arrange
         var demande = Demande(StatutDemande.EnAnalyse);
         var assistante = Guid.CreateVersion7();
-        var sut = Service(Depot(demande), Assistante(assistante, demande));
+        var synchronisation = new Mock<ISynchronisationAgenda>();
+        var sut = Service(Depot(demande), Assistante(assistante, demande), synchronisation: synchronisation);
 
         // Act
         var resultat = await sut.ChangerPrioriteAsync(
@@ -126,6 +130,7 @@ public class DemandeRencontreReglesServiceTests
         // Assert
         resultat.Priorite.Should().Be(Priorite.Critique);
         resultat.Historique.Should().Contain(h => h.TypeEvenement == TypeEvenementDemande.ChangementPriorite);
+        synchronisation.Verify(s => s.DemandeModifiee(demande.Id), Times.Once);
     }
 
     [Fact]

@@ -59,6 +59,8 @@ public static class DependencyInjection
         services.Configure<GoogleCalendarOptions>(configuration.GetSection(GoogleCalendarOptions.SectionName));
         services.AddScoped<IClientCalendrier, ClientGoogleCalendar>();
         services.AddScoped<SynchronisationCalendrier>();
+        services.AddMemoryCache();
+        services.AddScoped<IDisponibilitesExternes, DisponibilitesGoogle>();
         services.AddScoped<Application.Services.Interfaces.IAgendaGoogleService, ServiceAgendaGoogle>();
         services.AddScoped<DevDataSeeder>();
         services.AddScoped<GenerateurScriptsMigration>();

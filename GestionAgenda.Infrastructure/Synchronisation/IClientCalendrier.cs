@@ -20,6 +20,8 @@ public sealed record EvenementAgenda(
 
 public sealed record AccesAgenda(bool Accessible, string Message);
 
+public sealed record EvenementLu(string Id, string? Titre, DateTimeOffset Debut, DateTimeOffset Fin, bool Libre);
+
 public interface IClientCalendrier
 {
     string CompteService { get; }
@@ -29,4 +31,10 @@ public interface IClientCalendrier
     Task SupprimerAsync(string agendaId, string evenementId, CancellationToken cancellationToken = default);
 
     Task<AccesAgenda> VerifierAccesAsync(string agendaId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<EvenementLu>> ListerAsync(
+        string agendaId,
+        DateTimeOffset debut,
+        DateTimeOffset fin,
+        CancellationToken cancellationToken = default);
 }

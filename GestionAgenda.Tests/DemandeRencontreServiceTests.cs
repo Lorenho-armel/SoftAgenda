@@ -88,6 +88,7 @@ public class DemandeRencontreServiceTests
             new VerifierCreneauRequestValidator(),
             mapper,
             notifications.Object,
+            new Mock<ISynchronisationAgenda>().Object,
             NullLogger<DemandeRencontreService>.Instance);
     }
 }

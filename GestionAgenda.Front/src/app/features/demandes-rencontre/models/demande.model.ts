@@ -11,7 +11,12 @@ export type StatutDemande =
   | 'Terminee'
   | 'Annulee';
 export type VueFile = 'Nouvelles' | 'Urgentes' | 'Critiques' | 'Prioritaires' | 'EnAttente' | 'Planifiees';
-export type TypeConflit = 'CalendrierDirigeant' | 'CalendrierParticipant' | 'Salle';
+export type TypeConflit =
+  | 'CalendrierDirigeant'
+  | 'CalendrierParticipant'
+  | 'Salle'
+  | 'AgendaGoogle'
+  | 'AgendaGoogleNonVerifie';
 export type BadgeTon = 'normal' | 'urgent' | 'critique' | 'faible' | 'moyenne' | 'haute';
 
 export interface Participant {

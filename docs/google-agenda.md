@@ -1,6 +1,13 @@
 # Synchronisation Google Agenda
 
-Sens unique, **application → Google Agenda** :
+Deux mécanismes complémentaires :
+
+- **Publication** (application → Google Agenda) : les rencontres et indisponibilités sont écrites dans l'agenda du dirigeant.
+- **Lecture des disponibilités** (Google Agenda → contrôle des conflits) : avant de planifier ou de déplacer, l'application consulte les créneaux occupés de l'agenda Google du dirigeant.
+
+## Publication
+
+Le détail :
 
 - Une rencontre **planifiée** (rendez-vous ou réunion) est publiée dans l'agenda Google du dirigeant : titre `[RDV] Motif – Société` ou `[Réunion] …`, salle en lieu, demandeur, participants, priorité et lien vers la demande en description.
 - Un **déplacement** met l'événement à jour ; une **annulation** le retire ; une rencontre **terminée** reste dans l'agenda.
@@ -9,6 +16,15 @@ Sens unique, **application → Google Agenda** :
 - Une modification faite directement dans Google Agenda **n'est pas reprise** par l'application et sera écrasée à la prochaine mise à jour de la rencontre.
 
 Les participants ne reçoivent pas d'invitation Google : un compte de service ne peut pas inviter sans délégation Google Workspace. Ils sont prévenus par les notifications de l'application.
+
+## Lecture des disponibilités
+
+- Un événement personnel ou pris hors de l'application qui chevauche le créneau produit un **conflit bloquant** « Conflit avec l'agenda Google du dirigeant : « Titre » (horaires) », affiché comme les autres conflits et visible dans le calendrier de planification.
+- Sont ignorés : les événements publiés par l'application (déjà contrôlés par sa base), ceux marqués **Disponible**, ceux que le dirigeant a **refusés**, et les journées entières marquées Disponible (le réglage par défaut de Google).
+- Un événement privé apparaît sous le titre « Occupé » : son contenu n'est jamais lu.
+- Si Google est injoignable ou trop lent (plus de 8 secondes), la planification reste possible avec un **avertissement non bloquant** « Disponibilités Google Agenda non vérifiées ».
+- Le résultat est mis en cache une minute : « Vérifier les conflits » puis « Planifier » n'interrogent Google qu'une fois.
+- Pour désactiver la lecture sans couper la publication : `"LireDisponibilites": false`.
 
 ## 1. Activer l'API
 
@@ -36,6 +52,7 @@ Dans `appsettings.Development.json` (non versionné) ou les variables d'environn
   "Actif": true,
   "FichierCleCompteService": "C:\\secrets\\gestion-agenda-compte-service.json",
   "UrlApplication": "https://agenda.softwell.local",
+  "LireDisponibilites": true,
   "Agendas": {
     "dirigeant@demo.local": "claire.martin@gmail.com"
   }

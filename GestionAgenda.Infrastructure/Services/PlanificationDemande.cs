@@ -7,7 +7,9 @@ using GestionAgenda.Domain.Interfaces;
 
 namespace GestionAgenda.Infrastructure.Services;
 
-public sealed class PlanificationDemande(IPlanificationRepository planification)
+public sealed class PlanificationDemande(
+    IPlanificationRepository planification,
+    IDisponibilitesExternes? disponibilites = null)
 {
     public async Task<BilanPlanification> EvaluerAsync(
         DemandeRencontre demande,
@@ -109,6 +111,16 @@ public sealed class PlanificationDemande(IPlanificationRepository planification)
         {
             var occupations = await planification.OccupationsSalleAsync(salle.Id, creneau, demande.Id, cancellationToken);
             conflits.AddRange(occupations.Select(occupation => ConflitsPlanification.Salle(salle.Id, salle.Nom, occupation)));
+        }
+
+        if (disponibilites is not null)
+        {
+            var externes = await disponibilites.OccupationsDirigeantAsync(demande.DirigeantId, creneau, cancellationToken);
+            conflits.AddRange(externes.Occupations.Select(ConflitsPlanification.AgendaGoogle));
+            if (!externes.Verifiees)
+            {
+                conflits.Add(ConflitsPlanification.AgendaGoogleNonVerifie(externes.Raison ?? "raison inconnue."));
+            }
         }
 
         return conflits;

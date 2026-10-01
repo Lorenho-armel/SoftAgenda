@@ -1,4 +1,5 @@
 using GestionAgenda.Domain.Enums;
+using GestionAgenda.Domain.Interfaces;
 
 namespace GestionAgenda.Domain.Demandes;
 
@@ -45,6 +46,34 @@ public static class ConflitsPlanification
             null,
             salleId,
             salleNom);
+
+    public static ConflitPlanification AgendaGoogle(CreneauOccupeExterne occupation) =>
+        new(
+            TypeConflit.AgendaGoogle,
+            true,
+            $"Conflit avec l'agenda Google du dirigeant : « {occupation.Titre} » ({Plage(occupation.Debut, occupation.Fin)}).",
+            null,
+            occupation.Titre,
+            occupation.Debut,
+            occupation.Fin,
+            null,
+            null,
+            null,
+            null);
+
+    public static ConflitPlanification AgendaGoogleNonVerifie(string raison) =>
+        new(
+            TypeConflit.AgendaGoogleNonVerifie,
+            false,
+            $"Disponibilités Google Agenda non vérifiées : {raison}",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
 
     private static string Texte(string sujet, OccupationCalendrier occurrence) =>
         $"{sujet} avec « {occurrence.Titre} » ({Plage(occurrence.Debut, occurrence.Fin)}).";

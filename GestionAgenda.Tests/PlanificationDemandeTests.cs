@@ -150,6 +150,51 @@ public class PlanificationDemandeTests
         await act.Should().ThrowAsync<DomainException>();
     }
 
+    [Fact]
+    public async Task Appliquer_AgendaGoogleOccupe_BloqueLaPlanification()
+    {
+        // Arrange
+        var demande = DemandeAcceptee();
+        var debut = demande.DateDebutSouhaitee;
+        var planification = new Mock<IPlanificationRepository>();
+        Libre(planification);
+        var disponibilites = new Mock<IDisponibilitesExternes>();
+        disponibilites.Setup(d => d.OccupationsDirigeantAsync(demande.DirigeantId, It.IsAny<Intervalle>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DisponibilitesExternes(true, null, [new CreneauOccupeExterne("Dentiste", debut, debut.AddMinutes(30))]));
+        var sut = new PlanificationDemande(planification.Object, disponibilites.Object);
+
+        // Act
+        var act = () => sut.AppliquerAsync(demande, StatutPlanifie(debut, null), Guid.CreateVersion7());
+
+        // Assert
+        var exception = await act.Should().ThrowAsync<ConflictException>();
+        exception.Which.Conflits.Should().ContainSingle(c =>
+            c.Nature == TypeConflit.AgendaGoogle && c.Bloquant && c.Message.Contains("Dentiste"));
+        demande.Statut.Should().Be(StatutDemande.Acceptee);
+    }
+
+    [Fact]
+    public async Task Appliquer_AgendaGoogleInjoignable_PlanifieAvecUnAvertissement()
+    {
+        // Arrange
+        var demande = DemandeAcceptee();
+        var planification = new Mock<IPlanificationRepository>();
+        Libre(planification);
+        var disponibilites = new Mock<IDisponibilitesExternes>();
+        disponibilites.Setup(d => d.OccupationsDirigeantAsync(It.IsAny<Guid>(), It.IsAny<Intervalle>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DisponibilitesExternes.NonVerifiees("Google est injoignable."));
+        var sut = new PlanificationDemande(planification.Object, disponibilites.Object);
+
+        // Act
+        var bilan = await sut.EvaluerAsync(demande, demande.DateDebutSouhaitee, null, CancellationToken.None);
+        await sut.AppliquerAsync(demande, StatutPlanifie(demande.DateDebutSouhaitee, null), Guid.CreateVersion7());
+
+        // Assert
+        bilan.PeutPlanifier.Should().BeTrue();
+        bilan.Conflits.Should().ContainSingle(c => c.Nature == TypeConflit.AgendaGoogleNonVerifie && !c.Bloquant);
+        demande.Statut.Should().Be(StatutDemande.Planifiee);
+    }
+
     private static void Libre(Mock<IPlanificationRepository> planification)
     {
         planification.Setup(p => p.OccupationsDirigeantAsync(

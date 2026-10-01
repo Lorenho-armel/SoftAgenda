@@ -88,6 +88,38 @@ public sealed class EvenementsAgendaTests
         options.AgendaDe("louis.petit@demo.local").Should().Be("louis.petit@demo.local");
     }
 
+    [Fact]
+    public void Occupations_IgnoreLesEvenementsDeLApplicationLibresOuHorsCreneau()
+    {
+        // Arrange
+        var debut = new DateTimeOffset(2026, 10, 27, 10, 0, 0, TimeSpan.Zero);
+        var fin = debut.AddHours(1);
+        var evenements = new[]
+        {
+            new EvenementLu("perso1", "Dentiste", debut.AddMinutes(30), debut.AddMinutes(90), false),
+            new EvenementLu(EvenementsAgenda.Identifiant(Guid.NewGuid()), "[RDV] Déjà planifié", debut, fin, false),
+            new EvenementLu("perso2", "Rappel", debut, fin, true),
+            new EvenementLu("perso3", "Avant", debut.AddHours(-2), debut, false),
+            new EvenementLu("perso4", null, debut.AddMinutes(-15), debut.AddMinutes(15), false),
+        };
+
+        // Act
+        var occupations = EvenementsAgenda.Occupations(evenements, debut, fin);
+
+        // Assert
+        occupations.Select(o => o.Titre).Should().Equal("Occupé", "Dentiste");
+    }
+
+    [Theory]
+    [InlineData("ga9f1c2d3e4b5a69788a9b0c1d2e3f4a5b", true)]
+    [InlineData("gaxyz", false)]
+    [InlineData("4fq1pm0e8u0hl2a5sjc3d1q8k0", false)]
+    public void EstPublieParApplication_ReconnaitNosIdentifiants(string identifiant, bool attendu)
+    {
+        // Act & Assert
+        EvenementsAgenda.EstPublieParApplication(identifiant).Should().Be(attendu);
+    }
+
     private static RencontreAPublier Rencontre(TypeDemande type, DateTimeOffset debut) =>
         new(DemandeId, type, "Point budget", "Holding Démo", debut, debut.AddHours(1), "Salle Atlas", "Louis Petit", "Alice Bernard", Priorite.Haute);
 }
