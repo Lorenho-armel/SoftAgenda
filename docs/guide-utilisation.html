@@ -43,7 +43,7 @@
   <div class="bande"></div>
   <h1>GestionAgenda</h1>
   <div class="sous">Guide d'utilisation et déroulement du workflow des demandes de rencontre</div>
-  <div class="meta">Version du 24 septembre 2026<br />Application web Angular + API .NET 10</div>
+  <div class="meta">Version du 1<sup>er</sup> octobre 2026<br />Application web Angular + API .NET 10<br />Synchronisation Google Sheets et Google Agenda</div>
 </section>
 
 <h2>Sommaire</h2>
@@ -56,12 +56,16 @@
   <li>Les écrans de l'application</li>
   <li>Travailler avec le calendrier</li>
   <li>Les notifications</li>
+  <li>Les indisponibilités du dirigeant</li>
+  <li>Synchronisation avec Google Sheets</li>
+  <li>Synchronisation avec Google Agenda</li>
   <li>Règles de gestion à connaître</li>
 </ol>
 
 <h2>1. Présentation</h2>
 <p>GestionAgenda centralise les <strong>demandes de rencontre</strong> adressées aux dirigeants d'une société. Un collaborateur demande un rendez-vous ou une réunion avec un dirigeant, sur une période souhaitée. L'assistante du dirigeant reçoit la demande. Elle l'accepte, la refuse ou la reporte, puis planifie la rencontre. Chaque personne concernée est notifiée à chaque étape.</p>
 <p>Chaque demande garde un <strong>historique</strong> complet : qui a fait quoi, quand, avec quel commentaire, et quelle période avant et après.</p>
+<p>L'application tient aussi compte des <strong>indisponibilités</strong> du dirigeant et se synchronise automatiquement avec un <strong>Google Sheet</strong> de suivi et avec l'<strong>agenda Google</strong> de chaque dirigeant.</p>
 
 <h2>2. Les rôles</h2>
 <p>Les rôles sont définis <strong>par société</strong> : une même personne peut être dirigeant dans une société et collaborateur dans une autre.</p>
@@ -90,6 +94,7 @@
   <tr><td><code>dirigeant.seul@demo.local</code></td><td>Marc Roux</td><td>Dirigeant sans assistante (traite lui-même)</td></tr>
 </table>
 <p>La session reste ouverte après une actualisation de la page. Le bouton de déconnexion la ferme.</p>
+<p>Les synchronisations Google sont facultatives : elles s'activent dans les sections <code>GoogleSheets</code> et <code>GoogleCalendar</code> de la configuration de l'API (voir <code>docs/google-sheets.md</code> et <code>docs/google-agenda.md</code>).</p>
 
 <h2 class="saut">4. Le cycle de vie d'une demande</h2>
 <h3>Parcours principal</h3>
@@ -161,11 +166,16 @@
   <li>
     <strong>Planification</strong> (demande acceptée) — section <em>Planification</em> du détail.
     <ul>
-      <li>La période souhaitée apparaît en doré. L'assistante clique sur une heure à l'intérieur pour choisir le créneau, qui a la durée demandée.</li>
-      <li>Elle indique une salle si nécessaire, puis clique sur <em>Vérifier les conflits</em> (occupation du dirigeant, des participants et de la salle).</li>
-      <li>Si aucun conflit n'est bloquant, elle confirme : la demande passe à <span class="statut s-planifiee">Planifiée</span> et un rendez-vous ou une réunion est créé.</li>
-      <li>Le dirigeant et les participants (internes et externes) reçoivent « Rencontre planifiée ».</li>
+      <li>La période souhaitée apparaît en doré. L'heure de début est <strong>préremplie</strong> avec le début souhaité ; l'assistante peut cliquer sur une autre heure à l'intérieur de la période. Le créneau a la durée demandée.</li>
+      <li>Le début choisi doit laisser la rencontre <strong>tenir entière dans la période souhaitée</strong> : le sélecteur de date l'impose, et un message indique sinon les bornes à respecter.</li>
+      <li>Elle choisit si nécessaire une <strong>salle dans la liste</strong> des salles de la société (nom et capacité). La salle souhaitée par le demandeur est présélectionnée.</li>
+      <li>Elle clique sur <em>Vérifier les conflits</em> : occupation du dirigeant, des participants et de la salle, indisponibilités du dirigeant et, si la synchronisation est active, rendez-vous de son <strong>agenda Google</strong>. Les conflits s'affichent sous le formulaire et dans le calendrier.</li>
+      <li>Si aucun conflit n'est bloquant, elle clique sur <em>Planifier</em> : la demande passe à <span class="statut s-planifiee">Planifiée</span> et un rendez-vous ou une réunion est créé. Le détail affiche alors « Rencontre planifiée : type, date, horaires, salle ».</li>
+      <li>Le dirigeant et les participants (internes et externes) reçoivent « Rencontre planifiée ». Le Google Sheet et l'agenda Google du dirigeant sont mis à jour automatiquement.</li>
     </ul>
+  </li>
+  <li>
+    <strong>Déplacer une rencontre planifiée.</strong> Dans la même section, le bouton devient <em>Déplacer</em> : l'heure actuelle et la salle actuelle sont préremplies, l'assistante choisit le nouveau créneau, vérifie les conflits et confirme. Les participants reçoivent « Rendez-vous modifié ».
   </li>
   <li>
     <strong>Rappels automatiques.</strong> Le dirigeant et les participants sont rappelés moins de 24 heures avant la rencontre, puis moins d'une heure avant.
@@ -180,11 +190,11 @@
 <table>
   <tr><th style="width:22%">Menu</th><th style="width:18%">Pour qui</th><th>Contenu</th></tr>
   <tr><td>Tableau de bord</td><td>Assistante</td><td>Compteurs et demandes à traiter pour ses dirigeants, rencontres à venir.</td></tr>
-  <tr><td>Agenda</td><td>Tous</td><td>Calendrier des demandes (couleur selon le statut) et, pour l'assistante, des rencontres planifiées. Clic, glisser-déposer et redimensionnement.</td></tr>
+  <tr><td>Agenda</td><td>Tous</td><td>Calendrier des demandes (couleur selon le statut) et, pour l'assistante, des rencontres planifiées. Clic, glisser-déposer et redimensionnement. Pour l'assistante et le dirigeant : indisponibilités, bouton <em>Ajouter une indisponibilité</em>, panneaux <em>Google Sheets</em> et <em>Google Agenda</em>.</td></tr>
   <tr><td>File des demandes</td><td>Tous</td><td>Demandes classées par vue : Nouvelles, Urgentes, Critiques, Prioritaires, En attente, Planifiées.</td></tr>
   <tr><td>Liste des demandes</td><td>Tous</td><td>Liste paginée, avec filtres (statut, dates, recherche…).</td></tr>
   <tr><td>Nouvelle demande</td><td>Tous</td><td>Calendrier « Période souhaitée » et formulaire de création dans une fenêtre.</td></tr>
-  <tr><td>Détail d'une demande</td><td>Personnes autorisées</td><td>Informations, participants, <em>Traitement</em> (décisions), <em>Planification</em> et <em>Historique</em>.</td></tr>
+  <tr><td>Détail d'une demande</td><td>Personnes autorisées</td><td>Informations (« Demandé par … à … · société »), participants, rencontre planifiée, <em>Historique</em> avec l'auteur de chaque action. Pour la personne qui gère la demande : <em>Traitement</em> (décisions) et <em>Planification</em>.</td></tr>
 </table>
 
 <h2>7. Travailler avec le calendrier</h2>
@@ -211,7 +221,56 @@
   <tr><td>Annulée</td><td>Demandeur, dirigeant, assistantes et participants</td><td>« La demande a été annulée : motif. »</td></tr>
 </table>
 
-<h2>9. Règles de gestion à connaître</h2>
+<h2 class="saut">9. Les indisponibilités du dirigeant</h2>
+<p>Une indisponibilité réserve un créneau de l'agenda du dirigeant : <strong>Déplacement</strong>, <strong>Temps bloqué</strong>, <strong>Personnel</strong> ou <strong>Événement</strong>. Aucune rencontre ne peut y être planifiée.</p>
+<ol>
+  <li>Dans l'<em>Agenda</em>, l'assistante ou le dirigeant clique sur <em>Ajouter une indisponibilité</em>.</li>
+  <li>Il choisit le dirigeant, le type, le motif, le début et la fin, puis valide : le créneau apparaît dans le calendrier avec sa propre couleur (voir la légende).</li>
+  <li>Un clic sur l'indisponibilité ouvre son détail, avec un bouton de suppression.</li>
+</ol>
+<div class="encadre">Les indisponibilités sont visibles des seuls gestionnaires (assistantes et dirigeant). Elles sont reportées dans le Google Sheet et, en privé, dans l'agenda Google du dirigeant (« Indisponible – Déplacement »…).</div>
+
+<h2>10. Synchronisation avec Google Sheets</h2>
+<p>Le Google Sheet de suivi est tenu à jour <strong>automatiquement</strong> par l'application, en mode « hybride » :</p>
+<ul>
+  <li><strong>Colonnes A à O</strong> de l'onglet <em>Agenda</em> (ID, date, horaires, type, objet, société, dirigeant, lieu, participants, demandeur, priorité, statut) : écrites par l'application à chaque création, changement de statut, déplacement, changement de priorité ou d'urgence, et à chaque ajout ou suppression d'indisponibilité. Ne pas les modifier à la main : elles seraient écrasées.</li>
+  <li><strong>Colonnes P à S</strong> (documents, brief, logistique, notes) et onglet <em>Suivi</em> : libres pour l'assistante. L'application n'y touche jamais.</li>
+  <li>Les statuts s'affichent en clair : À confirmer, Accepté, Confirmé (planifiée), Reporté, Refusé, Annulé, Terminé.</li>
+</ul>
+<h3>Le panneau Google Sheets (Agenda)</h3>
+<table>
+  <tr><th style="width:28%">Bouton</th><th>Effet</th></tr>
+  <tr><td>Ouvrir le Sheet</td><td>Ouvre le classeur dans un nouvel onglet.</td></tr>
+  <tr><td>Resynchroniser</td><td>Réécrit en arrière-plan toutes les demandes et indisponibilités des 30 derniers jours et à venir.</td></tr>
+  <tr><td>Importer les lignes à venir</td><td>Reprise <strong>ponctuelle</strong> de l'agenda déjà saisi dans le Sheet : chaque ligne future, sans ID et non annulée devient une demande (ou une indisponibilité pour les types Déplacement, Temps bloqué, Personnel, Événement). Un rapport détaille les lignes créées, ignorées ou en erreur.</td></tr>
+</table>
+<div class="encadre attention">Le sens normal est <strong>application → Sheet</strong>. Une modification faite dans les colonnes A à O du Sheet n'est pas reprise par l'application : il faut la faire dans l'application.</div>
+
+<h2>11. Synchronisation avec Google Agenda</h2>
+<h3>Publication dans l'agenda du dirigeant</h3>
+<ul>
+  <li>Chaque rencontre <strong>planifiée</strong> apparaît dans l'agenda Google du dirigeant : « [RDV] Motif – Société » ou « [Réunion] … », avec la salle en lieu, et en description le demandeur, les participants, la priorité et un lien vers la demande.</li>
+  <li>Un <strong>déplacement</strong> met l'événement à jour, une <strong>annulation</strong> le retire ; une rencontre terminée reste dans l'agenda. Les demandes non planifiées ne sont pas publiées.</li>
+  <li>Les indisponibilités apparaissent en <strong>privé</strong>.</li>
+</ul>
+<h3>Contrôle des disponibilités</h3>
+<ul>
+  <li>Avant chaque vérification, planification ou déplacement, l'application lit les créneaux occupés de l'agenda Google du dirigeant. Un rendez-vous personnel qui chevauche le créneau produit un <strong>conflit bloquant</strong> « Conflit avec l'agenda Google du dirigeant ».</li>
+  <li>Sont ignorés : les événements publiés par l'application, ceux marqués <em>Disponible</em> et ceux que le dirigeant a refusés. Un événement privé s'affiche « Occupé », sans son contenu.</li>
+  <li>Si Google est injoignable, la planification reste possible avec l'avertissement « Disponibilités Google Agenda non vérifiées ».</li>
+</ul>
+<h3>Le panneau Google Agenda (Agenda)</h3>
+<table>
+  <tr><th style="width:28%">Bouton</th><th>Effet</th></tr>
+  <tr><td>Ouvrir Google Agenda</td><td>Ouvre Google Agenda dans un nouvel onglet.</td></tr>
+  <tr><td>Vérifier l'accès</td><td>Indique, pour chaque dirigeant géré, si son agenda est bien partagé en écriture, ou ce qu'il faut corriger.</td></tr>
+  <tr><td>Resynchroniser</td><td>Republie en arrière-plan les rencontres et indisponibilités des 30 derniers jours et à venir.</td></tr>
+</table>
+<div class="encadre"><strong>Mise en place, une fois par dirigeant :</strong> dans Google Agenda, <em>Paramètres et partage</em> de son agenda, le partager avec l'adresse du compte de service affichée dans le panneau, avec le droit <em>Apporter des modifications aux événements</em>, puis cliquer sur <em>Vérifier l'accès</em>.</div>
+<div class="encadre attention">Le sens est <strong>application → Google Agenda</strong> : un événement modifié directement dans Google Agenda est écrasé à la prochaine mise à jour de la rencontre. Les participants ne reçoivent pas d'invitation Google ; ils sont prévenus par les notifications de l'application.</div>
+<p>En cas de coupure (Internet, pare-feu), rien n'est perdu : les mises à jour du Sheet et de l'agenda sont relancées automatiquement dès que Google redevient joignable.</p>
+
+<h2 class="saut">12. Règles de gestion à connaître</h2>
 <ul>
   <li>La période souhaitée doit commencer <strong>dans le futur</strong>, et la fin doit être après le début.</li>
   <li>La <strong>durée</strong> (15 à 480 minutes) ne peut pas dépasser la période souhaitée.</li>
@@ -220,9 +279,12 @@
   <li>Le motif fait entre 3 et 500 caractères.</li>
   <li>Le refus et le report exigent un <strong>commentaire</strong>, qui est transmis au demandeur.</li>
   <li>Les souhaits (dates, durée, salle…) ne sont modifiables qu'aux statuts <em>En attente</em>, <em>En analyse</em>, <em>Acceptée</em> et <em>Reportée</em>.</li>
-  <li>La planification est bloquée en cas de conflit (dirigeant, participant ou salle déjà occupé).</li>
+  <li>Le créneau planifié doit <strong>tenir entier dans la période souhaitée</strong> (début au plus tôt au début souhaité, fin au plus tard à la fin souhaitée).</li>
+  <li>La salle doit être active, appartenir à la société et avoir une capacité suffisante (dirigeant + participants).</li>
+  <li>La planification est bloquée en cas de conflit : dirigeant, participant ou salle déjà occupé, indisponibilité du dirigeant, ou rendez-vous de son agenda Google.</li>
+  <li>Seules les demandes <em>Acceptées</em> peuvent être planifiées, et seules les rencontres <em>Planifiées</em> peuvent être déplacées.</li>
 </ul>
-<div class="encadre attention"><strong>Limites actuelles.</strong> La section <em>Traitement</em> est affichée à tous les utilisateurs qui ouvrent une demande. Si une personne qui ne gère pas la demande tente une action, le serveur la refuse. Dans la planification, la salle se saisit encore par son identifiant.</div>
+<div class="encadre attention"><strong>Limites actuelles.</strong> Les synchronisations Google fonctionnent dans le sens application → Google : les modifications faites dans le Sheet (colonnes A à O) ou dans Google Agenda ne sont pas reprises. Les participants ne reçoivent pas d'invitation Google Agenda.</div>
 
 </body>
 </html>
