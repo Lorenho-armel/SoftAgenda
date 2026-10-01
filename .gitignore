@@ -3,6 +3,9 @@
 **/obj
 **/node_modules
 **/dist
+**/.angular/
+livraison*.zip
+TestResults/
 **/secrets/
 outils/simulation/resultats/
 **/*compte-service*.json
