@@ -44,6 +44,20 @@ export interface EtatFeuille {
   onglet: string;
 }
 
+export interface EtatAgendaGoogle {
+  configuree: boolean;
+  compteService: string | null;
+  lien: string;
+}
+
+export interface AccesAgendaGoogle {
+  dirigeantId: string;
+  dirigeantNom: string;
+  agenda: string;
+  accessible: boolean;
+  message: string;
+}
+
 export interface MessageImport {
   ligne: number;
   niveau: 'Erreur' | 'Avertissement';

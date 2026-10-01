@@ -56,6 +56,10 @@ public static class DependencyInjection
         services.AddScoped<IClientFeuille, ClientGoogleSheets>();
         services.AddScoped<SynchronisationFeuille>();
         services.AddScoped<Application.Services.Interfaces.IFeuilleAgendaService, ImportFeuille>();
+        services.Configure<GoogleCalendarOptions>(configuration.GetSection(GoogleCalendarOptions.SectionName));
+        services.AddScoped<IClientCalendrier, ClientGoogleCalendar>();
+        services.AddScoped<SynchronisationCalendrier>();
+        services.AddScoped<Application.Services.Interfaces.IAgendaGoogleService, ServiceAgendaGoogle>();
         services.AddScoped<DevDataSeeder>();
         services.AddScoped<GenerateurScriptsMigration>();
         services.AddApplication();

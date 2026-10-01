@@ -1,11 +1,8 @@
 using System.Net;
-using System.Security.Authentication;
-using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using GestionAgenda.Domain.Exceptions;
 using GestionAgenda.Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
@@ -49,40 +46,16 @@ public sealed class ClientGoogleSheets(IOptions<GoogleSheetsOptions> options) : 
 
     public void Dispose() => service?.Dispose();
 
-    private async Task<T> ExecuterAsync<T>(Func<Task<T>> appel)
-    {
-        try
+    private Task<T> ExecuterAsync<T>(Func<Task<T>> appel) =>
+        AppelsGoogle.ExecuterAsync(appel, exception => exception.HttpStatusCode switch
         {
-            return await appel();
-        }
-        catch (HttpRequestException exception) when (exception.InnerException is AuthenticationException)
-        {
-            throw new ServiceExterneException(
-                "Connexion à Google refusée : le certificat présenté n'est pas reconnu. Un pare-feu avec inspection SSL "
-                + "intercepte probablement la connexion (voir docs/google-sheets.md, section Pare-feu).",
-                exception);
-        }
-        catch (HttpRequestException exception)
-        {
-            throw new ServiceExterneException("Google est injoignable depuis le serveur : vérifiez la connexion Internet ou le proxy.", exception);
-        }
-        catch (GoogleApiException exception) when (exception.HttpStatusCode == HttpStatusCode.Forbidden)
-        {
-            throw new ServiceExterneException(
+            HttpStatusCode.Forbidden =>
                 $"Accès au Sheet refusé : partagez-le en Éditeur avec {compteService} et vérifiez que l'API Google Sheets est activée.",
-                exception);
-        }
-        catch (GoogleApiException exception) when (exception.HttpStatusCode == HttpStatusCode.NotFound)
-        {
-            throw new ServiceExterneException("Sheet introuvable : vérifiez GoogleSheets:SpreadsheetId.", exception);
-        }
-        catch (GoogleApiException exception) when (exception.HttpStatusCode == HttpStatusCode.BadRequest)
-        {
-            throw new ServiceExterneException(
+            HttpStatusCode.NotFound => "Sheet introuvable : vérifiez GoogleSheets:SpreadsheetId.",
+            HttpStatusCode.BadRequest =>
                 $"Requête refusée par Google : vérifiez que l'onglet « {configuration.Onglet} » existe ({exception.Error?.Message}).",
-                exception);
-        }
-    }
+            _ => null,
+        });
 
     private SheetsService Service()
     {

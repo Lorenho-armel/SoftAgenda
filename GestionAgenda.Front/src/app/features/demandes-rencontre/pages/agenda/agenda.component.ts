@@ -18,6 +18,7 @@ import { CalendrierComponent } from '../../../../shared/calendrier/calendrier.co
 import { EvenementClique, optionsCalendrier } from '../../../../shared/calendrier/calendrier.config';
 import { IconeComponent } from '../../../../shared/components/icone/icone.component';
 import { DemandeApercuComponent } from '../../components/demande-apercu/demande-apercu.component';
+import { GoogleAgendaPanneauComponent } from '../../components/google-agenda-panneau/google-agenda-panneau.component';
 import { GoogleSheetsPanneauComponent } from '../../components/google-sheets-panneau/google-sheets-panneau.component';
 import { IndisponibiliteModaleComponent } from '../../components/indisponibilite-modale/indisponibilite-modale.component';
 import { libelleStatut } from '../../models/demande-libelles';
@@ -43,7 +44,7 @@ interface IndisponibiliteOuverte {
 
 @Component({
   selector: 'app-agenda',
-  imports: [CalendrierComponent, DemandeApercuComponent, IndisponibiliteModaleComponent, GoogleSheetsPanneauComponent, IconeComponent],
+  imports: [CalendrierComponent, DemandeApercuComponent, IndisponibiliteModaleComponent, GoogleSheetsPanneauComponent, GoogleAgendaPanneauComponent, IconeComponent],
   templateUrl: './agenda.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

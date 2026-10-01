@@ -1,0 +1,37 @@
+@if (etat(); as etat) {
+  <section class="carte grid gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="m-0">Google Agenda</h2>
+        <p class="m-0 text-xs text-navy-soft">
+          @if (etat.configuree) {
+            Les rencontres planifiées et les indisponibilités sont publiées automatiquement dans l'agenda de chaque dirigeant.
+            @if (etat.compteService) {
+              Agenda à partager avec <strong>{{ etat.compteService }}</strong> (« Apporter des modifications aux événements »).
+            }
+          } @else {
+            Synchronisation non configurée sur le serveur (voir docs/google-agenda.md).
+          }
+        </p>
+      </div>
+      @if (etat.configuree) {
+        <div class="flex flex-wrap gap-2">
+          <a class="btn-secondaire" [href]="etat.lien" target="_blank" rel="noopener">Ouvrir Google Agenda</a>
+          <button type="button" class="btn-secondaire" [disabled]="verificationEnCours()" (click)="verifier()">
+            {{ verificationEnCours() ? 'Vérification…' : 'Vérifier l\'accès' }}
+          </button>
+          <button type="button" (click)="resynchroniser()">Resynchroniser</button>
+        </div>
+      }
+    </div>
+    @if (acces(); as acces) {
+      <ul class="m-0 grid list-none gap-1 rounded-lg border border-line p-3 text-sm">
+        @for (ligne of acces; track ligne.dirigeantId) {
+          <li [class]="ligne.accessible ? 'text-navy-soft' : 'text-danger'">
+            <strong>{{ ligne.dirigeantNom }}</strong> ({{ ligne.agenda }}) · {{ ligne.message }}
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}

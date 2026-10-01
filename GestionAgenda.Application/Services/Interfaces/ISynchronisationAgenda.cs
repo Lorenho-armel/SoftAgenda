@@ -6,5 +6,5 @@ public interface ISynchronisationAgenda
 
     void IndisponibiliteModifiee(Guid indisponibiliteId);
 
-    void IndisponibiliteSupprimee(Guid indisponibiliteId);
+    void IndisponibiliteSupprimee(Guid indisponibiliteId, Guid dirigeantId);
 }

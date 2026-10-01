@@ -11,6 +11,7 @@
   </header>
   @if (estGestionnaire) {
     <app-google-sheets-panneau (importe)="actualiser()" />
+    <app-google-agenda-panneau />
   }
   <div class="carte">
     <app-calendrier [options]="options" />

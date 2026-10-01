@@ -4,7 +4,9 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import {
+  AccesAgendaGoogle,
   CreerIndisponibilite,
+  EtatAgendaGoogle,
   DirigeantGere,
   EtatFeuille,
   Indisponibilite,
@@ -16,6 +18,7 @@ export class IndisponibilitesApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/indisponibilites`;
   private readonly feuilleUrl = `${environment.apiUrl}/google-sheets`;
+  private readonly agendaUrl = `${environment.apiUrl}/google-agenda`;
 
   dirigeants(): Observable<DirigeantGere[]> {
     return this.http
@@ -54,5 +57,21 @@ export class IndisponibilitesApiService {
 
   resynchroniserFeuille(): Observable<void> {
     return this.http.post<void>(`${this.feuilleUrl}/resynchronisation`, {});
+  }
+
+  etatAgendaGoogle(): Observable<EtatAgendaGoogle> {
+    return this.http
+      .get<ApiResponse<EtatAgendaGoogle>>(`${this.agendaUrl}/etat`)
+      .pipe(map((reponse) => reponse.data));
+  }
+
+  accesAgendaGoogle(): Observable<AccesAgendaGoogle[]> {
+    return this.http
+      .get<ApiResponse<AccesAgendaGoogle[]>>(`${this.agendaUrl}/acces`)
+      .pipe(map((reponse) => reponse.data));
+  }
+
+  resynchroniserAgendaGoogle(): Observable<void> {
+    return this.http.post<void>(`${this.agendaUrl}/resynchronisation`, {});
   }
 }

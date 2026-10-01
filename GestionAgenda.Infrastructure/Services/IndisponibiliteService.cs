@@ -72,7 +72,7 @@ public sealed class IndisponibiliteService(
         await ExigerGestionnaireAsync(utilisateurId, indisponibilite.DirigeantId, indisponibilite.SocieteId, cancellationToken);
         indisponibilites.Remove(indisponibilite);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        synchronisation.IndisponibiliteSupprimee(id);
+        synchronisation.IndisponibiliteSupprimee(id, indisponibilite.DirigeantId);
     }
 
     private async Task<DirigeantGere> ExigerGestionnaireAsync(
